@@ -20,7 +20,7 @@ API_PREFIX = app.config.get('API_PREFIX')
 SECRET_KEY = app.config.get("SECRET_KEY")
 
 
-cache = Cache(app,config={'CACHE_TYPE': 'simple',"CACHE_REDIS_HOST":app.config.get("REDIS_HOST"),"CACHE_REDIS_PORT":app.config.get("REDIS_PORT")})
+# cache = Cache(app,config={'CACHE_TYPE': 'simple',"CACHE_REDIS_HOST":app.config.get("REDIS_HOST"),"CACHE_REDIS_PORT":app.config.get("REDIS_PORT")})
 
 
 
