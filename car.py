@@ -107,5 +107,6 @@ apiManager.create_api(Customer, methods=['GET','POST','PATCH'])
 # apiManager.create_api(QuestionTag, methods=['GET'],url_prefix=API_PREFIX)
 # apiManager.create_api(Notification, methods=['GET','POST'],url_prefix=API_PREFIX,exclude_columns=["from.password","to.password"])
 # apiManager.create_api(Message, methods=['GET','POST'],url_prefix=API_PREFIX,exclude_columns=["from.password","to.password"])
+application = app
 if __name__ == '__main__':
     app.run()
