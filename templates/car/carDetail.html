@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block css %}
+
+<style type="text/css">
+
+</style>
+{% endblock %}
+{% block content %}
+<nav>
+    <div class="nav-wrapper blue lighten-2">
+        <a href="/carIndex" class="brand-logo">通力汽车 测试</a>
+
+    </div>
+</nav>
+
+<table class="striped centered">
+
+
+    <tbody>
+    <tr>
+        <td>图片</td>
+        <td><img src="{{data.img}}" class="responsive-img"></td>
+
+    </tr>
+    <tr>
+        <td>车牌</td>
+        <td>{{data.name}}</td>
+    </tr>
+    <tr>
+        <td>型号</td>
+        <td>{{data.type}}</td>
+    </tr>
+    <tr>
+        <td>购买时间</td>
+        <td>{{data.buy_at}}</td>
+    </tr>
+    <tr>
+        <td>定位设备IMEI</td>
+        <td>{{data.Gps.code}}</td>
+    </tr>
+    <tr>
+        <td>租赁历史</td>
+
+
+        <td>
+            {% for h in data.histories %}
+            <a href="/historyDetail/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}}   </a><br>
+             {% endfor  %}
+        </td>
+
+
+    </tr>
+    <tr>
+        <td>维护历史</td>
+
+
+        <td>
+            {% for m in data.mendhistories %}
+            <a href="/mendHistoryDetail/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>
+             {% endfor %}
+        </td>
+
+
+    </tr>
+    </tbody>
+</table>
+
+
+{% endblock %}
+{% block script %}
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=67CKhYZ0N7g1M0BLOHnOqsu6idBxN2vT"></script>
+<script>
+    $(document).ready(function () {
+        // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
+        $('.modal').modal();
+
+
+        function timestampToTime(timestamp) {
+            var date = new Date(timestamp * 1000);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            Y = date.getFullYear() + '-';
+            M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+            D = date.getDate() + ' ';
+            h = date.getHours() + ':';
+            m = date.getMinutes() + ':';
+            s = date.getSeconds();
+            return Y + M + D + h + m + s;
+        }
+
+        var data = [];
+        $.ajax({
+            url: 'api/carmonitor',
+            type: 'get',
+//        data: formData,
+            contentType: false,
+            processData: false,
+            success: function (result) {
+                if (result['status'] == "ok") {
+
+                }
+                else {
+                    alert('服务器出错，请稍后')
+                }
+            }
+
+        })
+    });
+</script>
+{% endblock %}
