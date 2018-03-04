@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_qiniustorage import Qiniu
 from flask_admin import Admin
 # import redis
-from flask_cache import Cache
+# from flask_cache import Cache
 
 
 app = Flask(__name__, instance_relative_config=True)
