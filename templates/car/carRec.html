@@ -113,7 +113,7 @@
                 });
                 // 创建标注对象并添加到地图
 //    var marker = new BMap.Marker(point, {icon: myIcon});
-                var marker = new BMap.Marker(point, {icon: myIcon});
+                var marker = new BMap.Marker(point, {icon: myIcon,rotation:data['course']});
                 marker.addEventListener("click", function () {
                     $('#modal-title').text(data['car']['name']);
                     $('#modal-carImg').attr('src', data['car']['img']);
