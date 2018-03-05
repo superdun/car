@@ -23,7 +23,7 @@ def carRecApi(imei):
     password = app.config.get('CAR_PASSWORD', '')
     carApi = CarOlineApi(account=account,password=password)
     carApi.getToken()
-    data = carApi.history(imei,int(time.time()-3600*48),int(time.time()-3600*24))
+    data = carApi.history(imei,1519967039,1520053454)
     carId = Gps.query.filter_by(code=imei).first().cars[0].id
     carName = Gps.query.filter_by(code=imei).first().cars[0].name
     carImg = Gps.query.filter_by(code=imei).first().cars[0].img
