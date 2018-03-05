@@ -128,8 +128,8 @@
             marker.addEventListener("click", function () {
                 $('#modal-title').text(data['car']['name']);
                 $('#modal-carImg').attr('src', data['car']['img']);
-                $('#modal-refreshTime').text($('#modal-refreshTime').text() + timestampToTime(data['gps_time']));
-                $('#modal-currentLoc').text($('#modal-currentLoc').text() + data['address']);
+                $('#modal-refreshTime').text('更新时间：' + timestampToTime(data['gps_time']));
+                $('#modal-currentLoc').text('当前位置：' + data['address']);
                 $('#modal-carDetail').attr('href', 'carDetail' + '/' + data['car']['id']);
                 $('#modal-carRec').attr('href', 'carRec' + '/' + data['car']['id']);
                 $('#modal1').modal('open');
