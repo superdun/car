@@ -124,8 +124,8 @@
                 imageOffset: new BMap.Size(0, 0 - index * 25)   // 设置图片偏移
             });
             // 创建标注对象并添加到地图
-//    var marker = new BMap.Marker(point, {icon: myIcon});
-            var marker = new BMap.Marker(point);
+            var marker = new BMap.Marker(point, {icon: myIcon});
+{#            var marker = new BMap.Marker(point);#}
             marker.addEventListener("click", function () {
                 $('#modal-title').text(data['car']['name']);
                 $('#modal-carImg').attr('src', data['car']['img']);
