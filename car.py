@@ -14,9 +14,9 @@ apiManager = flask_restless.APIManager(app, flask_sqlalchemy_db=db)
 #     sign_up_valid(data)
 
 
-@app.route('/')
-def hello_world():
-    return 'Hello World!!!'
+# @app.route('/')
+# def hello_world():
+#     return 'Hello World!!!'
 @app.route('/api/carrec/<imei>')
 def carRecApi(imei):
     account = app.config.get('CAR_ACCOUNT', '')
@@ -62,25 +62,41 @@ def carMonitorApi():
         return jsonify({'status':'ok','msg':data['msg'],'data':data['data']})
     else:
         return jsonify({'status': 'error', 'msg': data['msg'], 'data': []})
-@app.route('/carIndex')
+@app.route('/')
 def carIndex():
     return render_template('car/index.html')
-@app.route('/carDetail/<id>')
+@app.route('/car/<id>')
 def carDetail(id):
     data = Car.query.filter_by(id=int(id)).first()
     return render_template('car/carDetail.html',data=data)
-@app.route('/historyDetail/<id>')
+@app.route('/car')
+def carList():
+    data = Car.query.first()
+    return render_template('car/carList.html',data=data)
+@app.route('/history/<id>')
 def historyDetail(id):
     data = History.query.filter_by(id=int(id)).first()
     return render_template('car/historyDetail.html',data=data)
-@app.route('/mendHistoryDetail/<id>')
+@app.route('/history')
+def historyList():
+    data = History.query.all()
+    return render_template('car/historyList.html',data=data)
+@app.route('/mendHistory/<id>')
 def mendHistoryDetail(id):
     data = Mendhistory.query.filter_by(id=int(id)).first()
     return render_template('car/mendHistoryDetail.html',data=data)
-@app.route('/customerDetail/<id>')
+@app.route('/mendHistory')
+def mendHistoryList():
+    data = Mendhistory.query.all()
+    return render_template('car/mendhistoryList.html',data=data)
+@app.route('/customer/<id>')
 def customerDetail(id):
     data = Customer.query.filter_by(id=int(id)).first()
     return render_template('car/customerDetail.html',data=data)
+@app.route('/customer')
+def customerList():
+    data = Customer.query.all()
+    return render_template('car/customerList.html',data=data)
 @app.route('/carRec/<id>')
 def carRec(id):
     data  = Gps.query.filter_by(id=int(id)).first()
