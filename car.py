@@ -33,7 +33,7 @@ def carRecApi(imei):
     carId = Gps.query.filter_by(code=imei).first().cars[0].id
     carName = Gps.query.filter_by(code=imei).first().cars[0].name
     carImg = Gps.query.filter_by(code=imei).first().cars[0].img
-    print data
+    # print data
     if data['msg']=='OK':
         for i in  data['data']:
 
