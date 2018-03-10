@@ -94,7 +94,7 @@ def mendHistoryDetail(id):
 @app.route('/mendHistory')
 def mendHistoryList():
     data = Mendhistory.query.all()
-    return render_template('car/mendhistoryList.html',data=data)
+    return render_template('car/mendHistoryList.html',data=data)
 @app.route('/customer/<id>')
 def customerDetail(id):
     data = Customer.query.filter_by(id=int(id)).first()
