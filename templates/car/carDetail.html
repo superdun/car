@@ -39,7 +39,7 @@
 
         <td>
             {% for h in data.histories %}
-            <a href="/historyDetail/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}}   </a><br>
+            <a href="/history/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}}   </a><br>
              {% endfor  %}
         </td>
 
@@ -51,7 +51,7 @@
 
         <td>
             {% for m in data.mendhistories %}
-            <a href="/mendHistoryDetail/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>
+            <a href="/mendHistory/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>
              {% endfor %}
         </td>
 

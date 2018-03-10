@@ -6,39 +6,52 @@
 </style>
 {% endblock %}
 {% block content %}
+<ul class="collapsible">
+    <h4>客户列表</h4>
+
+    {% for d in data %}
+    <li>
+        <div class="collapsible-header row">
+            <div class="col s4"><img src="{{d.img}}" class=" responsive-img"></div>
+            <div class="col s8"><span class="title">车牌号：{{d.name}}</span>
+                <p>客户名：<a href="/customer/d.id">{{d.name}}</a><br>
+                    性别：{{d.gender}}<br>
+                    驾照号：{{d.idcode}}<br>
+                注册时间:{{d.created_at}}<br>
+                备注:{{d.comment}}</p>
+                <p style="color: #aaf8ff">点击该用户租赁历史详情</p>
+            </div>
+        </div>
+        <div class="collapsible-body">
+            <ul class="collection">
+                <li class="collection-header"><h4>租赁历史</h4></li>
+                {% if d.histories.count() ==0%}
+                <p>未找到记录</p>
+                {% endif %}
+                {% for h in d.histories %}
+                <li class="collection-item">
+                    <a href="/history/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}} </a><br>
+
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+        <!--<td>-->
+        <!--{% for h in d.histories %}-->
+        <!--<a href="/historyDetail/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}} </a><br>-->
+        <!--{% endfor %}-->
+        <!--</td>-->
+        <!--<td>-->
+        <!--{% for m in d.mendhistories %}-->
+        <!--<a href="/mendHistoryDetail/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>-->
+        <!--{% endfor %}-->
+        <!--</td>-->
+    </li>
+    {% endfor %}
+</ul>
 
 
-<table class="striped centered">
-    <h4>用户 {{data.name}} 详情</h4>
-
-    <tbody>
-    <tr>
-        <td>头像</td>
-        <td><img src="{{data.img}}" class="responsive-img"></td>
-
-    </tr>
-    <tr>
-        <td>客户名</td>
-        <td>{{data.name}}</a></td>
-    </tr>
-    <tr>
-        <td>性别</td>
-        <td>{{data.gender}}</td>
-    </tr>
-    <tr>
-        <td>驾照号</td>
-        <td>{{data.idcode}}</td>
-    </tr>
-        <tr>
-        <td>备注</td>
-        <td>{{data.comment}}</td>
-    </tr>
-    <tr>
-        <td>注册时间</td>
-        <td>{{data.created_at}}</td>
-    </tr>
-    </tbody>
-</table>
 
 
 {% endblock %}

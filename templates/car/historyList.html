@@ -6,35 +6,34 @@
 </style>
 {% endblock %}
 {% block content %}
+    <h4>租赁列表</h4>
+<ul class="collection">
 
 
-<table class="striped centered">
-    <h4>{{data.Car.name}}租赁历史详情</h4>
-
-    <tbody>
-
-    <tr>
-        <td>客户</td>
-        <td><a href="/customerDetail/{{data.Customer.id}}">{{data.Customer.name}}</a></td>
-    </tr>
-    <tr>
-        <td>租赁开始时间</td>
-        <td>{{data.started_at}}</td>
-    </tr>
-    <tr>
-        <td>租赁结束时间</td>
-        <td>{{data.ended_at}}</td>
-    </tr>
-        <tr>
-        <td>租赁价格</td>
-        <td>{{data.price}}</td>
-    </tr>
-    <tr>
-        <td>类型</td>
-        <td>{{data.type}}</td>
-    </tr>
-    </tbody>
-</table>
+    {% for d in data %}
+    <li class="collection-item">
+        <div class="row">
+            <div class="col s12"><span class="title">车牌号：<a href="/car/{{d.Car.id}}">{{d.Car.name}}</a></span>
+                <p>客户：<a href="/customer/d.Customer.id">{{d.Customer.name}}</a><br>
+                    租赁开始时间：{{d.started_at}}<br>
+                    租赁结束时间：{{d.ended_at}}<br>
+                    租赁价格:{{d.price}}<br>
+                    类型:{{d.type}}</p>
+            </div>
+        </div>
+        <!--<td>-->
+        <!--{% for h in d.histories %}-->
+        <!--<a href="/historyDetail/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}} </a><br>-->
+        <!--{% endfor %}-->
+        <!--</td>-->
+        <!--<td>-->
+        <!--{% for m in d.mendhistories %}-->
+        <!--<a href="/mendHistoryDetail/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>-->
+        <!--{% endfor %}-->
+        <!--</td>-->
+    </li>
+    {% endfor %}
+</ul>
 
 
 {% endblock %}

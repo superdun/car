@@ -78,8 +78,7 @@
 <script>
     $(document).ready(function () {
         // the "href" attribute of .modal-trigger must specify the modal ID that wants to be triggered
-        $('.modal').modal();
-        $(".button-collapse").sideNav();
+
         var map = new BMap.Map("map-container");
 
         function timestampToTime(timestamp) {
@@ -112,7 +111,7 @@
                 $('#modal-carImg').attr('src', data['car']['img']);
                 $('#modal-refreshTime').text('更新时间：' + timestampToTime(data['gps_time']));
                 $('#modal-currentLoc').text('当前位置：' + data['address']);
-                $('#modal-carDetail').attr('href', 'carDetail' + '/' + data['car']['id']);
+                $('#modal-carDetail').attr('href', 'car' + '/' + data['car']['id']);
                 $('#modal-carRec').attr('href', 'carRec' + '/' + data['car']['id']);
                 $('#modal1').modal('open');
 

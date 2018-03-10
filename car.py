@@ -19,11 +19,17 @@ apiManager = flask_restless.APIManager(app, flask_sqlalchemy_db=db)
 #     return 'Hello World!!!'
 @app.route('/api/carrec/<imei>')
 def carRecApi(imei):
+    started_at = request.args.get("started_at")
+    ended_at = request.args.get("ended_at")
+    if not started_at or not ended_at:
+        return jsonify({'status': 'error', 'msg': '时间错误', 'data': []})
+    if not started_at.isdigit() or not ended_at.isdigit():
+        return jsonify({'status': 'error', 'msg': '时间错误', 'data': []})
     account = app.config.get('CAR_ACCOUNT', '')
     password = app.config.get('CAR_PASSWORD', '')
     carApi = CarOlineApi(account=account,password=password)
     carApi.getToken()
-    data = carApi.history(imei,1519967039,1520053454)
+    data = carApi.history(imei,int(started_at),int(ended_at))
     carId = Gps.query.filter_by(code=imei).first().cars[0].id
     carName = Gps.query.filter_by(code=imei).first().cars[0].name
     carImg = Gps.query.filter_by(code=imei).first().cars[0].img
@@ -71,7 +77,7 @@ def carDetail(id):
     return render_template('car/carDetail.html',data=data)
 @app.route('/car')
 def carList():
-    data = Car.query.first()
+    data = Car.query.all()
     return render_template('car/carList.html',data=data)
 @app.route('/history/<id>')
 def historyDetail(id):
@@ -99,6 +105,7 @@ def customerList():
     return render_template('car/customerList.html',data=data)
 @app.route('/carRec/<id>')
 def carRec(id):
+
     data  = Gps.query.filter_by(id=int(id)).first()
 
     return render_template('car/carRec.html',data=data)

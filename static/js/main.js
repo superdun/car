@@ -2,7 +2,9 @@
  * Created by lidad on 2017/6/25.
  */
 window.onload=function () {
-
+    $('.collapsible').collapsible();
+            $('.modal').modal();
+        $(".button-collapse").sideNav();
     $("#search").click(function () {
         var searchKey = $("#searchGzh").val();
         if (searchKey){

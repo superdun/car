@@ -8,57 +8,59 @@
 {% block content %}
 
 
-<table class="striped centered">
+<ul class="collapsible">
 
+    <h4>车辆列表</h4>
+    {% for d in data %}
+    <li>
+        <div class="collapsible-header row">
+            <div class="col s4"><img src="{{d.img}}" class=" responsive-img"></div>
+            <div class="col s8"><span class="title">车牌号：{{d.name}}</span>
+                <p>型号：{{d.type}}<br>
+                    购买时间：{{d.buy_at}}<br>
+                    GPS设备号：{{d.Gps.code}}</p>
+                <p style="color: #aaf8ff">点击查看历史详情</p>
+            </div>
+        </div>
+        <div class="collapsible-body">
+            <ul class="collection">
+                <li class="collection-header"><h4>租赁历史</h4></li>
+                {% if d.histories.count() ==0%}
+                <p>未找到记录</p>
+                {% endif %}
+                {% for h in d.histories %}
+                <li class="collection-item">
+                    <a href="/history/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}} </a><br>
 
-    <tbody>
-    <tr>
-        <td>图片</td>
-        <td><img src="{{data.img}}" class="responsive-img"></td>
+                </li>
+                {% endfor %}
+            </ul>
+            <ul class="collection">
+                <li class="collection-header"><h4>维护保养历史</h4></li>
+                {% if d.mendhistories.count() ==0%}
+                <p>未找到记录</p>
+                {% endif %}
+                {% for m in d.mendhistories %}
+                <li class="collection-item">
+                    <a href="/mendHistory/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>
+                </li>
+                {% endfor %}
+            </ul>
 
-    </tr>
-    <tr>
-        <td>车牌</td>
-        <td>{{data.name}}</td>
-    </tr>
-    <tr>
-        <td>型号</td>
-        <td>{{data.type}}</td>
-    </tr>
-    <tr>
-        <td>购买时间</td>
-        <td>{{data.buy_at}}</td>
-    </tr>
-    <tr>
-        <td>定位设备IMEI</td>
-        <td>{{data.Gps.code}}</td>
-    </tr>
-    <tr>
-        <td>租赁历史</td>
-
-
-        <td>
-            {% for h in data.histories %}
-            <a href="/historyDetail/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}}   </a><br>
-             {% endfor  %}
-        </td>
-
-
-    </tr>
-    <tr>
-        <td>维护历史</td>
-
-
-        <td>
-            {% for m in data.mendhistories %}
-            <a href="/mendHistoryDetail/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>
-             {% endfor %}
-        </td>
-
-
-    </tr>
-    </tbody>
-</table>
+        </div>
+        <!--<td>-->
+        <!--{% for h in d.histories %}-->
+        <!--<a href="/historyDetail/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}} </a><br>-->
+        <!--{% endfor %}-->
+        <!--</td>-->
+        <!--<td>-->
+        <!--{% for m in d.mendhistories %}-->
+        <!--<a href="/mendHistoryDetail/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>-->
+        <!--{% endfor %}-->
+        <!--</td>-->
+    </li>
+    {% endfor %}
+</ul>
 
 
 {% endblock %}
