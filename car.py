@@ -224,6 +224,9 @@ def user_loader(username):
 @login_manager.request_loader
 def request_loader(request):
     username = request.form.get('username')
+    password = request.form.get('password')
+    if password=="":
+        return
     if username not in users:
         return
 
@@ -232,6 +235,7 @@ def request_loader(request):
 
     # DO NOT ever store passwords in plaintext and always compare password
     # hashes using constant-time comparison!
+
     user.is_authenticated = request.form[
                                 'password'] == users[username]['password']
 
