@@ -2,6 +2,7 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_qiniustorage import Qiniu
 from flask_admin import Admin
+import flask_login
 # import redis
 # from flask_cache import Cache
 
@@ -9,7 +10,9 @@ from flask_admin import Admin
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('config')
 app.config.from_pyfile('localConfig.py')
+login_manager = flask_login.LoginManager()
 
+login_manager.init_app(app)
 bootstrap = Bootstrap(app)
 qiniu_store = Qiniu(app)
 admin = Admin(app)

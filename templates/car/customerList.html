@@ -12,9 +12,9 @@
     {% for d in data %}
     <li>
         <div class="collapsible-header row">
-            <div class="col s4"><img src="{{d.img}}" class=" responsive-img"></div>
+            <div class="col s4"><img src="{{imgDomain}}{{d.img}}" class=" responsive-img"></div>
             <div class="col s8"><span class="title">车牌号：{{d.name}}</span>
-                <p>客户名：<a href="/customer/d.id">{{d.name}}</a><br>
+                <p>客户名：<a href="/customer/{{d.id}}">{{d.name}}</a><br>
                     性别：{{d.gender}}<br>
                     驾照号：{{d.idcode}}<br>
                 注册时间:{{d.created_at}}<br>

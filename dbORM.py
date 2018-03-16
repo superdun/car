@@ -12,6 +12,8 @@ class Gps(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(120))
     cars = db.relationship('Car', backref='Gps', lazy='dynamic')
+    def __repr__(self):
+        return self.code
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -22,6 +24,8 @@ class Car(db.Model):
     type =  db.Column(db.String(80))
     histories = db.relationship('History', backref='Car', lazy='dynamic')
     mendhistories = db.relationship('Mendhistory', backref='Car', lazy='dynamic')
+    def __repr__(self):
+        return self.name
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -31,6 +35,8 @@ class Customer(db.Model):
     comment = db.Column(db.String(800))
     img = db.Column(db.String(800))
     histories = db.relationship('History', backref='Customer', lazy='dynamic')
+    def __repr__(self):
+        return self.name
 class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -41,6 +47,8 @@ class History(db.Model):
     type = db.Column(db.String(80))
     price = db.Column(db.String(80))
     status = db.Column(db.String(80))
+    def __repr__(self):
+        return "%s %s"%(self.created_at,self.type)
 class Mendhistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -49,13 +57,18 @@ class Mendhistory(db.Model):
     type = db.Column(db.String(80))
     price = db.Column(db.String(80))
     status = db.Column(db.String(80))
+    def __repr__(self):
+        return "%s %s" % (self.created_at, self.type)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
     name = db.Column(db.String(80))
     password = db.Column(db.String(80))
+    auth = db.Column(db.Integer)
     histories = db.relationship('Mendhistory', backref='User', lazy='dynamic')
+    def __repr__(self):
+        return self.name
 # POST
 
 # class PostComment(db.Model):

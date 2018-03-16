@@ -45,7 +45,7 @@ class CarOlineApi(object):
         tm = int(time.time())
         signature = self.getSign(tm)
 
-        payload = {'account': account, 'time': tm, 'signature': signature}
+        payload = {'account': self.account, 'time': tm, 'signature': signature}
         r = requests.get(self.token_url, params=payload)
         if 'access_token' in r.json():
             self.refrehToken(r.json()['access_token'])
@@ -107,8 +107,8 @@ class CarOlineApi(object):
             return {'err':'no token'}
 
 
-account = u'乐租'
-password = '12345663'
+# account = u'乐租'
+# password = '12345663'
 # car = CarOlineApi(account,password)
 # car.getToken()
 # print car.monitor()

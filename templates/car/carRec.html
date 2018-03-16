@@ -101,7 +101,7 @@
         }
 
         function addMarker(point, index, data) {  // 创建图标对象
-            var myIcon = new BMap.Icon("http://oc1is8h9w.bkt.clouddn.com/carmarker1.png", new BMap.Size(300, 225), {
+            var myIconColor = new BMap.Icon("http://oc1is8h9w.bkt.clouddn.com/carmarker2.png", new BMap.Size(60, 60), {
                 // 指定定位位置。
                 // 当标注显示在地图上时，其所指向的地理位置距离图标左上
                 // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
@@ -109,18 +109,33 @@
                 // 设置图片偏移。
                 // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
                 // 需要指定大图的偏移位置，此做法与css sprites技术类似。
-                imageOffset: new BMap.Size(0, 0 - index * 25)   // 设置图片偏移
+                imageOffset: new BMap.Size(0, 0 )   // 设置图片偏移
+            });
+            var myIconGrey = new BMap.Icon("http://oc1is8h9w.bkt.clouddn.com/carmarker3.png", new BMap.Size(60, 60), {
+                // 指定定位位置。
+                // 当标注显示在地图上时，其所指向的地理位置距离图标左上
+                // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
+                // 图标中央下端的尖角位置。
+                // 设置图片偏移。
+                // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
+                // 需要指定大图的偏移位置，此做法与css sprites技术类似。
+                imageOffset: new BMap.Size(0, 0 )   // 设置图片偏移
             });
             // 创建标注对象并添加到地图
-//    var marker = new BMap.Marker(point, {icon: myIcon});
-            var marker = new BMap.Marker(point, {icon: myIcon, rotation: data['course']});
+            if (data["car"]["id"]!==""){
+                 var marker = new BMap.Marker(point, {icon: myIconColor, rotation: data['course']});
+
+            }
+            else {
+                var marker = new BMap.Marker(point, {icon: myIconGrey, rotation: data['course']});
+            }
             marker.addEventListener("click", function () {
-                $('#modal-title').text(data['car']['name']);
-                $('#modal-carImg').attr('src', data['car']['img']);
-                $('#modal-refreshTime').text($('当前时间：' + timestampToTime(data['gps_time'])));
-                $('#modal-currentLoc').text('当前位置：' + data['address']);
-                $('#modal-carDetail').attr('href', 'carDetail' + '/' + data['car']['id']);
-                $('#modal-carRec').attr('href', 'carRec' + '/' + data['car']['id']);
+                $('#modal-title').text(data['name']);
+                $('#modal-carImg').attr('src', "{{imgDomain}}"+data['img']);
+                $('#modal-refreshTime').text($('当前时间：' + timestampToTime(data['Gps']['gps_time'])));
+                $('#modal-currentLoc').text('当前位置：' + data['Gps']['address']);
+                $('#modal-carDetail').attr('href', 'carDetail' + '/' + data['id']);
+                $('#modal-carRec').attr('href', 'carRec' + '/' + data['id']);
                 $('#modal1').modal('open');
 
             });
@@ -135,7 +150,7 @@
         var ended_at = Date.parse(new Date()) / 1000;
         var started_at = ended_at - 3600 * 24;
         $.ajax({
-            url: '/api/carrec/' + '{{data.code}}' + "?started_at=" + started_at + "&ended_at=" + ended_at,
+            url: '/api/carrec/' + '{{data.Gps.code}}' + "?started_at=" + started_at + "&ended_at=" + ended_at,
             type: 'get',
 //        data: formData,
             contentType: false,

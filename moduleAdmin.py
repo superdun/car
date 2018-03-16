@@ -6,7 +6,7 @@ from flask_admin.helpers import get_url
 from flask_admin._compat import string_types, urljoin
 from flask_admin.contrib.sqla import ModelView
 from wtforms import Form as wtForm
-from dbORM import db, User,Gzh
+from dbORM import db, User,Car,Gps,Customer
 from wtforms import TextAreaField, SelectField
 from wtforms.widgets import TextArea
 import thumb
@@ -29,8 +29,9 @@ def dashboard():
 
 
     admin.add_view(UserView(User, db.session))
-    admin.add_view(GzhView(Gzh, db.session))
-
+    admin.add_view(CarView(Car, db.session))
+    admin.add_view(GpsView(Gps, db.session))
+    admin.add_view(CustomerView(Customer, db.session))
 class UploadWidget(form.ImageUploadInput):
     def get_url(self, field):
         if field.thumbnail_size:
@@ -60,7 +61,7 @@ class ImageUpload(form.ImageUploadField):
             return filename
 
 
-class GzhView(ModelView):
+class CarView(ModelView):
     def is_accessible(self):
 
         return flask_login.current_user.is_authenticated
@@ -69,19 +70,28 @@ class GzhView(ModelView):
     # column_list = ("title", "create_at", "view_count",
     #                "category", "is_full", "status","max_book_count")
 
-
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),url_relative_path=QINIU_DOMAIN),
         # 'category': SelectField(u'category', choices=CATEGORY),
-        'status': SelectField(u'status', choices=[('published', u'发布'), ('deleted', u'删除')]),
-        # 'is_full': SelectField(u'is_full', choices=[("no", u'未满'),("yes", u'已满'),("almost",u"快满了")])
     }
-    column_formatters = dict(created_at=lambda v, c, m, p: date_format(m.created_at),
-                             img=lambda v, c, m, p: img_url_format(m.img))
-    form_columns = ("name", "url","img")
-    form_excluded_columns = ('create_at')
+    # column_formatters = dict(created_at=lambda v, c, m, p: date_format(m.created_at),
+    #                          img=lambda v, c, m, p: img_url_format(m.img))
+    # form_columns = ("name", "url","img")
+    # form_excluded_columns = ('create_at')
     # create_template = 'admin/post/create.html'
     # edit_template = 'admin/post/edit.html'
+class GpsView(ModelView):
+    def is_accessible(self):
+        return flask_login.current_user.is_authenticated
+
+class CustomerView(ModelView):
+    def is_accessible(self):
+        return flask_login.current_user.is_authenticated
+    form_extra_fields = {
+        'img': ImageUpload('Image', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),url_relative_path=QINIU_DOMAIN),
+        # 'category': SelectField(u'category', choices=CATEGORY),
+    }
+    form_excluded_columns = ('img')
 
 
 

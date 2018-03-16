@@ -14,7 +14,7 @@
     {% for d in data %}
     <li>
         <div class="collapsible-header row">
-            <div class="col s4"><img src="{{d.img}}" class=" responsive-img"></div>
+            <div class="col s4"><img src="{{imgDomain}}{{d.img}}" class=" responsive-img"></div>
             <div class="col s8"><span class="title">车牌号：{{d.name}}</span>
                 <p>型号：{{d.type}}<br>
                     购买时间：{{d.buy_at}}<br>
