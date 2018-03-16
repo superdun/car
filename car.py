@@ -246,7 +246,7 @@ def request_loader(request):
 def login():
     if request.method == 'GET':
         if flask_login.current_user.is_authenticated:
-            return redirect('/admin')
+            return redirect('admin')
         return render_template('login.html')
 
     username = request.form['username']
