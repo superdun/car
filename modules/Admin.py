@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, url_for, jsonify, request, Response, redirect
-from flask_admin import Admin, BaseView, expose
-from flask_admin.helpers import get_url
 
-from flask_admin._compat import string_types, urljoin
-from flask_admin.contrib.sqla import ModelView
-from wtforms import Form as wtForm
-from dbORM import db, User, Car, Gps, Customer
-from wtforms import TextAreaField, SelectField
-from wtforms.widgets import TextArea
-import thumb
-from flask_qiniustorage import Qiniu
-from jinja2 import Markup
-from flask_admin import form
-from flask_admin.form import rules
-import flask_login
 import os
 import os.path as op
-from moduleGlobal import app, admin, qiniu_store, QINIU_DOMAIN, CATEGORY, UPLOAD_URL
 import time
+from flask_admin import Admin
+import flask_login
+from flask_admin import form
+from flask_admin.contrib.sqla import ModelView
+from jinja2 import Markup
+from flask import current_app
+from db.dbORM import db, User, Car, Gps, Customer
+from helpers import thumb
+from flask_qiniustorage import Qiniu
 
-
+admin = Admin(current_app)
+QINIU_DOMAIN = current_app.config.get('QINIU_BUCKET_DOMAIN', '')
+UPLOAD_URL = current_app.config.get('UPLOAD_URL')
 def date_format(value):
     return time.strftime(u'%Y/%m/%d %H:%M:%S', time.localtime(float(value)))
 
@@ -58,6 +53,7 @@ class ImageUpload(form.ImageUploadField):
 
         data.seek(0)
         data.save(path)
+        qiniu_store = Qiniu(current_app)
         with open(path, 'rb') as fp:
             ret, info = qiniu_store.save(fp, filename)
             if 200 != info.status_code:

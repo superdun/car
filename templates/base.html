@@ -14,23 +14,23 @@
 <body>
 <nav>
     <div class="nav-wrapper blue lighten-2">
-        <a href="{{url_for('carIndex')}}" class="brand-logo"><i class="material-icons">home</i>通力汽车</a>
+        <a href="{{url_for('web.carIndex')}}" class="brand-logo"><i class="material-icons">home</i>通力汽车</a>
       <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
       <ul class="right hide-on-med-and-down">
-        <li><a href="{{url_for('customerList')}}">客户信息</a></li>
-        <li><a href="{{url_for('carList')}}">车辆信息</a></li>
-        <li><a href="{{url_for('mendHistoryList')}}">维护信息</a></li>
-        <li><a href="{{url_for('historyList')}}">租赁历史</a></li>
+        <li><a href="{{url_for('web.customerList')}}">客户信息</a></li>
+        <li><a href="{{url_for('web.carList')}}">车辆信息</a></li>
+        <li><a href="{{url_for('web.mendHistoryList')}}">维护信息</a></li>
+        <li><a href="{{url_for('web.historyList')}}">租赁历史</a></li>
           <li><a href="admin">后台管理</a></li>
-          <li><a href="{{url_for('logout')}}">退出登录</a></li>
+          <li><a href="{{url_for('login.logout')}}">退出登录</a></li>
       </ul>
       <ul class="side-nav" id="mobile-demo">
-        <li><a href="{{url_for('customerList')}}">客户信息</a></li>
-        <li><a href="{{url_for('carList')}}">车辆信息</a></li>
-        <li><a href="{{url_for('mendHistoryList')}}">维护信息</a></li>
-        <li><a href="{{url_for('historyList')}}">租赁历史</a></li>
+        <li><a href="{{url_for('web.customerList')}}">客户信息</a></li>
+        <li><a href="{{url_for('web.carList')}}">车辆信息</a></li>
+        <li><a href="{{url_for('web.mendHistoryList')}}">维护信息</a></li>
+        <li><a href="{{url_for('web.historyList')}}">租赁历史</a></li>
           <li><a href="admin">后台管理</a></li>
-          <li><a href="{{url_for('logout')}}">退出登录</a></li>
+          <li><a href="{{url_for('login.logout')}}">退出登录</a></li>
       </ul>
     </div>
 

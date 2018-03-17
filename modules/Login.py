@@ -1,13 +1,11 @@
 # -*- coding:utf-8 -*-
 from datetime import datetime
-from passlib.apps import custom_app_context as pwd_context
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from flask import current_app
 import flask_restless
-from moduleGlobal import SECRET_KEY,cache
 from flask_jwt import JWT, jwt_required, current_identity
-from werkzeug.security import safe_str_cmp
-from dbORM import User
-from moduleGlobal import app
+from passlib.apps import custom_app_context as pwd_context
+from db.dbORM import User
+
 
 def authenticate(username, password):
     user = User.query.filter_by(username=username).first()
@@ -22,7 +20,7 @@ def identity(payload):
     user_id = payload['identity']
     return User.query.filter_by(id=user_id).first()
 
-jwt = JWT(app, authenticate, identity)
+jwt = JWT(current_app, authenticate, identity)
 
 
 @jwt_required()
