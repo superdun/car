@@ -21,6 +21,7 @@ with app.app_context():
 
     app.register_blueprint(Web.web, url_prefix='')
     app.register_blueprint(Login.login_bp, url_prefix='')
+    app.register_blueprint(WechatView.wechatView, url_prefix='/wx')
     # admin
 
     from modules import Admin
