@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block css %}
+<style>
+    .carTypeName{
+        font-size: 20px;
+        font-family: "Roboto", sans-serif;
+        font-weight: 200;
+    }
+    .carTypePrice{
+        color: red;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="row">
+    {% for d in data %}
+
+    <div class="col s12 m6 l4">
+        <div class="card horizontal">
+            <div class="card-image">
+                <img src="{{imgDomain}}{{ d.img }}!fang">
+            </div>
+            <div class="card-stacked">
+                <div class="card-content">
+                    <p class="carTypeName">{{ d.name }}</p>
+                </div>
+                <div class="card-action row">
+                    <div class=" carTypePrice col s8 ">价格：{{d.price}}/天</div>
+                    <div class="col s4">
+                        <a href="#" class="addtocart btn-floating  waves-effect waves-light blue lighten-2 "><i
+                                class="material-icons">shopping_cart</i></a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% endfor %}
+</div>
+{% endblock %}
+{% block script %}
+<script>
+
+        $(".addtocart").click(function () {
+            alert("即将开启，请持续关注，敬请期待！!")
+        })
+
+
+</script>
+{% endblock %}

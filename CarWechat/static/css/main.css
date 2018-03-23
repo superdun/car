@@ -1,0 +1,19 @@
+.ghzTitle{
+    text-align: center;
+}
+.gzhCardContainer{
+    padding: 2px;
+}
+#search{
+    cursor: pointer;
+}
+nav .brand-logo {
+    font-size: 1.1rem!important;
+
+}
+    #modal-carImg {
+        max-width: 150px;
+    }
+    #login{
+
+    }
