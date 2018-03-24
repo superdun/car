@@ -43,15 +43,15 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
     name = db.Column(db.String(80))
-    idcode = db.Column(db.String(80))
+    idcode = db.Column(db.String(80), unique=True)
     gender = db.Column(db.String(80))
     comment = db.Column(db.String(800))
     img = db.Column(db.String(800))
     histories = db.relationship('History', backref='Customer', lazy='dynamic')
-    openid = db.Column(db.String(800))
+    openid = db.Column(db.String(800), unique=True)
     password = db.Column(db.String(800))
     driveage = db.Column(db.Integer)
-    phone= db.Column(db.String(800))
+    phone= db.Column(db.String(800), unique=True)
     status = db.Column(db.String(800),default="pending")
     @property
     def is_authenticated(self):

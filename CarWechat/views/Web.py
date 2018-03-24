@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
-from  flask import Blueprint, render_template,redirect,request,abort,url_for
-from flask_login import login_required
+from  flask import Blueprint, render_template,redirect,request,abort,url_for,current_app
+from flask_login import login_required,current_user
+from helpers.thumb import upLoadFromUrl
 from db.dbORM import *
 from wechatpy import oauth,events
 from wechatpy import parse_message, create_reply
@@ -24,10 +25,9 @@ login_manager = flask_login.LoginManager()
 
 login_manager.init_app(current_app)
 
-
 @login_manager.user_loader
 def user_loader(id):
-    return Customer.query.get(int(id))
+    return Customer.query.filter_by(id=int(id)).first()
 
 @web.route('/', methods=['GET', 'POST'])
 def wechatIndex():
@@ -75,27 +75,48 @@ def wechatAuthorize():
     wx_code = request.args.get("code")
     wxAuth.fetch_access_token(wx_code)
     openId = wxAuth.open_id
+    userInfo = wxAuth.get_user_info(openId)
+    img = upLoadFromUrl(userInfo["headimgurl"],openId)
     customer = Customer.query.filter_by(openid = openId).first()
     if not customer:
 
-        customer = Customer(openid=openId,status="pending")
+        customer = Customer(openid=openId,status="pending",img=img )
 
         db.session.add(customer)
         db.session.commit()
     flask_login.login_user(customer)
 
-    if customer.name=="" or customer.phone=="" or customer.status!="normal":
-        return redirect(url_for("wechat.wechatSign"))
-    return render_template('car/index.html')
+    if customer.status=="pending":
+        return redirect(url_for("web.wechatSign"))
+    return redirect(url_for("web.selectCar"))
 
 @web.route('/sign')
 def wechatSign():
-    return render_template('car/sign.html')
+    return render_template('car/sign.html',imgDomain="http://%s" % QINIU_DOMAIN)
 
 @web.route('/selectcar')
 def selectCar():
-    CarType = Cartype.query.filter(Cartype.status!="deleted").all()
-    return render_template('car/selectCar.html',data = CarType,imgDomain="http://%s" % QINIU_DOMAIN)
+    if current_user.is_authenticated:
+        if current_user.status=="normal":
+            CarType = Cartype.query.filter(Cartype.status != "deleted").all()
+            return render_template('car/selectCar.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
+        else:
+            return redirect(url_for("web.wechatSign"))
+
+    else:
+        return redirect(url_for('web.wechatSign'))
+
+@web.route('/order')
+def order():
+    if current_user.is_authenticated:
+        if current_user.status == "normal":
+            CarType = Cartype.query.filter(Cartype.status != "deleted").all()
+            return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
+        else:
+            return redirect(url_for("web.wechatSign"))
+
+    else:
+        return redirect(url_for('web.wechatSign'))
     # try:
     #     wx_code = request.args.get("code")
     #     print wxAuth.get_user_info()

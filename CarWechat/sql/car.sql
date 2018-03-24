@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50718
 File Encoding         : 65001
 
-Date: 2018-03-24 00:05:45
+Date: 2018-03-24 21:37:38
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -85,19 +85,16 @@ CREATE TABLE `customer` (
   `driveage` int(20) DEFAULT NULL,
   `phone` varchar(255) DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phone` (`phone`) USING BTREE,
+  UNIQUE KEY `idcode` (`idcode`),
+  UNIQUE KEY `openid` (`openid`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of customer
 -- ----------------------------
-INSERT INTO `customer` VALUES ('1', '2018-03-03 19:04:03', '李狗蛋', '210124XXXX', '男', '老客户，驾龄九年', 'PKCGK/th.jpg', null, null, null, null, null);
-INSERT INTO `customer` VALUES ('2', '2018-03-03 19:04:23', '王二', '12344444XXX', '男', '不靠谱', 'PKCGK/th_1.jpg', null, null, null, null, null);
-INSERT INTO `customer` VALUES ('3', '2018-03-03 19:05:04', '李芳', '4412313XXXX', '女', '女司机！', 'PKCGK/th_2.jpg', null, null, null, null, null);
-INSERT INTO `customer` VALUES ('4', '2018-03-22 23:10:12', '李盾', '111', null, null, null, 'oCmBowgviSDxO23e2v7xNLkn6mco', 'e10adc3949ba59abbe56e057f20f883e', '13', '13061938526', 'pending');
-INSERT INTO `customer` VALUES ('5', '2018-03-23 00:33:54', 'dun', '1', null, null, null, null, 'e10adc3949ba59abbe56e057f20f883e', '10', '13061938526', null);
-INSERT INTO `customer` VALUES ('6', '2018-03-23 00:37:45', '李盾', '12', null, null, null, null, 'e10adc3949ba59abbe56e057f20f883e', '12', '13061938526', 'pending');
-INSERT INTO `customer` VALUES ('7', '2018-03-23 00:39:53', '李盾', '12', null, null, null, null, 'e10adc3949ba59abbe56e057f20f883e', '12', '13061938526', 'pending');
+INSERT INTO `customer` VALUES ('20', '2018-03-24 20:35:40', null, null, null, null, 'oCmBowgviSDxO23e2v7xNLkn6mco.jpg', 'oCmBowgviSDxO23e2v7xNLkn6mco', null, null, null, 'normal');
 
 -- ----------------------------
 -- Table structure for `gps`
@@ -149,9 +146,6 @@ CREATE TABLE `history` (
 -- ----------------------------
 -- Records of history
 -- ----------------------------
-INSERT INTO `history` VALUES ('1', '1', '1', '2017-10-17 19:13:34.000000', '2018-03-03 19:13:38.000000', '正在进行', '租赁', '1000', '2018-03-03 19:13:58.000000');
-INSERT INTO `history` VALUES ('2', '1', '1', '2016-07-12 19:14:52.000000', '2017-04-18 19:14:58.000000', '完成订单', '租赁', '1200', '2018-03-03 19:15:13.000000');
-INSERT INTO `history` VALUES ('3', '3', '1', '2014-09-02 19:15:51.000000', '2015-11-19 19:15:58.000000', '完成订单', '租赁', '500', '2018-03-03 19:16:18.000000');
 
 -- ----------------------------
 -- Table structure for `mendhistory`

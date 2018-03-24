@@ -1,19 +1,31 @@
-.ghzTitle{
+.ghzTitle {
     text-align: center;
 }
-.gzhCardContainer{
+
+.gzhCardContainer {
     padding: 2px;
 }
-#search{
+
+#search {
     cursor: pointer;
 }
+
 nav .brand-logo {
-    font-size: 1.1rem!important;
+    font-size: 1.1rem !important;
 
 }
-    #modal-carImg {
-        max-width: 150px;
-    }
-    #login{
 
-    }
+#modal-carImg {
+    max-width: 150px;
+}
+
+#login {
+
+}
+.head{
+    width:50px;
+    padding: 5px;
+}
+.greyWords{
+    color: grey;
+}

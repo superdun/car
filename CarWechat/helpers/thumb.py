@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+from flask import current_app
 import os
 import os.path as op
 import string
@@ -6,7 +7,19 @@ import random
 from werkzeug import secure_filename
 from flask_qiniustorage import Qiniu
 import shutil
+from qiniu import Auth
+from qiniu import BucketManager
+def upLoadFromUrl(url,id):
+    access_key = current_app.config.get('QINIU_ACCESS_KEY', '')
+    secret_key = current_app.config.get('QINIU_SECRET_KEY', '')
 
+    bucket_name = current_app.config.get('QINIU_BUCKET_NAME', '')
+    q = Auth(access_key, secret_key)
+    bucket = BucketManager(q)
+    key = '%s.jpg'%str(id)
+    ret, info = bucket.fetch(url, bucket_name, key)
+    print(info)
+    return key
 
 def relativePath():
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5)) + '/'

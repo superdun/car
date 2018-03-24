@@ -41,6 +41,12 @@
             </div>
             <div class="row">
                 <div class="input-field ">
+                    <input id="confirm-password" type="password" class="validate" placeholder="不小于六位的密码">
+                    <label for="confirm-password">确认密码</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field ">
                     <input id="idCode" type="text" class="validate" placeholder="输入您的身份证号">
                     <label for="idCode">身份证号</label>
                 </div>
@@ -108,7 +114,7 @@
             re = /^1\d{10}$/;
             if (re.test($('#phone').val())) {
                 var idCodeObj1 = IdCode;
-                idCodeObj1.targetLable = '#idCodeLable1';
+                idCodeObj1.targetLable = '#vCodeLable1';
                 idCodeObj1.targetButton = '#getvCode';
                 idCodeObj1.getIdCode($('#phone').val());
             }
@@ -122,35 +128,49 @@
                 $('#vCode').addClass('invalid')
             }
             else {
-                var formData = new FormData();
-                formData.append('name', $('#name').removeClass('invalid').val());
-                formData.append('driveage', $('#driveage').removeClass('invalid').val());
-                formData.append('password', $('#password').removeClass('invalid').val());
-                formData.append('idCode', $('#idCode').removeClass('invalid').val());
-                formData.append('vCode', $('#vCode').removeClass('invalid').val());
-                formData.append('phone', $('#phone').removeClass('invalid').val());
-                $.ajax({
-                    url: 'api/sign',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (result) {
-                        if (result['status'] == 'lacked') {
-                            result['msg'].forEach(function (v, k) {
-                                $('#' + v).removeClass('valid').addClass('invalid')
-                            })
-                        }
-                        if (result['status'] == 'wrongcode') {
-                            $('#vCode').removeClass('valid').addClass('invalid')
-                        }
-                        if (result['status'] == 'ok') {
-                            alert('信息录入成功')
+                if ($('#password').val() != $('#confirm-password').val()) {
+                    alert("密码输入不一致")
+                    $('#password').addClass('invalid')
+                    $('#confirm-password').addClass('invalid')
+                }
+                else {
+                    var formData = new FormData();
+                    formData.append('name', $('#name').removeClass('invalid').val());
+                    formData.append('driveage', $('#driveage').removeClass('invalid').val());
+                    formData.append('password', $('#password').removeClass('invalid').val());
+                    formData.append('idCode', $('#idCode').removeClass('invalid').val());
+                    formData.append('vCode', $('#vCode').removeClass('invalid').val());
+                    formData.append('phone', $('#phone').removeClass('invalid').val());
+                    $.ajax({
+                        url: 'api/sign',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (result) {
+                            if (result['status'] == 'lacked') {
+                                result['msg'].forEach(function (v, k) {
+                                    $('#' + v).removeClass('valid').addClass('invalid')
+                                })
+                            }
+                            if (result['status'] == 'wrongcode') {
+                                $('#vCode').removeClass('valid').addClass('invalid')
+                            }
+                            if (result['status'] == 'ok') {
+                                alert('信息录入成功');
+                                location.href("{{url_for('web.selectCar')}}")
+                            }
+                            if (result['status'] == 'dup') {
+                                alert('当前手机号码/身份证号已存在')
+                            }
+                            if (result['status'] == 'nochange') {
+                                alert('您已经注册过，不能修改信息，如有疑问请联系客服人工修改')
+                            }
                         }
 
-                    }
+                    })
+                }
 
-                })
 
             }
         });

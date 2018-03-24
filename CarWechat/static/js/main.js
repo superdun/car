@@ -4,7 +4,7 @@
 window.onload=function () {
     $('.collapsible').collapsible();
             $('.modal').modal();
-        $(".button-collapse").sideNav();
+        $("#headimg").sideNav();
     $("#search").click(function () {
         var searchKey = $("#searchGzh").val();
         if (searchKey){
