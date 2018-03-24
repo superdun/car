@@ -60,9 +60,9 @@ class CarOlineApi(object):
         else:
             return {'err':'no token'}
 
-    def tracking(self,ieis):
+    def tracking(self,imeis):
         if self.hasToken:
-            payload = {'ieis': ieis, 'map_type': self.map_type}
+            payload = {'imeis': imeis, 'map_type': self.map_type}
             payload = self.payloadMaker(payload)
             r = requests.post(self.tracking_url, params=payload)
             return r.json()

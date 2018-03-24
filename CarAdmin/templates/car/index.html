@@ -36,15 +36,15 @@
     <div class="modal-content">
         <div class="row">
             <div class="col s8">
-                <h4 id="modal-failed-title">
+                <h6 id="modal-failed-title">
 
-                </h4>
+                </h6>
             </div>
         </div>
 
 
-        <p id="modal-failed-refreshTime">更新时间：</p>
-        <p id="modal-failed-currentLoc">当前位置：</p>
+        <!--<p id="modal-failed-refreshTime">更新时间：</p>-->
+        <!--<p id="modal-failed-currentLoc">当前位置：</p>-->
 
     </div>
     <div class="modal-footer">
@@ -55,9 +55,6 @@
 <div id="modal1" class="modal bottom-sheet">
     <div class="modal-content">
         <div class="row">
-            <div class="col s4">
-                <img class="circle responsive-img" src="" alt="汽车图像" id="modal-carImg">
-            </div>
             <div class="col s8">
                 <h4 id="modal-title">
 
@@ -66,8 +63,8 @@
         </div>
 
 
-        <p id="modal-refreshTime">更新时间：</p>
-        <p id="modal-currentLoc">当前位置：</p>
+        <!--<p id="modal-refreshTime">更新时间：</p>-->
+        <!--<p id="modal-currentLoc">当前位置：</p>-->
         <div class="row">
             <div class="col s6">
                 <a href="#" id="modal-carRec">回放</a>
@@ -119,7 +116,7 @@
                 // 设置图片偏移。
                 // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
                 // 需要指定大图的偏移位置，此做法与css sprites技术类似。
-                imageOffset: new BMap.Size(0, 0 - index * 0.2)   // 设置图片偏移
+                imageOffset: new BMap.Size(0, 0)   // 设置图片偏移
             });
             var myIconGrey = new BMap.Icon("http://p5w48dhwa.bkt.clouddn.com/carGrey.png", new BMap.Size(60, 60), {
                 // 指定定位位置。
@@ -143,17 +140,17 @@
             marker.addEventListener("click", function () {
                 if (data['car']["id"] !== "") {
                     $('#modal-title').text(data['car']['name']);
-                    $('#modal-carImg').attr('src', "{{imgDomain}}" + data['car']['img']);
-                    $('#modal-refreshTime').text('更新时间：' + timestampToTime(data['gps_time']));
-                    $('#modal-currentLoc').text('当前位置：' + data['address']);
+//                    $('#modal-carImg').attr('src', "{{imgDomain}}" + data['car']['img']);
+//                    $('#modal-refreshTime').text('更新时间：' + timestampToTime(data['gps_time']));
+//                    $('#modal-currentLoc').text('当前位置：' + data['address']);
                     $('#modal-carDetail').attr('href', 'car' + '/' + data['car']['id']);
                     $('#modal-carRec').attr('href', 'carRec' + '/' + data['car']['id']);
                     $('#modal1').modal('open');
                 }
                 else {
                     $('#modal-failed-title').text('此设备暂未绑定车辆,请联系管理员或登陆后台修改');
-                    $('#modal-failed-refreshTime').text('更新时间：' + timestampToTime(data['gps_time']));
-                    $('#modal-failed-currentLoc').text('当前位置：' + data['address']);
+//                    $('#modal-failed-refreshTime').text('更新时间：' + timestampToTime(data['gps_time']));
+//                    $('#modal-failed-currentLoc').text('当前位置：' + data['address']);
                     $('#modal2').modal('open');
                 }
 

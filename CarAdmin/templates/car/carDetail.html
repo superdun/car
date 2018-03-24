@@ -23,7 +23,20 @@
     </tr>
     <tr>
         <td>型号</td>
-        <td>{{data.type}}</td>
+        <td>{{data.Cartype.name}}</td>
+    </tr>
+    <tr>
+        <td>设备状态</td>
+        <td>{{GPSData.GPSStatus}}</td>
+    </tr>
+    <tr>
+        <td>位置更新时间</td>
+        <td>{{GPSData.updateTime}}</td>
+    </tr>
+
+    <tr>
+        <td>最新位置</td>
+        <td>{{GPSData.address}}</td>
     </tr>
     <tr>
         <td>购买时间</td>
@@ -39,8 +52,8 @@
 
         <td>
             {% for h in data.histories %}
-            <a href="/history/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}}   </a><br>
-             {% endfor  %}
+            <a href="/history/{{h.id }}">{{h.created_at}}：{{h.Customer.name}}, {{h.type}} </a><br>
+            {% endfor %}
         </td>
 
 
@@ -52,7 +65,7 @@
         <td>
             {% for m in data.mendhistories %}
             <a href="/mendHistory/{{m.id }}">{{m.created_at}}：{{m.User.name}}, {{m.type}} </a><br>
-             {% endfor %}
+            {% endfor %}
         </td>
 
 

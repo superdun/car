@@ -5,7 +5,9 @@ from db.dbORM import *
 from modules.CarSDK import CarOlineApi
 
 api = Blueprint('api', __name__)
-
+account = current_app.config.get('CAR_ACCOUNT', '')
+password = current_app.config.get('CAR_PASSWORD', '')
+carApi = CarOlineApi(account=account, password=password)
 
 @api.route('/api/carrec/<imei>')
 def carRecApi(imei):
@@ -15,9 +17,6 @@ def carRecApi(imei):
         return jsonify({'status': 'error', 'msg': '时间错误', 'data': []})
     if not started_at.isdigit() or not ended_at.isdigit():
         return jsonify({'status': 'error', 'msg': '时间错误', 'data': []})
-    account = current_app.config.get('CAR_ACCOUNT', '')
-    password = current_app.config.get('CAR_PASSWORD', '')
-    carApi = CarOlineApi(account=account, password=password)
     carApi.getToken()
     data = carApi.history(imei, int(started_at), int(ended_at))
     carId = Gps.query.filter_by(code=imei).first().cars[0].id
@@ -39,9 +38,7 @@ def carRecApi(imei):
 
 @api.route('/api/carmonitor')
 def carMonitorApi():
-    account = current_app.config.get('CAR_ACCOUNT', '')
-    password = current_app.config.get('CAR_PASSWORD', '')
-    carApi = CarOlineApi(account=account, password=password)
+
     carApi.getToken()
     data = carApi.monitor()
     print data
@@ -72,3 +69,9 @@ def carMonitorApi():
         return jsonify({'status': 'ok', 'msg': data['msg'], 'data': data['data']})
     else:
         return jsonify({'status': 'error', 'msg': data['msg'], 'data': []})
+@api.route('/api/carmonitor/<id>')
+def oneCarMonitorApi(id):
+    carApi.getToken()
+    car = Car.query.get(id)
+    data = carApi.tracking(car.imei)
+    return jsonify(data)
