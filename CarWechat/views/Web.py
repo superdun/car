@@ -19,7 +19,7 @@ QINIU_DOMAIN = current_app.config.get('QINIU_BUCKET_DOMAIN', '')
 wxAppId = current_app.config.get('WECHAT_APP_ID', '')
 wxAppsecret = current_app.config.get('WECHAT_APP_SECERET', '')
 wxAuth = oauth.WeChatOAuth(app_id=wxAppId, secret=wxAppsecret,
-                           redirect_uri="http://1o4958r317.51mypc.cn/wx/wx_authorize", scope="snsapi_userinfo")
+                           redirect_uri=current_app.config.get('WECHAT_AUTH_REDIRECT_URL'), scope="snsapi_userinfo")
 
 login_manager = flask_login.LoginManager()
 
