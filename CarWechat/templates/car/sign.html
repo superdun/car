@@ -149,6 +149,7 @@
                         processData: false,
                         success: function (result) {
                             if (result['status'] == 'lacked') {
+                                alert("信息填写有误");
                                 result['msg'].forEach(function (v, k) {
                                     $('#' + v).removeClass('valid').addClass('invalid')
                                 })
