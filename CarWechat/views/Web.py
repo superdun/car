@@ -123,3 +123,6 @@ def order():
     #     return render_template('car/wechat/index.html')
     # except:
     #     return render_template('car/wechat/error.html')
+@web.route('/MP_verify_KaJXT0CWMzGQXy1c.txt')
+def wxVerufy():
+    return current_app.config.get("WECHAT_VERYFI")
