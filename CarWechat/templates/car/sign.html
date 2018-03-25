@@ -158,7 +158,7 @@
                             }
                             if (result['status'] == 'ok') {
                                 alert('信息录入成功');
-                                location.href("{{url_for('web.selectCar')}}")
+                                window.location = "{{url_for('web.selectCar')}}"
                             }
                             if (result['status'] == 'dup') {
                                 alert('当前手机号码/身份证号已存在')

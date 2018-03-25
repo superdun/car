@@ -59,6 +59,7 @@ def profileApi():
             customer.password = psswd
             customer.driveage = driveage
             customer.idcode = idCode
+            customer.status = 'normal'
         else:
             customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode,status='normal')
     else:
