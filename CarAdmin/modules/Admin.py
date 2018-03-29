@@ -9,10 +9,10 @@ from flask_admin import form
 from flask_admin.contrib.sqla import ModelView
 from jinja2 import Markup
 from flask import current_app
-from db.dbORM import db, User, Car, Gps, Customer
+from db.dbORM import db, User, Car, Gps, Customer,Cartype
 from helpers import thumb
 from flask_qiniustorage import Qiniu
-
+from wtforms import SelectField
 admin = Admin(current_app)
 QINIU_DOMAIN = current_app.config.get('QINIU_BUCKET_DOMAIN', '')
 UPLOAD_URL = current_app.config.get('UPLOAD_URL')
@@ -29,6 +29,8 @@ def dashboard():
     admin.add_view(CarView(Car, db.session))
     admin.add_view(GpsView(Gps, db.session))
     admin.add_view(CustomerView(Customer, db.session))
+    admin.add_view(CartypeView(Cartype, db.session))
+
 
 
 class UploadWidget(form.ImageUploadInput):
@@ -73,7 +75,7 @@ class CarView(ModelView):
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
                            url_relative_path=QINIU_DOMAIN),
-        # 'category': SelectField(u'category', choices=CATEGORY),
+        'status': SelectField(u'status', choices=("deleted","pending","normal")),
     }
     # column_formatters = dict(created_at=lambda v, c, m, p: date_format(m.created_at),
     #                          img=lambda v, c, m, p: img_url_format(m.img))
@@ -97,7 +99,7 @@ class CustomerView(ModelView):
                            url_relative_path=QINIU_DOMAIN),
         # 'category': SelectField(u'category', choices=CATEGORY),
     }
-    form_excluded_columns = ('img')
+    form_excluded_columns = ('img','password')
 
 
 class UserView(ModelView):
@@ -106,3 +108,7 @@ class UserView(ModelView):
 
     column_list = ("name", "auth")
     form_columns = ("name", "auth")
+class CartypeView(ModelView):
+    def is_accessible(self):
+        return flask_login.current_user.is_authenticated
+
