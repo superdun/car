@@ -4,13 +4,12 @@ from flask_login import login_required, current_user
 from helpers.thumb import upLoadFromUrl
 from helpers.other import getRandomStr
 from db.dbORM import *
-from wechatpy import oauth, events
-from wechatpy import parse_message, create_reply, client
+from wechatpy import parse_message, create_reply
 from wechatpy.utils import check_signature
 from wechatpy.exceptions import (
     InvalidSignatureException,
-    InvalidAppIdException,
 )
+import modules.Wechat as wx
 
 import time
 import flask_login
@@ -19,11 +18,8 @@ web = Blueprint('web', __name__)
 
 QINIU_DOMAIN = current_app.config.get('QINIU_BUCKET_DOMAIN', '')
 
-wxAppId = current_app.config.get('WECHAT_APP_ID', '')
-wxAppsecret = current_app.config.get('WECHAT_APP_SECERET', '')
-wxAuth = oauth.WeChatOAuth(app_id=wxAppId, secret=wxAppsecret,
-                           redirect_uri=current_app.config.get('WECHAT_URL') + current_app.config.get(
-                               'WECHAT_AUTH_REDIRECT_URL'), scope="snsapi_userinfo")
+
+wxAuth = wx.getAuth()
 
 login_manager = flask_login.LoginManager()
 
@@ -109,13 +105,16 @@ def wechatSign():
 def selectCar():
     wxNonceStr = getRandomStr(15)
     wxTimeStamp = time.time()
-    from modules.Session import session_interface
-    wxClient = client.WeChatClient(appid=wxAppId, secret=wxAppsecret, session=session_interface)
+
+    wxClient = wx.getClient()
     wxTicket = wxClient.jsapi.get_jsapi_ticket()
     url = current_app.config.get('WECHAT_URL') + url_for("web.selectCar")
     signature = wxClient.jsapi.get_jsapi_signature(wxNonceStr, wxTicket, wxTimeStamp, url)
     wxJSSDKConfig = {'url': url, 'signature': signature, 'nonceStr': wxNonceStr, 'timestamp': wxTimeStamp,
-                     "appId": wxAppId}
+                     "appId": wx.getAppId()}
+
+    wxPay = wx.getPay()
+
     if current_user.is_authenticated:
         if current_user.status == "normal":
             CarType = Cartype.query.filter(Cartype.status != "deleted").all()
