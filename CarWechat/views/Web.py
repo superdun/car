@@ -65,6 +65,9 @@ def wechatIndex():
             # return echostr
             # return redirect(wxAuth.authorize_url)
 
+def returnError(msg):
+       return render_template('car/error.html', data={'msg':u'抱歉，%s'%msg.decode('utf8')}, imgDomain="http://%s" % QINIU_DOMAIN)
+
 
 # @web.route('/index')
 # def wechatIndex():
@@ -103,23 +106,13 @@ def wechatSign():
 
 @web.route('/selectcar')
 def selectCar():
-    wxNonceStr = getRandomStr(15)
-    wxTimeStamp = time.time()
 
-    wxClient = wx.getClient()
-    wxTicket = wxClient.jsapi.get_jsapi_ticket()
-    url = current_app.config.get('WECHAT_URL') + url_for("web.selectCar")
-    signature = wxClient.jsapi.get_jsapi_signature(wxNonceStr, wxTicket, wxTimeStamp, url)
-    wxJSSDKConfig = {'url': url, 'signature': signature, 'nonceStr': wxNonceStr, 'timestamp': wxTimeStamp,
-                     "appId": wx.getAppId()}
-
-    wxPay = wx.getPay()
 
     if current_user.is_authenticated:
         if current_user.status == "normal":
             CarType = Cartype.query.filter(Cartype.status != "deleted").all()
             return render_template('car/selectCar.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN,
-                                   wxJSSDKConfig=wxJSSDKConfig)
+                                   )
         else:
             return redirect(url_for("web.wechatSign"))
 
@@ -131,8 +124,10 @@ def selectCar():
 def order():
     if current_user.is_authenticated:
         if current_user.status == "normal":
+
             CarType = Cartype.query.filter(Cartype.status != "deleted").all()
-            return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
+            return returnError("未查询到相关订单")
+            # return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
         else:
             return redirect(url_for("web.wechatSign"))
 
@@ -145,7 +140,32 @@ def order():
         # except:
         #     return render_template('car/wechat/error.html')
 
+@web.route('/cart/<id>')
+def cart(id):
+    if current_user.is_authenticated:
+        if current_user.status == "normal":
+            wxNonceStr = getRandomStr(15)
+            wxTimeStamp = time.time()
+
+            wxClient = wx.getClient()
+            wxTicket = wxClient.jsapi.get_jsapi_ticket()
+            url = current_app.config.get('WECHAT_URL') + url_for("web.selectCar")
+            signature = wxClient.jsapi.get_jsapi_signature(wxNonceStr, wxTicket, wxTimeStamp, url)
+            wxJSSDKConfig = {'url': url, 'signature': signature, 'nonceStr': wxNonceStr, 'timestamp': wxTimeStamp,
+                             "appId": wx.getAppId()}
+
+            wxPay = wx.getPay()
+            CarType = Cartype.query.filter(Cartype.status != "deleted" and Cartype.id==id).first()
+            if not CarType:
+                return returnError("该车型暂时已满员，请选择其他车辆")
+            return render_template('car/cart.html', carData=CarType, wxJSSDKConfig=wxJSSDKConfig,imgDomain="http://%s" % QINIU_DOMAIN)
+        else:
+            return redirect(url_for("web.wechatSign"))
+
+    else:
+        return redirect(url_for('web.wechatSign'))
 
 @web.route('/MP_verify_KaJXT0CWMzGQXy1c.txt')
 def wxVerufy():
     return current_app.config.get("WECHAT_VERYFI")
+
