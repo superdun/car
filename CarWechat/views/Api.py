@@ -1,11 +1,31 @@
 # -*- coding:utf-8 -*-
-from  flask import Blueprint, jsonify, request, current_app
+from  flask import Blueprint, request, current_app, url_for,jsonify
 from db.dbORM import *
 from sqlalchemy import exc
 from modules.CarSDK import CarOlineApi
 import hashlib
 import flask_login
+import modules.Wechat as wx
+from wechatpy.exceptions import (
+    InvalidSignatureException,
+    WeChatPayException
+)
+from datetime import datetime
+from wechatpy.utils import timezone
+import time
+import json
+import random
+
 api = Blueprint('api', __name__)
+
+
+def getOutTradeNo():
+    now = datetime.fromtimestamp(time.time(), tz=timezone('Asia/Shanghai'))
+    return '{0}{1}{2}'.format(
+        current_app.config.get("WECHAT_MCH_ID"),
+        now.strftime('%Y%m%d%H%M%S'),
+        random.randint(1000, 10000)
+    )
 
 
 @api.route('/idcode', methods=['POST'])
@@ -15,22 +35,21 @@ def idcodeApi():
     idCode = makeIdCode(num)
     msg = u'{"code": "%s"}' % idCode
     from modules.SMS import sendSMS
-    sendResult = sendSMS('id', num, msg).send()
+    sendResult = sendSMS('id', num, msg.decode('utf8')).send()
     print sendResult
     return jsonify({'status': 'ok', 'msg': sendResult})
 
+
 @api.route('/sign', methods=['POST'])
 def profileApi():
-
     filter_list = []
     for i in request.form:
         if request.form[i] == '' or request.form[i] == 'null':
             filter_list.append(i)
-        elif len(request.form['password'])<6:
+        elif len(request.form['password']) < 6:
             filter_list.append("password")
-        elif len(request.form['idCode'])!=18:
+        elif len(request.form['idCode']) != 18:
             filter_list.append("idCode")
-
 
     name = request.form['name']
     if request.form['driveage'].isnumeric():
@@ -48,10 +67,10 @@ def profileApi():
     vCode = str(request.form['vCode'])
     if filter_list:
         return jsonify({'status': 'lacked', 'msg': filter_list})
-    from modules.VCode import cache
-    if vCode != cache.get(phone):
+    from modules.VCode import Cache
+    if vCode != Cache.cache.get(phone):
         return jsonify({'status': 'wrongcode', 'msg': '验证码错误'})
-    if flask_login.current_user.is_authenticated :
+    if flask_login.current_user.is_authenticated:
         customer = Customer.query.filter_by(openid=flask_login.current_user.openid).first()
         if customer:
             customer.name = name
@@ -61,9 +80,10 @@ def profileApi():
             customer.idcode = idCode
             customer.status = 'normal'
         else:
-            customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode,status='normal')
+            customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode,
+                                status='normal')
     else:
-        customer = Customer(name=name,phone=phone,password=psswd,driveage=driveage,idcode=idCode,status='normal')
+        customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode, status='normal')
     try:
         db.session.add(customer)
         db.session.commit()
@@ -84,7 +104,110 @@ def profileApi():
                 return jsonify({'status': 'nochange', 'msg': ""})
         else:
             return jsonify({'status': 'dup', 'msg': ""})
-    cache.delete(phone)
+    Cache.cache.delete(phone)
     return jsonify({'status': 'ok', 'msg': ""})
 
 
+@api.route('/getpayresult', methods=["POST"])
+def getPayResult():
+    wxPay = wx.getPay()
+    if wxPay.sandbox:
+        sandKey = wxPay._fetch_sanbox_api_key()
+        wxPay.sandbox_api_key = sandKey
+    try:
+        r = wxPay.parse_payment_result(request.data)
+    except InvalidSignatureException:
+        order.status = "failed"
+        order.detail = "Invalid signature"
+        db.session.add(order)
+        db.session.commit()
+        return "err"
+    if r["return_code"] == "SUCCESS":
+        order = Order.query.filter_by(tradeno=r["out_trade_no"]).first()
+        if not order:
+            e = Error(msg=json.dumps(r), type=1)
+            db.session.add(e)
+            db.session.commit()
+        else:
+            if not order.wxtradeno:
+                order.wxtradeno = r["transaction_id"]
+                order.pay_at = r["time_end"]
+                order.status = "ok"
+                db.session.add(order)
+                db.session.commit()
+    else:
+        rr = wxPay.close(r["out_trade_no"])
+        order.status = "failed"
+        order.detail = r["err_code_des"]
+        db.session.add(order)
+        db.session.commit()
+    return "ok"
+
+
+@api.route('/makeorder', methods=['POST'])
+def getOrderApi():
+    carTypeId = request.form.get("id")
+    count = request.form.get("count")
+    if (not carTypeId) or (not count):
+        return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
+    car = Cartype.query.filter_by(id=int(carTypeId)).first()
+    if not car:
+        return jsonify({'status': 'error', 'code': 2, 'msg': "未找到商品"})
+    if int(count) < 0:
+        return jsonify({'status': 'error', 'code': 3, 'msg': "数量错误"})
+    if not flask_login.current_user.is_authenticated:
+        return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
+    carName = car.name
+    body = u"%s*%s天" % (carName, count)
+    totalfee = int(car.price) * int(count)
+    notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
+    open_id = flask_login.current_user.openid
+    order = Order(userid=open_id, carid=int(carTypeId), totalfee=totalfee, tradetype='JSAPI', count=int(count))
+
+    wxPay = wx.getPay()
+    out_trade_no = getOutTradeNo()
+    try:
+        oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
+                                 user_id=open_id, out_trade_no=out_trade_no)
+    except WeChatPayException:
+        return  jsonify({'status': 'failed', 'result': u"订单创建失败"})
+    if oresult['return_code'] == 'SUCCESS':
+        prepay_id = oresult['prepay_id']
+        order.prepayid = prepay_id
+        order.tradeno = out_trade_no
+        order.status = 'waiting'
+        order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
+        db.session.add(order)
+        db.session.commit()
+        return jsonify({'status': 'ok', 'result': wxPay.jsapi.get_jsapi_params(prepay_id)})
+    else:
+        order.status = 'error'
+        order.tradeno = out_trade_no
+        db.session.add(order)
+        db.session.commit()
+        return jsonify({'status': 'failed', 'result': oresult["err_code_des"]})
+@api.route('/cancelorder/<id>')
+def cancelOrderApi(id):
+    wxPay = wx.getPay()
+    if wxPay.sandbox:
+        sandKey = wxPay._fetch_sanbox_api_key()
+        wxPay.sandbox_api_key = sandKey
+    order = Order.query.filter_by(id=id).first()
+    if not order:
+        return jsonify({"status":'ok'})
+    tradeNo = order.tradeno
+    rr = wxPay.close(tradeNo)
+    return jsonify({"status": 'ok'})
+@api.route('/refund/<id>')
+def refundApi(id):
+    # wxPay = wx.getPay()
+    # if wxPay.sandbox:
+    #     sandKey = wxPay._fetch_sanbox_api_key()
+    #     wxPay.sandbox_api_key = sandKey
+    # order = Order.query.filter_by(id=id).first()
+    # if not order:
+    #     return jsonify({"status":'ok'})
+    # tradeNo = order.tradeno
+    # rr = wxPay.close(tradeNo)
+    # return jsonify({"status": 'ok'})
+    pass

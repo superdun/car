@@ -1,20 +1,73 @@
 {% extends "base.html" %}
 {% block css %}
-<style type="text/css">
-    .container {
-        padding: 20px;
-    }
-</style>
+    <style type="text/css">
+        .container {
+            padding: 20px;
+        }
+
+        .collection-item {
+            height: 150px;
+        }
+    </style>
 {% endblock %}
 {% block content %}
-<div class="container">
-    <div>
-        <h6 class="greyWords">对不起 ,没有查询到相关订单</h6>
+    <div class="container">
+        <ul class="collection">
+            {% for d in data %}
+                <li class="collection-item avatar">
+                    <img src="{{ imgDomain }}{{ d.Cartype.img }}!fang" alt="" class="circle">
+                    <span class="title">{{ d.Cartype.name }}</span>
+                    <p>订单金额：{{ d.totalfee }} 元</p>
+                    <p>生成时间：{{ d.created_at }}</p>
+                    <p class="truncate">订单编号：{{ d.tradeno }}</p>
+                    {% if d.status=="ok" %}
+                        <p>
+                            订单状态：已支付
+                        </p>
+                    {% elif d.status=="waiting" %}
+                        <p style="color: red">
+                            订单状态：待支付</p>
+                    {% else %}
+                        <p style="color: gray">
+                            订单状态：已取消</p>
+                    {% endif %}
+                    <a class="dropdown-button secondary-content" data-activates='dropdown{{ loop.index }}'><i
+                            class="material-icons">list</i></a>
+
+                    {% if d.status=="waiting" %}
+                        <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
+                            <li><a href="#!" id="cancel{{ d.id }}">取消订单</a></li>
+                            <li><a href="{{ url_for('web.orderDetail',id=d.id) }}">去支付</a></li>
+
+                        </ul>
+                    {% elif d.status=="failed" %}
+                        <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
+                            <li><a href="{{ url_for("web.orderDetail",id=d.id) }}">查看详情</a></li>
+
+                        </ul>
+                    {% else %}
+                        <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
+                            <li><a href="#" id="refund{{ d.id }}">申请退款</a></li>
+                            <li><a href="{{ url_for("web.orderDetail",id=d.id) }}">查看详情</a></li>
+
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+
+        </ul>
     </div>
-</div>
 {% endblock %}
 {% block script %}
-<script>
-
-</script>
+    <script>
+        $('.dropdown-button').dropdown({
+                inDuration: 300,
+                outDuration: 225,
+                constrain_width: false, // Does not change width of dropdown to that of the activator
+                gutter: 0, // Spacing from edge
+                belowOrigin: false, // Displays dropdown below the button
+                alignment: 'left' // Displays dropdown with edge aligned to the left of button
+            }
+        );
+    </script>
 {% endblock %}

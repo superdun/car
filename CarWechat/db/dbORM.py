@@ -12,6 +12,8 @@ class Cartype(db.Model):
     cars = db.relationship('Car', backref='Cartype', lazy='dynamic')
     img = db.Column(db.String(200))
     status = db.Column(db.String(800), default="pending")
+    orders = db.relationship('Order', backref='Cartype', lazy='dynamic')
+
     def __repr__(self):
         return self.name
 
@@ -48,6 +50,7 @@ class Customer(db.Model):
     comment = db.Column(db.String(800))
     img = db.Column(db.String(800))
     histories = db.relationship('History', backref='Customer', lazy='dynamic')
+    orders = db.relationship('Order', backref='Customer', lazy='dynamic')
     openid = db.Column(db.String(800), unique=True)
     password = db.Column(db.String(800))
     driveage = db.Column(db.Integer)
@@ -98,7 +101,29 @@ class Mendhistory(db.Model):
     def __repr__(self):
         return "%s %s" % (self.created_at, self.type)
 
-
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
+    totalfee = db.Column(db.Integer)
+    userid = db.Column(db.Integer, db.ForeignKey('customer.openid'))
+    tradetype = db.Column(db.String(80))
+    detail = db.Column(db.String(800))
+    tradeno = db.Column(db.String(80))
+    count = db.Column(db.Integer)
+    status = db.Column(db.String(80),default='pending')
+    prepayid = db.Column(db.String(80))
+    wxtradeno = db.Column(db.String(80))
+    pay_at = db.Column(db.String(80))
+    def __repr__(self):
+        return self.tradeno
+class Error(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    msg = db.Column(db.String(8000))
+    type = db.Column(db.Integer)
+    def __repr__(self):
+        return self.id
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
