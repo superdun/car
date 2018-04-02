@@ -32,4 +32,4 @@ def getPay():
     mch_cert  = current_app.config.get("WECHAT_CER_PATH")
     mch_key = current_app.config.get("WECHAT_CER_KEY_PATH")
     return pay.WeChatPay(appid=wxAppId, api_key=wxPayApiKey, mch_id= wxMchId,  mch_cert=mch_cert, mch_key=mch_key, timeout=None,
-                           sandbox=True)
+                           sandbox=False)

@@ -169,6 +169,7 @@ def getOrderApi():
     try:
         oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
                                  user_id=open_id, out_trade_no=out_trade_no)
+
     except WeChatPayException:
         return  jsonify({'status': 'failed', 'result': u"订单创建失败"})
     if oresult['return_code'] == 'SUCCESS':
