@@ -82,7 +82,8 @@ def getJSSDK(url):
     return {'url': url, 'signature': signature, 'nonceStr': wxNonceStr, 'timestamp': wxTimeStamp,
             "appId": wx.getAppId()}
 
-
+def getOrderConfig():
+    return current_app.config.get("ORDER_STATUS")
 # @web.route('/index')
 # def wechatIndex():
 #     if
@@ -136,9 +137,10 @@ def selectCar():
 def order():
     if current_user.is_authenticated:
         if current_user.status == "normal":
+            orderConfig = getOrderConfig()
             openId = current_user.openid
             orders = Order.query.filter_by(userid=openId).all()
-            return render_template("car/order.html", data=orders, imgDomain="http://%s" % QINIU_DOMAIN)
+            return render_template("car/order.html", data=orders, imgDomain="http://%s" % QINIU_DOMAIN,orderConfig=orderConfig)
             # return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
         else:
             return redirect(url_for("web.wechatSign"))
@@ -157,13 +159,14 @@ def orderDetail(id):
             order = Order.query.filter_by(id=id).first()
             if not order:
                 return returnError("未找到相关订单")
+            orderConfig = getOrderConfig()
             import json
             if order.status=="waiting":
                 wxJSSDKPayConfig = json.loads(order.detail)
                 return render_template("car/repay.html", data=order, imgDomain="http://%s" % QINIU_DOMAIN,
-                                   wxJSSDKPayConfig=wxJSSDKPayConfig, wxJSSDKConfig=wxJSSDKConfig)
+                                   wxJSSDKPayConfig=wxJSSDKPayConfig, wxJSSDKConfig=wxJSSDKConfig,orderConfig=orderConfig)
             else :
-                return render_template('car/orderDetail.html', data=order, imgDomain="http://%s" % QINIU_DOMAIN)
+                return render_template('car/orderDetail.html', data=order, imgDomain="http://%s" % QINIU_DOMAIN,orderConfig=orderConfig)
         else:
             return redirect(url_for("web.wechatSign"))
 

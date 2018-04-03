@@ -115,6 +115,25 @@ class Order(db.Model):
     prepayid = db.Column(db.String(80))
     wxtradeno = db.Column(db.String(80))
     pay_at = db.Column(db.String(80))
+    refundid = db.Column(db.Integer, db.ForeignKey('refundorder.id'))
+    def __repr__(self):
+        return self.tradeno
+
+class Refundorder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
+    totalfee = db.Column(db.Integer)
+    userid = db.Column(db.Integer, db.ForeignKey('customer.openid'))
+    tradetype = db.Column(db.String(80))
+    detail = db.Column(db.String(800))
+    tradeno = db.Column(db.String(80))
+    count = db.Column(db.Integer)
+    status = db.Column(db.String(80),default='pending')
+    prepayid = db.Column(db.String(80))
+    wxtradeno = db.Column(db.String(80))
+    pay_at = db.Column(db.String(80))
+    order = db.relationship('Order', backref='Refundorder', lazy='dynamic')
     def __repr__(self):
         return self.tradeno
 class Error(db.Model):

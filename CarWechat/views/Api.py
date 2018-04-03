@@ -171,7 +171,7 @@ def getOrderApi():
                                  user_id=open_id, out_trade_no=out_trade_no)
 
     except WeChatPayException:
-        return  jsonify({'status': 'failed', 'result': u"订单创建失败"})
+        return  jsonify({'status': 'failed','orderId':order.id, 'result': u"订单创建失败"})
     if oresult['return_code'] == 'SUCCESS':
         prepay_id = oresult['prepay_id']
         order.prepayid = prepay_id
@@ -180,13 +180,13 @@ def getOrderApi():
         order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
         db.session.add(order)
         db.session.commit()
-        return jsonify({'status': 'ok', 'result': wxPay.jsapi.get_jsapi_params(prepay_id)})
+        return jsonify({'status': 'ok','orderId':order.id, 'result': wxPay.jsapi.get_jsapi_params(prepay_id)})
     else:
-        order.status = 'error'
+        order.status = 'failed'
         order.tradeno = out_trade_no
         db.session.add(order)
         db.session.commit()
-        return jsonify({'status': 'failed', 'result': oresult["err_code_des"]})
+        return jsonify({'status': 'failed','orderId':order.id, 'result': oresult["err_code_des"]})
 @api.route('/cancelorder/<id>')
 def cancelOrderApi(id):
     wxPay = wx.getPay()
@@ -195,20 +195,46 @@ def cancelOrderApi(id):
         wxPay.sandbox_api_key = sandKey
     order = Order.query.filter_by(id=id).first()
     if not order:
-        return jsonify({"status":'ok'})
+        return jsonify({"status": 'ok'})
     tradeNo = order.tradeno
-    rr = wxPay.close(tradeNo)
-    return jsonify({"status": 'ok'})
-@api.route('/refund/<id>')
-def refundApi(id):
-    # wxPay = wx.getPay()
-    # if wxPay.sandbox:
-    #     sandKey = wxPay._fetch_sanbox_api_key()
-    #     wxPay.sandbox_api_key = sandKey
-    # order = Order.query.filter_by(id=id).first()
-    # if not order:
-    #     return jsonify({"status":'ok'})
-    # tradeNo = order.tradeno
-    # rr = wxPay.close(tradeNo)
+    rr = wxPay.order.close(tradeNo)
+    if rr['result_code']=="SUCCESS":
+        order.status = "canceled"
+        order.detail = json.dumps(rr)
+        db.session.add(order)
+
+        db.session.commit()
+        return jsonify({"status": 'ok'})
+    else:
+        return jsonify({"status": 'ok'})
+    # try:
+    #     wxPay = wx.getPay()
+    #     if wxPay.sandbox:
+    #         sandKey = wxPay._fetch_sanbox_api_key()
+    #         wxPay.sandbox_api_key = sandKey
+    #     order = Order.query.filter_by(id=id).first()
+    #     if not order:
+    #         return jsonify({"status": 'ok'})
+    #     tradeNo = order.tradeno
+    #     rr = wxPay.close(tradeNo)
+    #     order.status = "canceled"
+    #     order.detail = json.dumps(rr)
+    #     db.session.add(order)
+    #
+    #     db.session.commit()
+    # except:
+    #     return jsonify({"status": 'failed'})
     # return jsonify({"status": 'ok'})
-    pass
+@api.route('/refundapply/<id>')
+def refundApplyApi(id):
+    try:
+        order = Order.query.filter_by(id=id).first()
+        order.status = 'refunding'
+        refundOrder = Refundorder(userid=order.userid)
+        db.session.add(refundOrder)
+        order.refundid = refundOrder.id
+        db.session.add(order)
+        db.session.commit()
+    except:
+        return jsonify({"status": 'failed'})
+    return jsonify({"status": 'ok'})

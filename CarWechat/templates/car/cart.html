@@ -34,10 +34,10 @@
                     <table class="striped centered">
 
                         <tbody>
-{#                        <tr>#}
-{#                            <td>订单编号</td>#}
-{#                            <td></td>#}
-{#                        </tr>#}
+                        {#                        <tr>#}
+                        {#                            <td>订单编号</td>#}
+                        {#                            <td></td>#}
+                        {#                        </tr>#}
                         <tr>
                             <td>车型</td>
                             <td>{{ carData.name }}</td>
@@ -57,10 +57,11 @@
                         </tbody>
                     </table>
                     <div class="row">
-                        <div class="col s6 offset-s3"><a class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
-                                               id="pay">支付</a></div>
-{#                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"#}
-{#                                               id="cancel">取消订单</a></div>#}
+                        <div class="col s6 offset-s3"><a
+                                class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
+                                id="pay">支付</a></div>
+                        {#                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"#}
+                        {#                                               id="cancel">取消订单</a></div>#}
                     </div>
                 </div>
             </div>
@@ -83,7 +84,7 @@
                 processData: false,
                 success: function (data) {
                     if (data['status'] === 'ok') {
-                        result = data['result']
+                        result = data['result'];
                         wx.chooseWXPay({
                             timestamp: result['timeStamp'], // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
                             nonceStr: result['nonceStr'], // 支付签名随机串，不长于 32 位
@@ -91,12 +92,26 @@
                             signType: result['signType'], // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
                             paySign: result['paySign'], // 支付签名
                             success: function (res) {
-                                alert('支付成功！')// 支付成功后的回调函数
+                                if (res.errMsg == "chooseWXPay:ok") {
+                                    alert('支付成功！')// 支付成功后的回调函数
+
+                                } else {
+                                    alert(res.errMsg);
+                                }
+                                setTimeout(1000);
+                                window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]
+
+
                             }
                         });
+                        setTimeout(1000);
+                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]
+
                     }
                     else {
-                        alert(data['result'])
+                        alert(data['result']);
+                        setTimeout(3000);
+                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]
                     }
                 }
 
@@ -104,7 +119,7 @@
         }
         $(document).ready(function () {
             function setSum() {
-                $("#sum").html($("#count").val() * $("#price").text()).css("color", 'red');
+                $("#sum").html($("#count").val() * $("#price").text() / 100).css("color", 'red');
             }
 
             var count = $("#count").spinner(
@@ -115,7 +130,7 @@
                 }
             );
             $("#count").val(1);
-            $("#sum").html($("#count").val() * $("#price").text());
+            $("#sum").html($("#count").val() * $("#price").text() / 100);
             $("#pay").click(function () {
                 getOrder();
             })

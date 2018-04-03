@@ -39,27 +39,40 @@
                             <td>{{ data.tradeno }}</td>
                         </tr>
                         <tr>
+                            <td>订单时间</td>
+                            <td>{{ data.created_at }}</td>
+                        </tr>
+                        <tr>
+                            <td>订单编号</td>
+                            <td style="color: {{ orderConfig[data.status][2] }}">{{ orderConfig[data.status][0] }}</td>
+                        </tr>
+                        <tr>
                             <td>车型</td>
                             <td>{{ data.Cartype.name }}</td>
                         </tr>
-                        <tr>
-                            <td>每日租金</td>
-                            <td id="price">{{ data.Cartype.price }}</td>
-                        </tr>
+                        {#                        <tr>#}
+                        {#                            <td>每日租金</td>#}
+                        {#                            <td id="price">{{ data.Cartype.price }}</td>#}
+                        {#                        </tr>#}
                         <tr>
                             <td>天数</td>
                             <td>{{ data.count }}</td>
                         </tr>
                         <tr>
                             <td>总价</td>
-                            <td id="sum">{{ data.totalfee }}</td>
+                            <td id="sum">{{ data.totalfee/100 }}</td>
                         </tr>
                         </tbody>
                     </table>
                     <div class="row">
-                        <div class="col s6 offset-s3"><a
-                                class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
-                                id="pay">支付</a></div>
+                        {% if data.status=="ok" %}
+                            <div class="col s6 offset-s3">
+                                <a
+                                        class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
+                                        id="refund">退款</a>
+                            </div>
+                        {% endif %}
+
                         {#                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"#}
                         {#                                               id="cancel">取消订单</a></div>#}
                     </div>
@@ -72,9 +85,29 @@
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script>
+        function refund() {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/refundapply/{{ data.id }}',
+                type: 'get',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        alert("正在申请退款，如有疑问请联系客服")
+                    }
+                    else {
+                        alert("申请失败，请重试或联系客服")
+                    }
+                    location.reload()
 
+                }
+
+            })
+        }
         $(document).ready(function () {
-
+            $('#refund').click(function () {
+                refund();
+            })
         });
 
     </script>

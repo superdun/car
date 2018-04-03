@@ -34,34 +34,43 @@
                     <table class="striped centered">
 
                         <tbody>
-                 <tr>
+
+                        <tr>
                             <td>订单编号</td>
+                            <td style="color: {{ orderConfig[data.status][2] }}">{{ orderConfig[data.status][0] }}</td>
+                        </tr>
+                        <tr>
+                            <td>订单时间</td>
+                            <td>{{ data.created_at }}</td>
+                        </tr>
+                        <tr>
+                            <td>订单状态</td>
                             <td>{{ data.tradeno }}</td>
                         </tr>
                         <tr>
                             <td>车型</td>
                             <td>{{ data.Cartype.name }}</td>
                         </tr>
-                        <tr>
-                            <td>每日租金</td>
-                            <td id="price">{{ data.Cartype.price }}</td>
-                        </tr>
+                        {#                        <tr>#}
+                        {#                            <td>每日租金</td>#}
+                        {#                            <td id="price">{{ data.Cartype.price }}</td>#}
+                        {#                        </tr>#}
                         <tr>
                             <td>天数</td>
                             <td>{{ data.count }}</td>
                         </tr>
                         <tr>
                             <td>总价</td>
-                            <td id="sum">{{ data.totalfee }}</td>
+                            <td id="sum">{{ data.totalfee/100 }}</td>
                         </tr>
                         </tbody>
                     </table>
                     <div class="row">
-                        <div class="col s6 offset-s3"><a
+                        <div class="col s6 "><a
                                 class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
                                 id="pay">支付</a></div>
-                        {#                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"#}
-                        {#                                               id="cancel">取消订单</a></div>#}
+                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"
+                                               id="cancel">取消订单</a></div>
                     </div>
                 </div>
             </div>
@@ -72,7 +81,25 @@
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script>
+        function cancel() {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelorder/{{ data.id }}',
+                type: 'get',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        alert("已取消")
+                    }
+                    else {
+                        alert("取消失败，请重试")
+                    }
+                    location.reload()
 
+                }
+
+            })
+        }
         $(document).ready(function () {
 
         });
@@ -96,10 +123,21 @@
                     signType: '{{ wxJSSDKPayConfig['signType'] }}', // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
                     paySign: '{{ wxJSSDKPayConfig['paySign'] }}', // 支付签名
                     success: function (res) {
-                        alert('支付成功！')// 支付成功后的回调函数
+                        if (res.errMsg == "chooseWXPay:ok") {
+                            alert('支付成功！')// 支付成功后的回调函数
+
+                        } else {
+                            alert(res.errMsg);
+                        }
+                        setTimeout(3000);
+                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/{{ data.id }}'
+
                     }
                 });
-            })
+            });
+            $("#cancel").click(function () {
+                cancel()
+            });
         });
         wx.error(function (res) {
             // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。

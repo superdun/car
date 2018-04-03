@@ -20,38 +20,17 @@
                     <p>订单金额：{{ d.totalfee }} 元</p>
                     <p>生成时间：{{ d.created_at }}</p>
                     <p class="truncate">订单编号：{{ d.tradeno }}</p>
-                    {% if d.status=="ok" %}
-                        <p>
-                            订单状态：已支付
-                        </p>
-                    {% elif d.status=="waiting" %}
-                        <p style="color: red">
-                            订单状态：待支付</p>
-                    {% else %}
-                        <p style="color: gray">
-                            订单状态：已取消</p>
-                    {% endif %}
+                    <p style="color: {{ orderConfig[d.status][2] }}">
+                        订单状态：{{ orderConfig[d.status][0] }}
+                    </p>
+
                     <a class="dropdown-button secondary-content" data-activates='dropdown{{ loop.index }}'><i
                             class="material-icons">list</i></a>
-
-                    {% if d.status=="waiting" %}
-                        <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
-                            <li><a href="#!" id="cancel{{ d.id }}">取消订单</a></li>
-                            <li><a href="{{ url_for('web.orderDetail',id=d.id) }}">去支付</a></li>
-
-                        </ul>
-                    {% elif d.status=="failed" %}
-                        <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
-                            <li><a href="{{ url_for("web.orderDetail",id=d.id) }}">查看详情</a></li>
-
-                        </ul>
-                    {% else %}
-                        <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
-                            <li><a href="#" id="refund{{ d.id }}">申请退款</a></li>
-                            <li><a href="{{ url_for("web.orderDetail",id=d.id) }}">查看详情</a></li>
-
-                        </ul>
-                    {% endif %}
+                    <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
+                        {% for o in orderConfig[d.status][1] %}
+                        <li><a href="{{ url_for('web.orderDetail',id=d.id) }}" >{{ o }}</a></li>
+                        {% endfor %}
+                    </ul>
                 </li>
             {% endfor %}
 
