@@ -30,23 +30,23 @@
 
             <div class="card">
                 <div class="card-content">
-                    <span class="card-title">订单确认</span>
+                    <span class="card-title">订单--{{ orderConfig[data.status][0] }} </span>
                     <table class="striped centered">
 
                         <tbody>
-
                         <tr>
-                            <td>订单编号</td>
+                            <td >订单编号</td>
+                            <td>{{ data.tradeno |cutstring}}</td>
+                        </tr>
+                        <tr>
+                            <td>订单状态</td>
                             <td style="color: {{ orderConfig[data.status][2] }}">{{ orderConfig[data.status][0] }}</td>
                         </tr>
                         <tr>
                             <td>订单时间</td>
                             <td>{{ data.created_at }}</td>
                         </tr>
-                        <tr>
-                            <td>订单状态</td>
-                            <td>{{ data.tradeno }}</td>
-                        </tr>
+
                         <tr>
                             <td>车型</td>
                             <td>{{ data.Cartype.name }}</td>

@@ -81,7 +81,9 @@ def getJSSDK(url):
 
     return {'url': url, 'signature': signature, 'nonceStr': wxNonceStr, 'timestamp': wxTimeStamp,
             "appId": wx.getAppId()}
-
+@current_app.template_filter('cutstring')
+def reverse_filter(s):
+    return u'%s******%s'%(s[0:4],s[-4:])
 def getOrderConfig():
     return current_app.config.get("ORDER_STATUS")
 # @web.route('/index')
