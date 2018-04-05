@@ -226,6 +226,7 @@ def refundApplyApi(id):
 
     order = Order.query.filter_by(id=id).first()
     order.status = 'refunding'
+    order.isrefund = 1
     db.session.add(order)
     db.session.commit()
 
