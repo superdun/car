@@ -117,11 +117,7 @@ def getPayResult():
     try:
         r = wxPay.parse_payment_result(request.data)
     except InvalidSignatureException:
-        order.status = "failed"
-        order.detail = "Invalid signature"
-        db.session.add(order)
-        db.session.commit()
-        return "err"
+        return
     if r["return_code"] == "SUCCESS":
         order = Order.query.filter_by(tradeno=r["out_trade_no"]).first()
         if not order:
@@ -206,7 +202,7 @@ def cancelOrderApi(id):
         db.session.commit()
         return jsonify({"status": 'ok'})
     else:
-        return jsonify({"status": 'ok'})
+        return jsonify({"status": 'failed'})
     # try:
     #     wxPay = wx.getPay()
     #     if wxPay.sandbox:
@@ -227,14 +223,10 @@ def cancelOrderApi(id):
     # return jsonify({"status": 'ok'})
 @api.route('/refundapply/<id>')
 def refundApplyApi(id):
-    try:
-        order = Order.query.filter_by(id=id).first()
-        order.status = 'refunding'
-        refundOrder = Refundorder(userid=order.userid)
-        db.session.add(refundOrder)
-        order.refundid = refundOrder.id
-        db.session.add(order)
-        db.session.commit()
-    except:
-        return jsonify({"status": 'failed'})
+
+    order = Order.query.filter_by(id=id).first()
+    order.status = 'refunding'
+    db.session.add(order)
+    db.session.commit()
+
     return jsonify({"status": 'ok'})

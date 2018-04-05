@@ -44,7 +44,7 @@
                         </tr>
                         <tr>
                             <td>每日租金</td>
-                            <td id="price">{{ carData.price }}</td>
+                            <td id="price">{{ carData.price }}元</td>
                         </tr>
                         <tr>
                             <td>天数</td>
@@ -119,7 +119,7 @@
         }
         $(document).ready(function () {
             function setSum() {
-                $("#sum").html($("#count").val() * $("#price").text() / 100).css("color", 'red');
+                $("#sum").html($("#count").val() * $("#price").text() / 100+"元").css("color", 'red');
             }
 
             var count = $("#count").spinner(
@@ -130,7 +130,7 @@
                 }
             );
             $("#count").val(1);
-            $("#sum").html($("#count").val() * $("#price").text() / 100);
+            $("#sum").html($("#count").val() * $("#price").text() / 100+"元");
             $("#pay").click(function () {
                 getOrder();
             })

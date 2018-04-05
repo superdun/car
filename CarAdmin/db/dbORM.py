@@ -11,8 +11,11 @@ class Cartype(db.Model):
     price = db.Column(db.String(80))
     cars = db.relationship('Car', backref='Cartype', lazy='dynamic')
     img = db.Column(db.String(200))
+    status = db.Column(db.String(800), default="pending")
+    orders = db.relationship('Order', backref='Cartype', lazy='dynamic')
+
     def __repr__(self):
-        return self.name
+        return u"%s,单价%s元"%(self.name,float(self.price)/100)
 
 class Gps(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -42,15 +45,16 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
     name = db.Column(db.String(80))
-    idcode = db.Column(db.String(80))
+    idcode = db.Column(db.String(80), unique=True)
     gender = db.Column(db.String(80))
     comment = db.Column(db.String(800))
     img = db.Column(db.String(800))
     histories = db.relationship('History', backref='Customer', lazy='dynamic')
-    openid = db.Column(db.String(800))
+    orders = db.relationship('Order', backref='Customer', lazy='dynamic')
+    openid = db.Column(db.String(800), unique=True)
     password = db.Column(db.String(800))
     driveage = db.Column(db.Integer)
-    phone= db.Column(db.String(800))
+    phone= db.Column(db.String(800), unique=True)
     status = db.Column(db.String(800),default="pending")
     @property
     def is_authenticated(self):
@@ -67,7 +71,10 @@ class Customer(db.Model):
     def get_id(self):
         return unicode(self.id)
     def __repr__(self):
-        return self.name
+        if self.name:
+            return self.name
+        else:
+            return ""
 
 
 class History(db.Model):
@@ -97,7 +104,37 @@ class Mendhistory(db.Model):
     def __repr__(self):
         return "%s %s" % (self.created_at, self.type)
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
+    totalfee = db.Column(db.Integer)
+    userid = db.Column(db.Integer, db.ForeignKey('customer.openid'))
+    tradetype = db.Column(db.String(80))
+    detail = db.Column(db.String(800))
+    tradeno = db.Column(db.String(80))
+    count = db.Column(db.Integer)
+    status = db.Column(db.String(80),default='pending')
+    prepayid = db.Column(db.String(80))
+    wxtradeno = db.Column(db.String(80))
+    pay_at = db.Column(db.String(80))
+    isrefund = db.Column(db.Integer)
+    r_pay_at = db.Column(db.String(80))
+    r_tradeno = db.Column(db.String(80))
+    r_wxtradeno = db.Column(db.String(80))
+    r_detail = db.Column(db.String(800))
+    r_totalfee = db.Column(db.Integer)
+    def __repr__(self):
+        return self.tradeno
 
+
+class Error(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    msg = db.Column(db.String(8000))
+    type = db.Column(db.Integer)
+    def __repr__(self):
+        return self.id
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())

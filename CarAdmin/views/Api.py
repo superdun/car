@@ -1,13 +1,45 @@
 # -*- coding:utf-8 -*-
-from  flask import Blueprint, jsonify, request, current_app
-from flask_login import login_required
+from  flask import Blueprint, jsonify, request, current_app, url_for
+
 from db.dbORM import *
 from modules.CarSDK import CarOlineApi
+import modules.Wechat as wx
+import flask_login
+
+from datetime import datetime
+from wechatpy.utils import timezone
+import time
+import json
+import random
 
 api = Blueprint('api', __name__)
 account = current_app.config.get('CAR_ACCOUNT', '')
 password = current_app.config.get('CAR_PASSWORD', '')
 carApi = CarOlineApi(account=account, password=password)
+
+
+def getOutTradeNo():
+    now = datetime.fromtimestamp(time.time(), tz=timezone('Asia/Shanghai'))
+    return '{0}{1}{2}'.format(
+        current_app.config.get("WECHAT_MCH_ID"),
+        now.strftime('%Y%m%d%H%M%S'),
+        random.randint(1000, 10000)
+    )
+
+
+def getRefundResult(s, key):
+    import base64
+    from Crypto.Cipher import AES
+    import hashlib
+    hl = hashlib.md5()
+    hl.update(key)
+    newkey = hl.hexdigest()
+    mode = AES.MODE_ECB
+    iv = 16 * '\x00'
+    decryptor = AES.new(newkey, mode, IV=iv)
+    a = base64.b64encode(s)
+    return decryptor.decrypt(a)
+
 
 @api.route('/api/carrec/<imei>')
 def carRecApi(imei):
@@ -38,7 +70,6 @@ def carRecApi(imei):
 
 @api.route('/api/carmonitor')
 def carMonitorApi():
-
     carApi.getToken()
     data = carApi.monitor()
     print data
@@ -69,9 +100,109 @@ def carMonitorApi():
         return jsonify({'status': 'ok', 'msg': data['msg'], 'data': data['data']})
     else:
         return jsonify({'status': 'error', 'msg': data['msg'], 'data': []})
+
+
 @api.route('/api/carmonitor/<id>')
 def oneCarMonitorApi(id):
     carApi.getToken()
     car = Car.query.get(id)
     data = carApi.tracking(car.imei)
     return jsonify(data)
+
+
+@api.route('/api/getrefundresult', methods=["POST"])
+def getRefundResult():
+    wxPay = wx.getPay()
+    if wxPay.sandbox:
+        sandKey = wxPay._fetch_sanbox_api_key()
+        wxPay.sandbox_api_key = sandKey
+    try:
+        r = wxPay.parse_payment_result(request.data)
+
+
+    except InvalidSignatureException:
+        return
+    if r["return_code"] == "SUCCESS":
+        rawr = r["req_info"]
+        if wxPay.sandbox:
+            sandKey = wxPay._fetch_sanbox_api_key()
+            r = getRefundResult(rawr, sandKey)
+        else:
+            r = getRefundResult(rawr, getPayApiKey())
+
+        order = Order.query.filter_by(tradeno=r["out_trade_no"]).first()
+        if not order:
+            e = Error(msg=json.dumps(r), type=1)
+            db.session.add(e)
+            db.session.commit()
+        else:
+            if r["refund_status"] == "SUCCESS":
+                order.status = "refunded"
+                order.r_pay_at = r["success_time"]
+                order.r_totalfee = r["settlement_refund_fee"]
+                order.r_Detail = json.dumps(r)
+    return "ok"
+
+
+@api.route('/api/refreshrefundresult', methods=["POST"])
+def refreshRefundResult():
+    wxPay = wx.getPay()
+    if wxPay.sandbox:
+        sandKey = wxPay._fetch_sanbox_api_key()
+        wxPay.sandbox_api_key = sandKey
+    orders = Order.query.filter_by(status="refundconfirmed").all()
+    for i in orders:
+        refund_id = i.r_wxtradeno
+        out_refund_no = i.r_tradeno
+        transaction_id = i.wxtradeno
+        out_trade_no = i.tradeno
+        r = wxPay.refund.query(refund_id=refund_id, out_refund_no=out_refund_no, transaction_id=transaction_id,
+                               out_trade_no=out_trade_no)
+
+
+
+@api.route('api/refund/<id>')
+def refundApplyApi(id):
+    if flask_login.current_user.is_authenticated:
+        if request.args.get("isconfirm"):
+            isconfirm = True
+        else:
+            isconfirm = False
+        order = Order.query.filter_by(id=id).first()
+        if not isconfirm:
+            order.status = 'refundfailed'
+            db.session.add(order)
+            db.session.commit()
+        else:
+            wxPay = wx.getPay()
+            if wxPay.sandbox:
+                sandKey = wxPay._fetch_sanbox_api_key()
+                wxPay.sandbox_api_key = sandKey
+
+            # total_fee = int(order.totalfee)
+            # refund_fee = total_fee
+            # refund_no = getOutTradeNo()
+            # transaction_id = order.wxtradeno
+            total_fee = 1
+            refund_fee = 1
+            refund_no = getOutTradeNo()
+            transaction_id = "4200000093201804052900832510"
+
+            notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getRefundResult')
+
+            rr = wxPay.refund.apply(total_fee=total_fee, refund_fee=refund_fee, out_refund_no=refund_no,
+                                    transaction_id=transaction_id)
+
+            if rr['result_code'] == "SUCCESS":
+                order.status = "refundconfirmed"
+                order.r_tradeno = refund_no
+                order.r_totalfee = rr["refund_fee"]
+                order.r_wxtradeno = rr['refund_id']
+                db.session.add(order)
+
+                db.session.commit()
+                return jsonify({"status": 'ok'})
+            else:
+                return jsonify({"status": 'failed'})
+
+        return jsonify({"status": 'ok'})
