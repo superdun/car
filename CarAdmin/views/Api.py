@@ -144,7 +144,7 @@ def getRefundResult():
     return "ok"
 
 
-@api.route('/api/refreshrefundresult', methods=["POST"])
+@api.route('/api/refreshrefundresult')
 def refreshRefundResult():
     wxPay = wx.getPay()
     if wxPay.sandbox:
@@ -158,10 +158,18 @@ def refreshRefundResult():
         out_trade_no = i.tradeno
         r = wxPay.refund.query(refund_id=refund_id, out_refund_no=out_refund_no, transaction_id=transaction_id,
                                out_trade_no=out_trade_no)
-        
+        for k in range(int(r['refund_count'])):
+            if r["refund_status_%d"%k]=="SUCCESS":
+                i.status="refunded"
+                i.r_pay_at=r["refund_success_time_%d"%k]
+                i.r_totalfee = r["refund_fee_%d" % k]
+                i.r_detail = json.dumps(r)
+                db.session.add(i)
 
+                db.session.commit()
+    return jsonify({"status":"ok"})
 
-@api.route('api/refund/<id>')
+@api.route('/api/refund/<id>')
 def refundApplyApi(id):
     if flask_login.current_user.is_authenticated:
         if request.args.get("isconfirm"):
@@ -186,7 +194,7 @@ def refundApplyApi(id):
             total_fee = 1
             refund_fee = 1
             refund_no = getOutTradeNo()
-            transaction_id = "4200000093201804052900832510"
+            transaction_id = "4200000098201804052954108790"
 
             notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getRefundResult')
 

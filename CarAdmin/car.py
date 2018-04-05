@@ -17,7 +17,7 @@ with app.app_context():
     from views import Web,Api,Login
 
     app.register_blueprint(Web.web, url_prefix='')
-    app.register_blueprint(Api.api, url_prefix='/')
+    app.register_blueprint(Api.api, url_prefix='')
     app.register_blueprint(Login.login_bp, url_prefix='')
 
 
