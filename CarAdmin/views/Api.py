@@ -158,7 +158,7 @@ def refreshRefundResult():
         out_trade_no = i.tradeno
         r = wxPay.refund.query(refund_id=refund_id, out_refund_no=out_refund_no, transaction_id=transaction_id,
                                out_trade_no=out_trade_no)
-
+        
 
 
 @api.route('api/refund/<id>')
