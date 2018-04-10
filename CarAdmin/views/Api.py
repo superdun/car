@@ -211,6 +211,10 @@ def refundApplyApi(id):
                 db.session.commit()
                 return jsonify({"status": 'ok'})
             else:
+                order.status = "refundfailed"
+                db.session.add(order)
+
+                db.session.commit()
                 return jsonify({"status": 'failed'})
 
         return jsonify({"status": 'ok'})
