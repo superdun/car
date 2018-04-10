@@ -21,8 +21,20 @@
                     else {
                         alert("处理失败，请重试")
                     }
+                    refreshrefund();
+                    setInterval(3000);
                     location.reload()
 
+                }
+
+            })
+            function refreshrefund(confirm) {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/api/refreshrefundresult',
+                type: 'get',
+                contentType: false,
+                processData: false,
+                success: function (data) {
                 }
 
             })
