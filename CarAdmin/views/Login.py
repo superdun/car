@@ -2,7 +2,7 @@
 import hashlib
 from flask import current_app, render_template, request, redirect, url_for,Blueprint
 import flask_login
-from db.dbORM import User
+from db.dbORM import User,Loginrecord,db
 login_bp = Blueprint('login',__name__)
 login_manager = flask_login.LoginManager()
 
@@ -11,7 +11,7 @@ users = {}
 raw_users = User.query.all()
 
 for user in raw_users:
-    users[user.name] = {'password': user.password}
+    users[user.name] = {'password': user.password,'role':user.Userrole.stage,'username':user.name,'id':user.id}
 
 
 @login_manager.unauthorized_handler
@@ -29,7 +29,9 @@ def user_loader(username):
         return
 
     user = User()
-    user.id = username
+    user.name = username
+    user.id = users[username]['id']
+    user.role = users[username]['role']
     return user
 
 
@@ -43,8 +45,14 @@ def request_loader(request):
         return
 
     user = User()
-    user.id = username
-
+    user.name = username
+    user.id = users[username]['id']
+    user.role = users[username]['role']
+    lr = Loginrecord()
+    lr.userid=users[username]['id']
+    lr.ip = request.remote_addr
+    db.session.add(lr)
+    db.session.commit()
     # DO NOT ever store passwords in plaintext and always compare password
     # hashes using constant-time comparison!
 

@@ -158,7 +158,7 @@ def getOrderApi():
     totalfee = int(car.price) * int(count)
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
     open_id = flask_login.current_user.openid
-    order = Order(userid=open_id, carid=int(carTypeId), totalfee=totalfee, tradetype='JSAPI', count=int(count))
+    order = Order(customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee, tradetype='JSAPI', count=int(count))
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()

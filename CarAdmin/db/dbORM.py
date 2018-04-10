@@ -109,7 +109,8 @@ class Order(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now())
     carid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
     totalfee = db.Column(db.Integer)
-    userid = db.Column(db.Integer, db.ForeignKey('customer.openid'))
+    customeropenid = db.Column(db.Integer, db.ForeignKey('customer.openid'))
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
     tradetype = db.Column(db.String(80))
     detail = db.Column(db.String(800))
     tradeno = db.Column(db.String(80))
@@ -124,6 +125,9 @@ class Order(db.Model):
     r_wxtradeno = db.Column(db.String(80))
     r_detail = db.Column(db.String(800))
     r_totalfee = db.Column(db.Integer)
+    fromdate = db.Column(db.DateTime)
+    todate = db.Column(db.DateTime)
+    offlinefee = db.Column(db.Integer)
     def __repr__(self):
         return self.tradeno
 
@@ -135,6 +139,14 @@ class Error(db.Model):
     type = db.Column(db.Integer)
     def __repr__(self):
         return self.id
+class Loginrecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    detail = db.Column(db.String(8000))
+    ip = db.Column(db.String(80))
+    def __repr__(self):
+        return self.created_at
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -142,10 +154,20 @@ class User(db.Model):
     password = db.Column(db.String(80))
     auth = db.Column(db.Integer)
     histories = db.relationship('Mendhistory', backref='User', lazy='dynamic')
+    roleid = db.Column(db.Integer, db.ForeignKey('userrole.id'))
+    orders =  db.relationship('Order', backref='User', lazy='dynamic')
+    loginrecords = db.relationship('Loginrecord', backref='User', lazy='dynamic')
 
     def __repr__(self):
         return self.name
 
+class Userrole(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80))
+    stage = db.Column(db.Integer)
+    loginrecords = db.relationship('User', backref='Userrole', lazy='dynamic')
+    def __repr__(self):
+        return self.name
 # POST
 
 # class PostComment(db.Model):

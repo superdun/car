@@ -7,13 +7,16 @@ from flask_admin import Admin
 import flask_login
 from flask_admin import form
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla.view import  func
 from jinja2 import Markup
 from flask import current_app
 from db.dbORM import db, User, Car, Gps, Customer, Cartype, Order
 from helpers import thumb
 from flask_qiniustorage import Qiniu
-from wtforms import SelectField, StringField
+from wtforms import SelectField, PasswordField
 from flask_admin import BaseView, expose
+import hashlib
+
 admin = Admin(current_app)
 QINIU_DOMAIN = current_app.config.get('QINIU_BUCKET_DOMAIN', '')
 UPLOAD_URL = current_app.config.get('UPLOAD_URL')
@@ -28,13 +31,16 @@ def img_url_format(value):
 
 
 def dashboard():
-    admin.add_view(UserView(User, db.session))
-    admin.add_view(CarView(Car, db.session))
-    admin.add_view(GpsView(Gps, db.session))
-    admin.add_view(CustomerView(Customer, db.session))
-    admin.add_view(CartypeView(Cartype, db.session))
-    admin.add_view(OrderView(Order, db.session))
+    admin.add_view(UserView(User, db.session, name=u"员工管理"))
+    admin.add_view(UserView1(User, db.session, name=u"个人资料", endpoint="profile"))
+    admin.add_view(CarView(Car, db.session, name=u"车辆管理"))
+    admin.add_view(GpsView(Gps, db.session, name=u"设备管理"))
+    admin.add_view(CustomerView(Customer, db.session, name=u"客户管理"))
+    admin.add_view(CartypeView(Cartype, db.session, name=u"车型管理"))
+    admin.add_view(OrderView(Order, db.session, name=u"订单管理"))
+    admin.add_view(OrderView1(Order, db.session, name=u"我的订单", endpoint="myorders"))
     # admin.add_view(OrderAdminView(name=u'订单管理', endpoint='refund'))
+
 
 class UploadWidget(form.ImageUploadInput):
     def get_url(self, field):
@@ -67,10 +73,16 @@ class ImageUpload(form.ImageUploadField):
             return filename
 
 
-class CarView(ModelView):
+class AdminModel(ModelView):
     def is_accessible(self):
-        return flask_login.current_user.is_authenticated
+        if flask_login.current_user.is_authenticated and flask_login.current_user.role == 1:
+            return True
+        else:
+            return False
 
+
+# super admin models
+class CarView(AdminModel):
     # Override displayed fields
     # column_list = ("title", "create_at", "view_count",
     #                "category", "is_full", "status","max_book_count")
@@ -80,23 +92,13 @@ class CarView(ModelView):
                            url_relative_path=QINIU_DOMAIN),
         'status': SelectField(u'status', choices=("deleted", "pending", "normal")),
     }
-    # column_formatters = dict(created_at=lambda v, c, m, p: date_format(m.created_at),
-    #                          img=lambda v, c, m, p: img_url_format(m.img))
-    # form_columns = ("name", "url","img")
-    # form_excluded_columns = ('create_at')
-    # create_template = 'admin/post/create.html'
-    # edit_template = 'admin/post/edit.html'
 
 
-class GpsView(ModelView):
-    def is_accessible(self):
-        return flask_login.current_user.is_authenticated
+class GpsView(AdminModel):
+    pass
 
 
-class CustomerView(ModelView):
-    def is_accessible(self):
-        return flask_login.current_user.is_authenticated
-
+class CustomerView(AdminModel):
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
                            url_relative_path=QINIU_DOMAIN),
@@ -105,18 +107,22 @@ class CustomerView(ModelView):
     form_excluded_columns = ('img', 'password')
 
 
-class UserView(ModelView):
-    def is_accessible(self):
-        return flask_login.current_user.is_authenticated
+class UserView(AdminModel):
+    form_extra_fields = {
+        'password': PasswordField(u'密码')
+    }
+    column_labels = dict(name=u'用户名', password=u'密码', Userrole=u'角色')
+    column_list = ("name", 'Userrole')
+    form_columns = ("name", "password", 'Userrole')
 
-    column_list = ("name", "auth")
-    form_columns = ("name", "auth")
+    def on_model_change(self, form, model, is_created):
+        password = model.password
+        md5 = hashlib.md5()
+        md5.update(password)
+        model.password = md5.hexdigest()
 
 
-class CartypeView(ModelView):
-    def is_accessible(self):
-        return flask_login.current_user.is_authenticated
-
+class CartypeView(AdminModel):
     column_formatters = dict(price=lambda v, c, m, p: float(m.price) / 100)
 
 
@@ -127,28 +133,64 @@ def formatPayAt(patAt):
 
     else:
         return ""
-class OrderView(ModelView):
-    def is_accessible(self):
-        return flask_login.current_user.is_authenticated
+
+
+class OrderView(AdminModel):
     @property
     def can_refund(self):
         self.id = request.args.get('id')
-        if self.get_one(request.args.get('id')).status=="refunding":
+        if self.id:
+            if self.get_one(request.args.get('id')).status == "refunding":
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    column_labels = dict(created_at=u'创建时间', tradetype=u'交易类型', Cartype=u'车辆型号'
+                         , totalfee=u'总价', Customer=u'客户', status=u'订单状态', pay_at=u'付款时间', fromdate=u'起租时间',
+                         todate=u'交还时间',
+                         isrefund=u'是否退款', r_pay_at=u'退款时间', r_totalfee=u'退款金额', offlinefee=u'金额/元' )
+
+    edit_template = 'admin/order.html'
+    column_list = (
+        "id", "created_at", "tradetype", "Cartype", "totalfee", "Customer", "status", "pay_at", "fromdate", "todate",
+        "isrefund", "r_pay_at", "r_totalfee")
+    form_columns = ("offlinefee", "fromdate", "todate", "Customer", "Cartype")
+    column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at))
+    column_editable_list=( "fromdate", "todate")
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            current_user = flask_login.current_user
+            model.userid = current_user.id
+            model.tradetype = u"offline"
+            model.status= "ok"
+
+
+# 管理员model
+class Admin1Model(ModelView):
+    def is_accessible(self):
+        if flask_login.current_user.is_authenticated and flask_login.current_user.role == 2:
             return True
         else:
             return False
-    edit_template = 'admin/order.html'
-    column_exclude_list = ("detail", "tradetype", "prepayid", "refundorder","wxtradeno")
-    form_excluded_columns = ("detail", "tradetype", "prepayid", "refundorder")
-    column_formatters = dict(pay_at=lambda v, c, m, p:formatPayAt(m.pay_at))
 
-    # form_ajax_refs = {
-    #     'Cartype': {
-    #         'fields': ['name', 'price'],
-    #         'page_size': 10
-    #     }
-    # }
-# class OrderAdminView(BaseView):
-#     @expose('/')
-#     def index(self):
-#         return self.render('admin/order.html')
+
+class UserView1(Admin1Model, UserView):
+    def get_query(self):
+        current_user = flask_login.current_user
+        return self.session.query(self.model).filter(self.model.id == current_user.id)
+
+
+class OrderView1(Admin1Model, OrderView):
+    def get_query(self):
+        current_user = flask_login.current_user
+        return self.session.query(self.model).filter(self.model.userid == current_user.id)
+
+    def get_count_query(self):
+        current_user = flask_login.current_user
+        return self.session.query(func.count('*')).filter(self.model.userid == current_user.id)
+    can_edit = False
+    can_delete = False
+
+
