@@ -8,9 +8,9 @@
     {{ super() }}
     {{ lib.form_js() }}
     <script>
-            function refund(confirm) {
+        function refund(confirm) {
             $.ajax({
-                url: window.location.protocol + "//" + window.location.host + '/api/refund/{{ admin_view.id }}?isconfirm='+confirm,
+                url: window.location.protocol + "//" + window.location.host + '/api/refund/{{ admin_view.id }}?isconfirm=' + confirm,
                 type: 'get',
                 contentType: false,
                 processData: false,
@@ -28,7 +28,9 @@
                 }
 
             })
-            function refreshrefund(confirm) {
+
+        }
+        function refreshrefund(confirm) {
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/api/refreshrefundresult',
                 type: 'get',
@@ -47,7 +49,7 @@
             }
             if ($("#refuse_refund")) {
                 $("#refuse_refund").click(function () {
-refund("False")
+                    refund("False")
                 })
             }
         })
