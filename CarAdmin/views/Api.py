@@ -187,14 +187,14 @@ def refundApplyApi(id):
                 sandKey = wxPay._fetch_sanbox_api_key()
                 wxPay.sandbox_api_key = sandKey
 
-            # total_fee = int(order.totalfee)
-            # refund_fee = total_fee
-            # refund_no = getOutTradeNo()
-            # transaction_id = order.wxtradeno
-            total_fee = 1
-            refund_fee = 1
+            total_fee = int(order.totalfee)
+            refund_fee = total_fee
             refund_no = getOutTradeNo()
-            transaction_id = "4200000098201804052954108790"
+            transaction_id = order.wxtradeno
+            # total_fee = 1
+            # refund_fee = 1
+            # refund_no = getOutTradeNo()
+            # transaction_id = "4200000098201804052954108790"
 
             notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getRefundResult')
 
