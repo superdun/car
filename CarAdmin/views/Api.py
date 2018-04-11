@@ -76,7 +76,22 @@ def carMonitorApi():
     if 'err' in data:
         return jsonify({'status': 'error', 'msg': data['err'], 'data': []})
     if data['msg'] == 'OK':
-
+        for i in data['data']:
+            carObj = Gps.query.filter_by(code=i['imei']).first()
+            if carObj and carObj.cars:
+                try:
+                    carId = carObj.cars[0].id
+                    carName = carObj.cars[0].name
+                    carImg = carObj.cars[0].img
+                except:
+                    carId = ""
+                    carName = ""
+                    carImg = ""
+            else:
+                carId = ""
+                carName = ""
+                carImg = ""
+            i['car'] = {'id': carId, 'name': carName, 'img': carImg}
         return jsonify({'status': 'ok', 'msg': data['msg'], 'data': data['data']})
     else:
         return jsonify({'status': 'error', 'msg': data['msg'], 'data': []})
