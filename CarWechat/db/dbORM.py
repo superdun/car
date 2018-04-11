@@ -36,7 +36,7 @@ class Car(db.Model):
     typeid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
     histories = db.relationship('History', backref='Car', lazy='dynamic')
     mendhistories = db.relationship('Mendhistory', backref='Car', lazy='dynamic')
-
+    status = db.Column(db.String(80), default="pending")
     def __repr__(self):
         return self.name
 

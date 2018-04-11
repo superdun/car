@@ -32,6 +32,11 @@ def user_loader(username):
     user.name = username
     user.id = users[username]['id']
     user.role = users[username]['role']
+    lr = Loginrecord()
+    lr.userid=users[username]['id']
+    lr.ip = request.remote_addr
+    db.session.add(lr)
+    db.session.commit()
     return user
 
 

@@ -141,7 +141,7 @@ def order():
         if current_user.status == "normal":
             orderConfig = getOrderConfig()
             openId = current_user.openid
-            orders = Order.query.filter_by(customeropenid=openId).all()
+            orders = Order.query.filter_by(customeropenid=openId).order_by(Order.id.desc()).all()
             return render_template("car/order.html", data=orders, imgDomain="http://%s" % QINIU_DOMAIN,orderConfig=orderConfig)
             # return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
         else:

@@ -16,6 +16,7 @@ import time
 import json
 import random
 
+
 api = Blueprint('api', __name__)
 
 
@@ -81,9 +82,9 @@ def profileApi():
             customer.status = 'normal'
         else:
             customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode,
-                                status='normal')
+                                status='normal',created_at=datetime.now())
     else:
-        customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode, status='normal')
+        customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode, status='normal',created_at=datetime.now())
     try:
         db.session.add(customer)
         db.session.commit()
@@ -158,7 +159,7 @@ def getOrderApi():
     totalfee = int(car.price) * int(count)
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
     open_id = flask_login.current_user.openid
-    order = Order(customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee, tradetype='JSAPI', count=int(count))
+    order = Order(created_at=datetime.now(),customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee, tradetype='JSAPI', count=int(count))
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
