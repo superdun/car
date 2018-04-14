@@ -51,7 +51,8 @@ def profileApi():
             filter_list.append("password")
         elif len(request.form['idCode']) != 18:
             filter_list.append("idCode")
-
+        elif len(request.form['name']) ==0:
+            filter_list.append("name")
     name = request.form['name']
     if request.form['driveage'].isnumeric():
         driveage = int(request.form['driveage'])
@@ -69,8 +70,14 @@ def profileApi():
     if filter_list:
         return jsonify({'status': 'lacked', 'msg': filter_list})
     from modules.VCode import Cache
-    if vCode != Cache.cache.get(phone):
-        return jsonify({'status': 'wrongcode', 'msg': '验证码错误'})
+    # if vCode != Cache.cache.get(phone):
+    #     return jsonify({'status': 'alert', 'msg': '验证码错误'})
+    from modules.VerifyIdcard import Verify
+    idCodeVerifyResult = Verify(idCode,name)
+    if idCodeVerifyResult['status']=='failed':
+        return jsonify({'status': 'alert', 'msg': '身份证验证服务器出错，请稍后重试'})
+    elif not idCodeVerifyResult['isok']:
+        return jsonify({'status': 'alert', 'msg': '身份证姓名不匹配'})
     if flask_login.current_user.is_authenticated:
         customer = Customer.query.filter_by(openid=flask_login.current_user.openid).first()
         if customer:
@@ -102,9 +109,9 @@ def profileApi():
                 db.session.add(cu)
                 db.session.commit()
             else:
-                return jsonify({'status': 'nochange', 'msg': ""})
+                return jsonify({'status': 'alert', 'msg': "您已经注册过，不能修改信息，如有疑问请联系客服人工修改"})
         else:
-            return jsonify({'status': 'dup', 'msg': ""})
+            return jsonify({'status': 'alert', 'msg': "当前手机号码/身份证号已存在"})
     Cache.cache.delete(phone)
     return jsonify({'status': 'ok', 'msg': ""})
 

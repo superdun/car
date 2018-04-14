@@ -5,3 +5,4 @@ import Login
 import VCode
 import Cache
 import Session
+import VerifyIdcard
