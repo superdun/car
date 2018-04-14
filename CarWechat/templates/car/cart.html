@@ -119,7 +119,7 @@
         }
         $(document).ready(function () {
             function setSum() {
-                $("#sum").html($("#count").val() * $("#price").text() / 100).css("color", 'red');
+                $("#sum").html($("#count").val() * $("#price").text() ).css("color", 'red');
             }
 
             var count = $("#count").spinner(
