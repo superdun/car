@@ -70,8 +70,8 @@ def profileApi():
     if filter_list:
         return jsonify({'status': 'lacked', 'msg': filter_list})
     from modules.VCode import Cache
-    # if vCode != Cache.cache.get(phone):
-    #     return jsonify({'status': 'alert', 'msg': '验证码错误'})
+    if vCode != Cache.cache.get(phone):
+        return jsonify({'status': 'alert', 'msg': '验证码错误'})
     from modules.VerifyIdcard import Verify
     idCodeVerifyResult = Verify(idCode,name)
     if idCodeVerifyResult['status']=='failed':
