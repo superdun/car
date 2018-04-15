@@ -125,7 +125,10 @@ def getPayResult():
         wxPay.sandbox_api_key = sandKey
     try:
         r = wxPay.parse_payment_result(request.data)
-    except InvalidSignatureException:
+    except InvalidSignatureException,e:
+        e = Error(msg=e.errmsg, type=3)
+        db.session.add(e)
+        db.session.commit()
         return
     if r["return_code"] == "SUCCESS":
         order = Order.query.filter_by(tradeno=r["out_trade_no"]).first()
@@ -185,7 +188,10 @@ def getOrderApi():
         oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
                                      user_id=open_id, out_trade_no=out_trade_no)
 
-    except WeChatPayException:
+    except WeChatPayException,e:
+        e = Error(msg=e.errmsg, type=4)
+        db.session.add(e)
+        db.session.commit()
         return jsonify({'status': 'failed', 'orderId': order.id, 'result': u"订单创建失败"})
     if oresult['return_code'] == 'SUCCESS':
         prepay_id = oresult['prepay_id']
