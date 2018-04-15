@@ -51,6 +51,14 @@
                             <td><input id="count" class="z-depth-3" name="value" min="1" max="15"></td>
                         </tr>
                         <tr>
+                            <td>可用折扣</td>
+                            <td id="prefername"></td>
+                        </tr>
+                        <tr>
+                            <td>折扣金额/元</td>
+                            <td id="cutfee"></td>
+                        </tr>
+                        <tr>
                             <td>总价</td>
                             <td id="sum">0</td>
                         </tr>
@@ -72,6 +80,33 @@
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script>
+
+        function getPrefer() {
+            var formDataPrefer = new FormData();
+            formDataPrefer.append('id', {{ carData.id }});
+            formDataPrefer.append('count', $("#count").val());
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/preferential',
+                type: 'POST',
+                data: formDataPrefer,
+                contentType: false,
+                processData: false,
+                async:false,
+                success: function (data) {
+                    if (data["isprefer"]) {
+                        $("#prefername").text(data["name"]).css("color", 'red');
+                        $("#cutfee").text("-"+data["cutfee"] / 100).css("color", 'red');
+                    }
+                    else {
+                        $("#prefername").text("无");
+                        $("#cutfee").text("0");
+                    }
+
+
+                }
+
+            })
+        }
         function getOrder() {
             var formData = new FormData();
             formData.append('id', {{ carData.id }});
@@ -82,6 +117,7 @@
                 data: formData,
                 contentType: false,
                 processData: false,
+                async:false,
                 success: function (data) {
                     if (data['status'] === 'ok') {
                         result = data['result'];
@@ -104,8 +140,8 @@
 
                             }
                         });
-{#                        setTimeout(1000);#}
-{#                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]#}
+                        {#                        setTimeout(1000);#}
+                        {#                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]#}
 
                     }
                     else {
@@ -119,18 +155,21 @@
         }
         $(document).ready(function () {
             function setSum() {
-                $("#sum").html($("#count").val() * $("#price").text() ).css("color", 'red');
+                $("#sum").html($("#count").val() * $("#price").text() - Math.abs($("#cutfee").text()*1)).css("color", 'red');
             }
 
             var count = $("#count").spinner(
                 {
                     change: function (event, ui) {
+                        getPrefer();
                         setSum();
                     }
                 }
             );
             $("#count").val(1);
-            $("#sum").html($("#count").val() * $("#price").text() );
+            getPrefer();
+            $("#sum").html($("#count").val() * $("#price").text() -  Math.abs($("#cutfee").text()*1));
+
             $("#pay").click(function () {
                 getOrder();
             })
@@ -138,7 +177,7 @@
 
 
         wx.config({
-            debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
             appId: '{{ wxJSSDKConfig['appId'] }}', // 必填，公众号的唯一标识
             timestamp: '{{ wxJSSDKConfig['timestamp'] }}', // 必填，生成签名的时间戳
             nonceStr: '{{ wxJSSDKConfig['nonceStr'] }}', // 必填，生成签名的随机串

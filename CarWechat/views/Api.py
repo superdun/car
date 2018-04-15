@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from  flask import Blueprint, request, current_app, url_for,jsonify
+from  flask import Blueprint, request, current_app, url_for, jsonify
 from db.dbORM import *
 from sqlalchemy import exc
 from modules.CarSDK import CarOlineApi
@@ -15,7 +15,7 @@ from wechatpy.utils import timezone
 import time
 import json
 import random
-
+from  modules.Preferential import getFees
 
 api = Blueprint('api', __name__)
 
@@ -51,7 +51,7 @@ def profileApi():
             filter_list.append("password")
         elif len(request.form['idCode']) != 18:
             filter_list.append("idCode")
-        elif len(request.form['name']) ==0:
+        elif len(request.form['name']) == 0:
             filter_list.append("name")
     name = request.form['name']
     if request.form['driveage'].isnumeric():
@@ -73,8 +73,8 @@ def profileApi():
     if vCode != Cache.cache.get(phone):
         return jsonify({'status': 'alert', 'msg': '验证码错误'})
     from modules.VerifyIdcard import Verify
-    idCodeVerifyResult = Verify(idCode,name)
-    if idCodeVerifyResult['status']=='failed':
+    idCodeVerifyResult = Verify(idCode, name)
+    if idCodeVerifyResult['status'] == 'failed':
         return jsonify({'status': 'alert', 'msg': '身份证验证服务器出错，请稍后重试'})
     elif not idCodeVerifyResult['isok']:
         return jsonify({'status': 'alert', 'msg': '身份证姓名不匹配'})
@@ -89,9 +89,10 @@ def profileApi():
             customer.status = 'normal'
         else:
             customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode,
-                                status='normal',created_at=datetime.now())
+                                status='normal', created_at=datetime.now())
     else:
-        customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode, status='normal',created_at=datetime.now())
+        customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode, status='normal',
+                            created_at=datetime.now())
     try:
         db.session.add(customer)
         db.session.commit()
@@ -164,18 +165,28 @@ def getOrderApi():
     carName = car.name
     body = u"%s*%s天" % (carName, count)
     totalfee = int(car.price) * int(count)
+    oldfee = totalfee
+    cutfee = 0
+    prefer = getFees(carTypeId, count, totalfee)
+    preferentialid=None
+    if prefer['isprefer']:
+        totalfee = prefer['newfee']
+        cutfee = prefer['cutfee']
+        oldfee = prefer['oldfee']
+        preferentialid = prefer['preferid']
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
     open_id = flask_login.current_user.openid
-    order = Order(created_at=datetime.now(),customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee, tradetype='JSAPI', count=int(count))
+    order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
+                  tradetype='JSAPI', count=int(count),oldfee=oldfee,cutfee=cutfee ,preferentialid=preferentialid)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
     try:
         oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
-                                 user_id=open_id, out_trade_no=out_trade_no)
+                                     user_id=open_id, out_trade_no=out_trade_no)
 
     except WeChatPayException:
-        return  jsonify({'status': 'failed','orderId':order.id, 'result': u"订单创建失败"})
+        return jsonify({'status': 'failed', 'orderId': order.id, 'result': u"订单创建失败"})
     if oresult['return_code'] == 'SUCCESS':
         prepay_id = oresult['prepay_id']
         order.prepayid = prepay_id
@@ -184,13 +195,15 @@ def getOrderApi():
         order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
         db.session.add(order)
         db.session.commit()
-        return jsonify({'status': 'ok','orderId':order.id, 'result': wxPay.jsapi.get_jsapi_params(prepay_id)})
+        return jsonify({'status': 'ok', 'orderId': order.id, 'result': wxPay.jsapi.get_jsapi_params(prepay_id)})
     else:
         order.status = 'failed'
         order.tradeno = out_trade_no
         db.session.add(order)
         db.session.commit()
-        return jsonify({'status': 'failed','orderId':order.id, 'result': oresult["err_code_des"]})
+        return jsonify({'status': 'failed', 'orderId': order.id, 'result': oresult["err_code_des"]})
+
+
 @api.route('/cancelorder/<id>')
 def cancelOrderApi(id):
     wxPay = wx.getPay()
@@ -202,7 +215,7 @@ def cancelOrderApi(id):
         return jsonify({"status": 'ok'})
     tradeNo = order.tradeno
     rr = wxPay.order.close(tradeNo)
-    if rr['result_code']=="SUCCESS":
+    if rr['result_code'] == "SUCCESS":
         order.status = "canceled"
         order.detail = json.dumps(rr)
         db.session.add(order)
@@ -211,27 +224,28 @@ def cancelOrderApi(id):
         return jsonify({"status": 'ok'})
     else:
         return jsonify({"status": 'failed'})
-    # try:
-    #     wxPay = wx.getPay()
-    #     if wxPay.sandbox:
-    #         sandKey = wxPay._fetch_sanbox_api_key()
-    #         wxPay.sandbox_api_key = sandKey
-    #     order = Order.query.filter_by(id=id).first()
-    #     if not order:
-    #         return jsonify({"status": 'ok'})
-    #     tradeNo = order.tradeno
-    #     rr = wxPay.close(tradeNo)
-    #     order.status = "canceled"
-    #     order.detail = json.dumps(rr)
-    #     db.session.add(order)
-    #
-    #     db.session.commit()
-    # except:
-    #     return jsonify({"status": 'failed'})
-    # return jsonify({"status": 'ok'})
+        # try:
+        #     wxPay = wx.getPay()
+        #     if wxPay.sandbox:
+        #         sandKey = wxPay._fetch_sanbox_api_key()
+        #         wxPay.sandbox_api_key = sandKey
+        #     order = Order.query.filter_by(id=id).first()
+        #     if not order:
+        #         return jsonify({"status": 'ok'})
+        #     tradeNo = order.tradeno
+        #     rr = wxPay.close(tradeNo)
+        #     order.status = "canceled"
+        #     order.detail = json.dumps(rr)
+        #     db.session.add(order)
+        #
+        #     db.session.commit()
+        # except:
+        #     return jsonify({"status": 'failed'})
+        # return jsonify({"status": 'ok'})
+
+
 @api.route('/refundapply/<id>')
 def refundApplyApi(id):
-
     order = Order.query.filter_by(id=id).first()
     order.status = 'refunding'
     order.isrefund = 1
@@ -239,3 +253,25 @@ def refundApplyApi(id):
     db.session.commit()
 
     return jsonify({"status": 'ok'})
+
+
+
+
+
+@api.route('/preferential', methods=['POST'])
+def getPreferential():
+    carTypeId = request.form.get("id")
+    count = request.form.get("count")
+    if (not carTypeId) or (not count):
+        return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
+    car = Cartype.query.filter_by(id=int(carTypeId)).first()
+    if not car:
+        return jsonify({'status': 'error', 'code': 2, 'msg': "未找到商品"})
+    if int(count) < 0:
+        return jsonify({'status': 'error', 'code': 3, 'msg': "数量错误"})
+    if not flask_login.current_user.is_authenticated:
+        return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
+
+    totalfee = int(car.price) * int(count)
+    prefer = getFees(carTypeId, count, totalfee)
+    return jsonify(prefer)

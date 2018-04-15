@@ -10,14 +10,14 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.view import func
 from jinja2 import Markup
 from flask import current_app
-from db.dbORM import db, User, Car, Gps, Customer, Cartype, Order
+from db.dbORM import *
 from helpers import thumb
 from flask_qiniustorage import Qiniu
 from wtforms import SelectField, PasswordField
 from flask_admin import BaseView, expose
 import hashlib
 
-admin = Admin(current_app,name=u'通力后台管理')
+admin = Admin(current_app, name=u'通力后台管理')
 QINIU_DOMAIN = current_app.config.get('QINIU_BUCKET_DOMAIN', '')
 UPLOAD_URL = current_app.config.get('UPLOAD_URL')
 
@@ -35,6 +35,7 @@ def dashboard():
     admin.add_view(UserView1(User, db.session, name=u"个人资料", endpoint="profile"))
     admin.add_view(CarView(Car, db.session, name=u"车辆管理"))
     admin.add_view(GpsView(Gps, db.session, name=u"设备管理"))
+    admin.add_view(PreferentialView(Preferential, db.session, name=u"优惠管理"))
     admin.add_view(CustomerView(Customer, db.session, name=u"客户管理"))
     admin.add_view(CartypeView(Cartype, db.session, name=u"车型管理"))
     admin.add_view(OrderView(Order, db.session, name=u"订单管理"))
@@ -90,7 +91,7 @@ class CarView(AdminModel):
     #                "category", "is_full", "status","max_book_count")
     column_exclude_list = ('img')
     column_labels = dict(created_at=u'创建时间', name=u'车牌', buy_at=u'购买时间', status=u'状态'
-                         , Gps=u'设备', Cartype=u'车型',histories=u"历史",orders=u'订单',image=u"头像",mendhistories=u'维修历史')
+                         , Gps=u'设备', Cartype=u'车型', histories=u"历史", orders=u'订单', image=u"头像", mendhistories=u'维修历史')
 
     form_extra_fields = {
         'img': ImageUpload(u"图像", base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
@@ -100,20 +101,20 @@ class CarView(AdminModel):
 
 
 class GpsView(AdminModel):
-    column_labels = dict(cars=u"车辆",code=u'设备码')
-
+    column_labels = dict(cars=u"车辆", code=u'设备码')
 
 
 class CustomerView(AdminModel):
     column_labels = dict(created_at=u'创建时间', name=u'姓名', gender=u'性别', idcode=u'身份证'
-                         , comment=u'备注', driveage=u'驾龄', phone=u'电话', status=u'状态',histories=u"历史",orders=u'订单',image=u"头像")
-    column_exclude_list = ('img', 'password','openid','')
+                         , comment=u'备注', driveage=u'驾龄', phone=u'电话', status=u'状态', histories=u"历史", orders=u'订单',
+                         image=u"头像")
+    column_exclude_list = ('img', 'password', 'openid', '')
     form_extra_fields = {
         'img': ImageUpload(u"头像", base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
                            url_relative_path=QINIU_DOMAIN),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
-    form_excluded_columns = ('img', 'password','openid','')
+    form_excluded_columns = ('img', 'password', 'openid', '')
 
 
 class UserView(AdminModel):
@@ -131,16 +132,27 @@ class UserView(AdminModel):
         model.password = md5.hexdigest()
 
 
+class PreferentialView(AdminModel):
+    column_labels = dict(name=u'优惠名', password=u'密码', status=u'状态', mincount=u"最小购买数", minfee=u"最低消费额",
+                         cutfee=u"固定折扣金额", multicount=u"是否乘数量", maxcutfee=u"最大折扣金额", cartypes=u'车型', orders=u"订单",
+                         created_at=u"创建时间")
+    form_extra_fields = {
+        'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
+    }
+    form_excluded_columns = ('orders', 'created_at')
+
+
 class CartypeView(AdminModel):
     column_exclude_list = ('img')
     form_excluded_columns = ('orders')
-    column_labels = dict(created_at=u'创建时间',name=u'车名', price=u'价格/分', status=u'状态',cars=u'该类车辆')
+    column_labels = dict(Preferential=u"所用优惠",created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态', cars=u'该类车辆')
     # column_formatters = dict(price=lambda v, c, m, p: float(m.price) / 100)
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
                            url_relative_path=QINIU_DOMAIN),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
+
 
 def formatPayAt(patAt):
     if patAt:
@@ -166,12 +178,13 @@ class OrderView(AdminModel):
     column_labels = dict(created_at=u'创建时间', tradetype=u'交易类型', Cartype=u'车辆型号'
                          , totalfee=u'总价', Customer=u'客户', status=u'订单状态', pay_at=u'付款时间', fromdate=u'起租时间',
                          todate=u'交还时间',
-                         isrefund=u'是否退款', r_pay_at=u'退款时间', r_totalfee=u'退款金额', offlinefee=u'金额/元')
+                         isrefund=u'是否退款', r_pay_at=u'退款时间', r_totalfee=u'退款金额', offlinefee=u'金额/元', cutfee=u"折扣价格",
+                         oldfee=u"原始价格", Preferential=u"所用优惠")
 
     edit_template = 'admin/order.html'
     column_list = (
         "id", "created_at", "tradetype", "Cartype", "totalfee", "Customer", "status", "pay_at", "fromdate", "todate",
-        "isrefund", "r_pay_at", "r_totalfee")
+        "isrefund", "r_pay_at", "r_totalfee","cutfee","oldfee")
     form_columns = ("offlinefee", "fromdate", "todate", "Customer", "Cartype")
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at))
     column_editable_list = ("fromdate", "todate")
@@ -179,9 +192,9 @@ class OrderView(AdminModel):
     @property
     def form_extra_fields(self):
         rawStatuses = current_app.config.get("ORDER_STATUS")
-        Statuses=[]
+        Statuses = []
         for i in rawStatuses:
-            Statuses.append((i,rawStatuses[i][0]))
+            Statuses.append((i, rawStatuses[i][0]))
         return {
             'status': SelectField(u'status', choices=Statuses),
         }
