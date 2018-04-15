@@ -192,12 +192,15 @@ def refundApplyApi(id):
             # transaction_id = "4200000098201804052954108790"
 
             notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getRefundResult')
-            try:
-                rr = wxPay.refund.apply(total_fee=total_fee, refund_fee=refund_fee, out_refund_no=refund_no,
-                                        transaction_id=transaction_id)
-            except:
 
-                return jsonify({"status": 'failed'})
+            rr = wxPay.refund.apply(total_fee=total_fee, refund_fee=refund_fee, out_refund_no=refund_no,
+                                         transaction_id=transaction_id)
+            # try:
+            #     rr = wxPay.refund.apply(total_fee=total_fee, refund_fee=refund_fee, out_refund_no=refund_no,
+            #                             transaction_id=transaction_id)
+            # except:
+            #
+            #     return jsonify({"status": 'failed'})
             if rr['result_code'] == "SUCCESS":
                 order.status = "refundconfirmed"
                 order.r_tradeno = refund_no
