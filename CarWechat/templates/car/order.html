@@ -17,7 +17,7 @@
                 <li class="collection-item avatar">
                     <img src="{{ imgDomain }}{{ d.Cartype.img }}!fang" alt="" class="circle">
                     <span class="title">{{ d.Cartype.name }}</span>
-                    <p>订单金额：{{ d.totalfee }} 元</p>
+                    <p>订单金额：{{ d.totalfee/100 }} 元</p>
                     <p>生成时间：{{ d.created_at }}</p>
                     <p class="truncate">订单编号：{{ d.tradeno }}</p>
                     <p style="color: {{ orderConfig[d.status][2] }}">

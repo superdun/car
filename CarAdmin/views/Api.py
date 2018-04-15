@@ -183,7 +183,7 @@ def refundApplyApi(id):
                 wxPay.sandbox_api_key = sandKey
 
             total_fee = int(order.totalfee)
-            refund_fee = total_fee
+            refund_fee = int(total_fee)
             refund_no = getOutTradeNo()
             transaction_id = order.wxtradeno
             # total_fee = 1
@@ -196,6 +196,7 @@ def refundApplyApi(id):
                 rr = wxPay.refund.apply(total_fee=total_fee, refund_fee=refund_fee, out_refund_no=refund_no,
                                         transaction_id=transaction_id)
             except:
+
                 return jsonify({"status": 'failed'})
             if rr['result_code'] == "SUCCESS":
                 order.status = "refundconfirmed"
