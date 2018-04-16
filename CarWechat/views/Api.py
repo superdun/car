@@ -47,8 +47,8 @@ def profileApi():
     for i in request.form:
         if request.form[i] == '' or request.form[i] == 'null':
             filter_list.append(i)
-        elif len(request.form['password']) < 6:
-            filter_list.append("password")
+        # elif len(request.form['password']) < 6:
+        #     filter_list.append("password")
         elif len(request.form['idCode']) != 18:
             filter_list.append("idCode")
         elif len(request.form['name']) == 0:
@@ -62,9 +62,9 @@ def profileApi():
 
     idCode = request.form['idCode']
 
-    md5 = hashlib.md5()
-    md5.update(request.form['password'])
-    psswd = md5.hexdigest()
+    # md5 = hashlib.md5()
+    # md5.update(request.form['password'])
+    # psswd = md5.hexdigest()
 
     vCode = str(request.form['vCode'])
     if filter_list:
@@ -83,15 +83,15 @@ def profileApi():
         if customer:
             customer.name = name
             customer.phone = phone
-            customer.password = psswd
+            # customer.password = psswd
             customer.driveage = driveage
             customer.idcode = idCode
             customer.status = 'normal'
         else:
-            customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode,
+            customer = Customer(name=name, phone=phone,  driveage=driveage, idcode=idCode,
                                 status='normal', created_at=datetime.now())
     else:
-        customer = Customer(name=name, phone=phone, password=psswd, driveage=driveage, idcode=idCode, status='normal',
+        customer = Customer(name=name, phone=phone,  driveage=driveage, idcode=idCode, status='normal',
                             created_at=datetime.now())
     try:
         db.session.add(customer)

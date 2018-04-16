@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block css %}
-
+<link href="https://cdn.bootcss.com/materialize/0.100.2/css/materialize.min.css" rel="stylesheet">
     <style>
 
 
@@ -10,25 +10,37 @@
     </style>
 {% endblock %}
 {% block content %}
+
+
+        <div class="weui-navbar">
+            <div class="weui-navbar__item weui-bar__item_on">
+                经济型
+            </div>
+            <div class="weui-navbar__item">
+                豪华型
+            </div>
+        </div>
+
     <div class="row">
         {% for d in data %}
 
-            <div class="col s12 m6 l4">
-                <div class="col s12 m6">
-                    <div class="card">
-                        <div class="card-image">
-                            <img src="{{ imgDomain }}{{ d.img }}!fang">
 
-                            <a href="{{ url_for('web.cart',id=d.id) }}" class="btn-floating halfway-fab waves-effect waves-light blue lighten-1 addtocart"><i
-                                    class="material-icons"
-                                    >shopping_cart</i></a>
-                        </div>
-                        <div class="card-content">
-                            <span class="card-title">{{ d.name }}</span>
-                            <p>价格：{{ d.price/100 }}/天</p>
-                        </div>
+            <div class="col s6 m6">
+                <div class="card">
+                    <div class="card-image">
+                        <img src="{{ imgDomain }}{{ d.img }}!fang">
+
+                        <a href="{{ url_for('web.cart',id=d.id) }}"
+                           class="btn-floating halfway-fab waves-effect waves-light blue lighten-1 addtocart"><i
+                                class="material-icons"
+                        >shopping_cart</i></a>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-title truncate">{{ d.name }}</span>
+                        <p>{{ d.price/100 }}/天</p>
                     </div>
                 </div>
+
 
                 <!--<div class="card horizontal">-->
                 <!--<div class="card-image">-->
@@ -56,11 +68,13 @@
 {% endblock %}
 {% block script %}
     <script>
+         $(document).ready(function () {
+            navSelect($('#nav-select'));
+         });
 
-
-{#        $(".addtocart").click(function () {#}
-{#            alert("即将开启，请持续关注，敬请期待！!")#}
-{#        })#}
+        {#        $(".addtocart").click(function () {#}
+        {#            alert("即将开启，请持续关注，敬请期待！!")#}
+        {#        })#}
 
 
     </script>

@@ -1,5 +1,40 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+.card .card-content .card-title {
+    font-size: 14px;
+}
+
+.card .card-content {
+    text-align: center;
+    padding-top: 12px;
+    padding-right: 0;
+    padding-bottom: 3px;
+    padding-left: 0;
+}
+.row .col{
+    padding-top: 0px;
+    padding-right: 0.35rem;
+    padding-bottom: 0px;
+    padding-left: 0.35rem;
+}
 .ghzTitle {
     text-align: center;
+
+}
+body > div.weui-tab > div.weui-tab__panel > div.row{
+    padding-top: 32px;
+}
+.weui-navbar__item{
+        padding-top: 4px!important;
+
+    padding-bottom: 3px!important;
+
 }
 
 .gzhCardContainer {
@@ -22,10 +57,12 @@ nav .brand-logo {
 #login {
 
 }
-.head{
-    width:50px;
+
+.head {
+    width: 50px;
     padding: 5px;
 }
-.greyWords{
+
+.greyWords {
     color: grey;
 }

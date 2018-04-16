@@ -11,42 +11,75 @@
     </style>
 {% endblock %}
 {% block content %}
-    <div class="container">
-        <ul class="collection">
-            {% for d in data %}
-                <li class="collection-item avatar">
-                    <img src="{{ imgDomain }}{{ d.Cartype.img }}!fang" alt="" class="circle">
-                    <span class="title">{{ d.Cartype.name }}</span>
-                    <p>订单金额：{{ d.totalfee/100 }} 元</p>
-                    <p>生成时间：{{ d.created_at }}</p>
-                    <p class="truncate">订单编号：{{ d.tradeno }}</p>
-                    <p style="color: {{ orderConfig[d.status][2] }}">
-                        订单状态：{{ orderConfig[d.status][0] }}
-                    </p>
+    <div class="weui-wepay-lists">
+        <div class="weui-wepay-lists__bd">
+            <div class="weui-cells">
+                {% for d in data %}
+                    <a href="{{ url_for('web.orderDetail',id=d.id) }}" class="weui-cell weui-cell_primary">
+                        <div class="weui-cell__hd">
+                            <img src="{{ imgDomain }}{{ d.Cartype.img }}!fang" alt="" width="34" height="34">
 
-                    <a class="dropdown-button secondary-content" data-activates='dropdown{{ loop.index }}'><i
-                            class="material-icons">list</i></a>
-                    <ul id='dropdown{{ loop.index }}' class='dropdown-content'>
-                        {% for o in orderConfig[d.status][1] %}
-                        <li><a href="{{ url_for('web.orderDetail',id=d.id) }}" >{{ o }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-            {% endfor %}
+                        </div>
+                        <div class="weui-cell__bd">
+                            <div class="weui-cell__title">
+                                {{ d.Cartype.name }}
+                            </div>
+                            <div class="weui-cell__info">
+                                {{ d.created_at }}
+                            </div>
+                        </div>
+                        <div class="weui-cell__ft">
+                            {% if  d.status=="ok" %}
+                                <div class="weui-cell__title weui-wepay-color-green">
+                                    ￥{{ d.totalfee/100 }}
+                                </div>
+                            {% else %}
+                                <div class="weui-cell__title weui-wepay-color-orange">
+                                    ￥{{ d.totalfee/100 }}
+                                </div>
+                            {% endif %}
+                            <div class="weui-cell__info">
+                                {{ orderConfig[d.status][0] }}
+                            </div>
+                        </div>
 
-        </ul>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
     </div>
+    {#    <div class="container">#}
+    {#        <ul class="collection">#}
+    {#            {% for d in data %}#}
+    {#                <li class="collection-item avatar">#}
+    {#                    <img src="{{ imgDomain }}{{ d.Cartype.img }}!fang" alt="" class="circle">#}
+    {#                    <span class="title">{{ d.Cartype.name }}</span>#}
+    {#                    <p>订单金额：{{ d.totalfee/100 }} 元</p>#}
+    {#                    <p>生成时间：{{ d.created_at }}</p>#}
+    {#                    <p class="truncate">订单编号：{{ d.tradeno }}</p>#}
+    {#                    <p style="color: {{ orderConfig[d.status][2] }}">#}
+    {#                        订单状态：{{ orderConfig[d.status][0] }}#}
+    {#                    </p>#}
+    {##}
+    {#                    <a class="dropdown-button secondary-content" data-activates='dropdown{{ loop.index }}'><i#}
+    {#                            class="material-icons">list</i></a>#}
+    {#                    <ul id='dropdown{{ loop.index }}' class='dropdown-content'>#}
+    {#                        {% for o in orderConfig[d.status][1] %}#}
+    {#                            <li><a href="{{ url_for('web.orderDetail',id=d.id) }}">{{ o }}</a></li>#}
+    {#                        {% endfor %}#}
+    {#                    </ul>#}
+    {#                </li>#}
+    {#            {% endfor %}#}
+    {##}
+    {#        </ul>#}
+    {#    </div>#}
 {% endblock %}
 {% block script %}
     <script>
-        $('.dropdown-button').dropdown({
-                inDuration: 300,
-                outDuration: 225,
-                constrain_width: false, // Does not change width of dropdown to that of the activator
-                gutter: 0, // Spacing from edge
-                belowOrigin: false, // Displays dropdown below the button
-                alignment: 'left' // Displays dropdown with edge aligned to the left of button
-            }
-        );
+        $(document).ready(function () {
+            navSelect($('#nav-order'));
+        });
+
+
     </script>
 {% endblock %}

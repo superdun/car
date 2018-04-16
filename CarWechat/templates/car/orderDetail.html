@@ -25,60 +25,56 @@
     </style>
 {% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="col s12 m6 l4">
+    <div class="weui-wepay-details">
+        <div class="weui-wepay-details__hd">
+            <div class="weui-wepay-details__state">
+                <h2 class="weui-wepay-details__title">
+                    {% if data.status=="ok" %}
+                        <i class="weui-wepay-details__icon weui-icon-success"></i>
 
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">订单--{{ orderConfig[data.status][0] }} </span>
-                    <table class="striped centered">
-
-                        <tbody>
-                        <tr>
-                            <td>订单编号</td>
-                            <td>{{ data.tradeno |cutstring}}</td>
-                        <tr>
-                            <td>订单时间</td>
-                            <td>{{ data.created_at }}</td>
-                        </tr>
-                        <tr>
-                            <td>订单状态</td>
-                            <td style="color: {{ orderConfig[data.status][2] }}">{{ orderConfig[data.status][0] }}</td>
-                        </tr>
-                        <tr>
-                            <td>车型</td>
-                            <td>{{ data.Cartype.name }}</td>
-                        </tr>
-                        {#                        <tr>#}
-                        {#                            <td>每日租金</td>#}
-                        {#                            <td id="price">{{ data.Cartype.price }}</td>#}
-                        {#                        </tr>#}
-                        <tr>
-                            <td>天数</td>
-                            <td>{{ data.count }}</td>
-                        </tr>
-                        <tr>
-                            <td>总价/元</td>
-                            <td id="sum">{{ data.totalfee/100 }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <div class="row">
-                        {% if data.status=="ok" %}
-                            <div class="col s6 offset-s3">
-                                <a
-                                        class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
-                                        id="refund">退款</a>
-                            </div>
-                        {% endif %}
-
-                        {#                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"#}
-                        {#                                               id="cancel">取消订单</a></div>#}
-                    </div>
-                </div>
+                    {% endif %} {{ orderConfig[data.status][0] }}</h2>
+                <p class="weui-wepay-details__desc">￥{{ data.totalfee/100 }}</p>
             </div>
         </div>
+        <div class="weui-wepay-details__bd">
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">单号：</div>
+                <div class="weui-wepay-detail__ft">{{ data.tradeno |cutstring }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">时间：</div>
+                <div class="weui-wepay-detail__ft">{{ data.created_at }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">订单状态：</div>
+                <div class="weui-wepay-detail__ft">{{ orderConfig[data.status][0] }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">车型：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Cartype.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">天数：</div>
+                <div class="weui-wepay-detail__ft">{{ data.count }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">折扣：</div>
+                <div class="weui-wepay-detail__ft">-￥{{ data.cutfee/100 }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">总价：</div>
+                <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ data.totalfee/100 }}</div>
+            </div>
+
+        </div>
+        {% if data.status=="ok" %}
+            <div class="weui-wepay-details__ft">
+                <a href="javascript:;" class="weui-btn weui-btn_primary" id="refund">申请退款</a>
+            </div>
+
+        {% endif %}
     </div>
+
 {% endblock %}
 {% block script %}
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -105,7 +101,8 @@
         }
         $(document).ready(function () {
             $('#refund').click(function () {
-                refund();
+                alert("暂不能申请退款，请联系客服");
+                {#                refund();#}
             })
         });
 

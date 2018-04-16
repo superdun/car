@@ -1,15 +1,10 @@
 /**
  * Created by lidad on 2017/6/25.
  */
-window.onload=function () {
-    $('.collapsible').collapsible();
-            $('.modal').modal();
-        $("#headimg").sideNav();
-    $("#search").click(function () {
-        var searchKey = $("#searchGzh").val();
-        if (searchKey){
-             window.location = document.domain+"?s="+searchKey
-        }
+function navSelect(item) {
+    item.siblings().removeClass("weui-bar__item_on");
+    item.addClass("weui-bar__item_on");
+}
+window.onload = function () {
 
-    })
 };
