@@ -40,6 +40,8 @@ def dashboard():
     admin.add_view(CartypeView(Cartype, db.session, name=u"车型管理"))
     admin.add_view(OrderView(Order, db.session, name=u"订单管理"))
     admin.add_view(OrderView1(Order, db.session, name=u"我的订单", endpoint="myorders"))
+    admin.add_view(CarcatView(Carcat, db.session, name=u"车类管理"))
+    admin.add_view(ServerstopView(Serverstop, db.session, name=u"服务站管理"))
     # admin.add_view(OrderAdminView(name=u'订单管理', endpoint='refund'))
 
 
@@ -145,15 +147,18 @@ class PreferentialView(AdminModel):
 class CartypeView(AdminModel):
     column_exclude_list = ('img')
     form_excluded_columns = ('orders')
-    column_labels = dict(Preferential=u"所用优惠",created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态', cars=u'该类车辆')
+    column_labels = dict(Preferential=u"所用优惠",created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态', cars=u'该类车辆',Carcat=u"种类")
     # column_formatters = dict(price=lambda v, c, m, p: float(m.price) / 100)
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
                            url_relative_path=QINIU_DOMAIN),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
+class CarcatView(AdminModel):
+    column_labels = dict(name=u"名称", cars=u'该类车型',Carcat=u"种类")
 
-
+class ServerstopView(AdminModel):
+    column_labels = dict(name=u"名称", owner=u'管理员',phone=u"电话",lat=u"纬度",lng=u"经度")
 def formatPayAt(patAt):
     if patAt:
         return u"%s年%s月%s日，%s：%s：%s" % (
