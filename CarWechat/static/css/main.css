@@ -7,33 +7,58 @@ body {
 }
 
 .card .card-content .card-title {
-    font-size: 14px;
+    font-size: 14px!important;
+}
+.weui-tabbar{
+    position: fixed!important;
+}
+#tabitem{
+    position: fixed!important;
+}
+.weui-tab__content{
+    padding-bottom: 50px;
+}
+.card .card-content {
+    text-align: center!important;
+    padding-top: 12px!important;
+    padding-right: 0!important;
+    padding-bottom: 3px!important;
+    padding-left: 0!important;
 }
 
-.card .card-content {
-    text-align: center;
-    padding-top: 12px;
-    padding-right: 0;
-    padding-bottom: 3px;
-    padding-left: 0;
+.weui-tab__panel {
+    background-color: #f8f8f8;
 }
-.row .col{
+
+.page__hd {
+    padding: 30px;
+    font-family: -apple-system-font, Helvetica Neue, Helvetica, sans-serif;
+}
+.page__title{
+    text-align: left;
+    font-size: 20px;
+    font-weight: 400;
+}
+.row .col {
     padding-top: 0px;
     padding-right: 0.35rem;
     padding-bottom: 0px;
     padding-left: 0.35rem;
 }
+
 .ghzTitle {
     text-align: center;
 
 }
-body > div.weui-tab > div.weui-tab__panel > div.row{
+
+body > div.weui-tab > div.weui-tab__panel > div.row {
     padding-top: 32px;
 }
-.weui-navbar__item{
-        padding-top: 4px!important;
 
-    padding-bottom: 3px!important;
+.weui-navbar__item {
+    padding-top: 4px !important;
+
+    padding-bottom: 3px !important;
 
 }
 
@@ -48,6 +73,10 @@ body > div.weui-tab > div.weui-tab__panel > div.row{
 nav .brand-logo {
     font-size: 1.1rem !important;
 
+}
+
+.weui-wepay-details {
+    padding-bottom: 60px;
 }
 
 #modal-carImg {

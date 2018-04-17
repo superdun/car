@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block css %}
+    <style type="text/css">
+
+    </style>
+{% endblock %}
+{% block content %}
+
+{% endblock %}
+{% block script %}
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=3.0&ak=67CKhYZ0N7g1M0BLOHnOqsu6idBxN2vT"></script>
+    <script>
+
+
+        $(document).ready(function () {
+            var map = new BMap.Map("weui-tab__panel");
+            map.addControl(new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_LEFT}));
+            map.addControl(new BMap.MapTypeControl());
+            var myGeo = new BMap.Geocoder();
+            function getPoint() {
+                map.clearOverlays();
+                $.ajax({
+                    url: window.location.protocol + "//" + window.location.host + '/wx/api/serverstop',
+                    type: 'get',
+//        data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        for (var i = 0; i < result['data'].length; i++) {
+                            addStopMarker(new BMap.Point(result['data'][i]['lng'], result['data'][i]['lat']),result['data'][i])
+                        }
+
+                    }
+
+                })
+            }
+
+            function addManMarker(point) {  // 创建图标对象
+                var manmarker = new BMap.Icon("{{ url_for('static',filename='img/人-small.png') }}", new BMap.Size(35, 35), {});
+                // 创建标注对象并添加到地图
+                var marker = new BMap.Marker(point, {icon: manmarker});
+                map.addOverlay(marker);
+            }
+
+            function addStopMarker(point, data) {  // 创建图标对象
+                var stopmarker = new BMap.Icon("{{ url_for('static',filename='img/公交车站-small.png') }}", new BMap.Size(35, 35), {});
+                // 创建标注对象并添加到地图
+                var marker = new BMap.Marker(point, {icon: stopmarker});
+                marker.addEventListener("click", function () {
+
+                    var address = "";
+
+                        var opts = {
+                            width: 150,     // 信息窗口宽度
+                            height: 150,     // 信息窗口高度
+                            title: data['name'], // 信息窗口标题
+                            enableMessage: true,//设置允许信息窗发送短息
+                        };
+
+// 根据坐标得到地址描述
+                        myGeo.getLocation(point, function (result) {
+                            if (result) {
+                                address = result.address;
+                            }
+                            var infoWindow = new BMap.InfoWindow("<p>地址：" + address + "</p><p>电话：" +
+                                data["phone"]+"</p><p>管理员："+data["owner"]+"</p>", opts);
+                            map.openInfoWindow(infoWindow, point);
+                        });
+
+
+
+                });
+                map.addOverlay(marker);
+            }
+
+            navSelect($('#nav-map'));
+            getPoint();
+            wx.config({
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: '{{ wxJSSDKConfig['appId'] }}', // 必填，公众号的唯一标识
+                timestamp: '{{ wxJSSDKConfig['timestamp'] }}', // 必填，生成签名的时间戳
+                nonceStr: '{{ wxJSSDKConfig['nonceStr'] }}', // 必填，生成签名的随机串
+                signature: '{{ wxJSSDKConfig['signature'] }}',// 必填，签名
+                jsApiList: ["getLocation", "chooseWXPay", "openLocation"] // 必填，需要使用的JS接口列表
+            });
+            wx.ready(function () {
+
+
+                translateCallback = function (data) {
+                    if (data.status === 0) {
+                        addManMarker(data.points[0]);
+                        map.centerAndZoom(data.points[0], 12);
+                    }
+                };
+                var convertor = new BMap.Convertor();
+
+                // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+                //alert("ok!")
+                wx.getLocation({
+                    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                    success: function (res) {
+                        var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                        var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                        var speed = res.speed; // 速度，以米/每秒计
+                        var accuracy = res.accuracy; // 位置精度
+
+                        var pointArr = [];
+                        var ggpoint = new BMap.Point(longitude, latitude);
+                        pointArr.push(ggpoint);
+                        convertor.translate(pointArr, 3, 5, translateCallback)
+                    }
+                });
+            });
+            wx.error(function (res) {
+                // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+            });
+        })
+    </script>
+{% endblock %}

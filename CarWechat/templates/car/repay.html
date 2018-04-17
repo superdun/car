@@ -47,7 +47,7 @@
             </div>
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">订单状态：</div>
-                <div class="weui-wepay-detail__ft">{{ orderConfig[data.status][0] }}</div>
+                <div class="weui-wepay-detail__ft weui-wepay-color-orange">{{ orderConfig[data.status][0] }}</div>
             </div>
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">车型：</div>
@@ -67,64 +67,14 @@
             </div>
 
         </div>
-        {% if data.status=="ok" %}
+
             <div class="weui-wepay-details__ft">
-                <a href="javascript:;" class="weui-btn weui-btn_primary" id="refund">申请退款</a>
+                <a href="javascript:;" class="weui-btn weui-btn_primary" id="pay">付款</a>
+                <a href="javascript:;" class="weui-btn weui-btn_warn" id="cancel">取消订单</a>
             </div>
 
-        {% endif %}
     </div>
-    <div class="container">
-        <div class="col s12 m6 l4">
 
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">订单--{{ orderConfig[data.status][0] }} </span>
-                    <table class="striped centered">
-
-                        <tbody>
-                        <tr>
-                            <td>订单编号</td>
-                            <td>{{ data.tradeno |cutstring }}</td>
-                        </tr>
-                        <tr>
-                            <td>订单状态</td>
-                            <td style="color: {{ orderConfig[data.status][2] }}">{{ orderConfig[data.status][0] }}</td>
-                        </tr>
-                        <tr>
-                            <td>订单时间</td>
-                            <td>{{ data.created_at }}</td>
-                        </tr>
-
-                        <tr>
-                            <td>车型</td>
-                            <td>{{ data.Cartype.name }}</td>
-                        </tr>
-                        {#                        <tr>#}
-                        {#                            <td>每日租金</td>#}
-                        {#                            <td id="price">{{ data.Cartype.price }}</td>#}
-                        {#                        </tr>#}
-                        <tr>
-                            <td>天数</td>
-                            <td>{{ data.count }}</td>
-                        </tr>
-                        <tr>
-                            <td>总价/元</td>
-                            <td id="sum">{{ data.totalfee/100 }}</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <div class="row">
-                        <div class="col s6 "><a
-                                class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
-                                id="pay">支付</a></div>
-                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"
-                                               id="cancel">取消订单</a></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 {% endblock %}
 {% block script %}
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>

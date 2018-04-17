@@ -153,6 +153,7 @@ def getPayResult():
 
 
 @api.route('/makeorder', methods=['POST'])
+@flask_login.login_required
 def getOrderApi():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
@@ -211,6 +212,7 @@ def getOrderApi():
 
 
 @api.route('/cancelorder/<id>')
+@flask_login.login_required
 def cancelOrderApi(id):
     wxPay = wx.getPay()
     if wxPay.sandbox:
@@ -251,6 +253,7 @@ def cancelOrderApi(id):
 
 
 @api.route('/refundapply/<id>')
+@flask_login.login_required
 def refundApplyApi(id):
     order = Order.query.filter_by(id=id).first()
     order.status = 'refunding'
@@ -265,6 +268,7 @@ def refundApplyApi(id):
 
 
 @api.route('/preferential', methods=['POST'])
+@flask_login.login_required
 def getPreferential():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
@@ -281,3 +285,15 @@ def getPreferential():
     totalfee = int(car.price) * int(count)
     prefer = getFees(carTypeId, count, totalfee)
     return jsonify(prefer)
+
+
+
+
+@api.route('/serverstop')
+@flask_login.login_required
+def getserverstop():
+    r = {'status':'ok',"data":[]}
+    serverstop = Serverstop.query.all()
+    for i in serverstop:
+        r['data'].append({'name':i.name,'phone':i.phone,'owner':i.owner,'lat':i.lat,'lng':i.lng})
+    return jsonify(r)

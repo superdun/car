@@ -1,1 +1,56 @@
 {% extends "base.html" %}
+{% block css %}
+    <style type="text/css">
+
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="page__hd">
+        <div class="page__title">
+            个人中心
+        </div>
+    </div>
+    <div class="page__bd">
+        <div class="weui-cell">
+            <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                <img src="{{ imgDomain }}{{ data.img }}" height="45" width="45">
+            </div>
+            <div class="weui-cell__bd">
+                <p>{{ data.name }}</p>
+            </div>
+        </div>
+        <div class="weui-cell weui-cell_access">
+            <div class="weui-cell__bd" href="{{ url_for('web.order') }}">历史订单</div>
+            <div class="weui-cell__ft" style="font-size: 0">
+            </div>
+        </div>
+
+        <div class="weui-cells__title">个人信息</div>
+
+        <div class="weui-cell ">
+            <div class="weui-cell__bd">注册日期</div>
+            <div class="weui-cell__ft" style="font-size: 0">
+                <span style="vertical-align:middle; font-size: 17px;">{{ data.created_at }}</span>
+            </div>
+        </div>
+        <div class="weui-cell ">
+            <div class="weui-cell__bd">手机号</div>
+            <div class="weui-cell__ft" style="font-size: 0">
+                <span style="vertical-align:middle; font-size: 17px;">{{ data.phone[:4] }}*****{{ data.phone[-4:] }}</span>
+            </div>
+        </div>
+        <div class="weui-cell ">
+            <div class="weui-cell__bd">身份证</div>
+            <div class="weui-cell__ft" style="font-size: 0">
+                <span style="vertical-align:middle; font-size: 17px;">{{ data.idcode[:4] }}*****{{ data.idcode[-4:] }}</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}error.html
+{% block script %}
+    <script>
+        $(document).ready(function () {
+            navSelect($('#nav-profile'));
+        })
+    </script>
+{% endblock %}

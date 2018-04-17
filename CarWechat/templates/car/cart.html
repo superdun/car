@@ -25,56 +25,49 @@
     </style>
 {% endblock %}
 {% block content %}
-    <div class="container">
-        <div class="col s12 m6 l4">
-
-            <div class="card">
-                <div class="card-content">
-                    <span class="card-title">订单确认</span>
-                    <table class="striped centered">
-
-                        <tbody>
-                        {#                        <tr>#}
-                        {#                            <td>订单编号</td>#}
-                        {#                            <td></td>#}
-                        {#                        </tr>#}
-                        <tr>
-                            <td>车型</td>
-                            <td>{{ carData.name }}</td>
-                        </tr>
-                        <tr>
-                            <td>每日租金/元</td>
-                            <td id="price">{{ carData.price/100 }}</td>
-                        </tr>
-                        <tr>
-                            <td>天数</td>
-                            <td><input id="count" class="z-depth-3" name="value" min="1" max="15"></td>
-                        </tr>
-                        <tr>
-                            <td>可用折扣</td>
-                            <td id="prefername"></td>
-                        </tr>
-                        <tr>
-                            <td>折扣金额/元</td>
-                            <td id="cutfee"></td>
-                        </tr>
-                        <tr>
-                            <td>总价</td>
-                            <td id="sum">0</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                    <div class="row">
-                        <div class="col s6 offset-s3"><a
-                                class="blue lighten-1 waves-effect waves-light btn col s8 offset-s2"
-                                id="pay">支付</a></div>
-                        {#                        <div class="col s6"><a class="red lighten-1 waves-effect waves-light btn col s8 offset-s2"#}
-                        {#                                               id="cancel">取消订单</a></div>#}
-                    </div>
-                </div>
+    <div class="weui-wepay-details">
+        <div class="weui-wepay-details__hd">
+            <div class="weui-wepay-details__state">
+                <h2 class="weui-wepay-details__title">在线下单</h2>
+                <p class="weui-wepay-details__desc" id="totalfee-top">￥0.0</p>
             </div>
         </div>
+        <div class="weui-wepay-details__bd">
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">车型：</div>
+                <div class="weui-wepay-detail__ft">{{ carData.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">每日租金/￥：</div>
+                <div class="weui-wepay-detail__ft" id="price">{{ carData.price/100 }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">天数：</div>
+                <div class="weui-wepay-detail__ft"><input id="count" class="z-depth-3" name="value" min="1" max="15">
+                </div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">可用折扣：</div>
+                <div class="weui-wepay-detail__ft" id="prefername"></div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">折扣金额/￥</div>
+                <div class="weui-wepay-detail__ft" id="cutfee"></div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">总价/￥</div>
+                <div class="weui-wepay-detail__ft" id="sum">0</div>
+            </div>
+
+
+        </div>
+
+        <div class="weui-wepay-details__ft">
+            <a href="javascript:;" class="weui-btn weui-btn_primary" id="pay">支付</a>
+        </div>
+
     </div>
+
 {% endblock %}
 {% block script %}
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -91,11 +84,11 @@
                 data: formDataPrefer,
                 contentType: false,
                 processData: false,
-                async:false,
+                async: false,
                 success: function (data) {
                     if (data["isprefer"]) {
                         $("#prefername").text(data["name"]).css("color", 'red');
-                        $("#cutfee").text("-"+data["cutfee"] / 100).css("color", 'red');
+                        $("#cutfee").text("-" + data["cutfee"] / 100).css("color", 'red');
                     }
                     else {
                         $("#prefername").text("无");
@@ -117,7 +110,7 @@
                 data: formData,
                 contentType: false,
                 processData: false,
-                async:false,
+                async: false,
                 success: function (data) {
                     if (data['status'] === 'ok') {
                         result = data['result'];
@@ -154,8 +147,12 @@
             })
         }
         $(document).ready(function () {
+            navSelect($('#nav-order'));
+
             function setSum() {
-                $("#sum").html($("#count").val() * $("#price").text() - Math.abs($("#cutfee").text()*1)).css("color", 'red');
+                var v = $("#count").val() * $("#price").text() - Math.abs($("#cutfee").text() * 1)
+                $("#totalfee-top").html('￥'+v);
+                $("#sum").html(v)
             }
 
             var count = $("#count").spinner(
@@ -163,13 +160,13 @@
                     change: function (event, ui) {
                         getPrefer();
                         setSum();
+                        $("#count").css("color", 'red');
                     }
                 }
             );
             $("#count").val(1);
             getPrefer();
-            $("#sum").html($("#count").val() * $("#price").text() -  Math.abs($("#cutfee").text()*1));
-
+            setSum();
             $("#pay").click(function () {
                 getOrder();
             })

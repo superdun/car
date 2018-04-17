@@ -13,7 +13,7 @@ import modules.Wechat as wx
 
 import time
 import flask_login
-
+from datetime import datetime
 web = Blueprint('web', __name__)
 
 QINIU_DOMAIN = current_app.config.get('QINIU_BUCKET_DOMAIN', '')
@@ -105,7 +105,7 @@ def wechatAuthorize():
     img = upLoadFromUrl(userInfo["headimgurl"], openId)
     customer = Customer.query.filter_by(openid=openId).first()
     if not customer:
-        customer = Customer(openid=openId, status="pending", img=img)
+        customer = Customer(openid=openId, status="pending", img=img,created_at=datetime.now() )
 
         db.session.add(customer)
         db.session.commit()
@@ -126,7 +126,8 @@ def selectCar():
     if current_user.is_authenticated:
         if current_user.status == "normal":
             CarType = Cartype.query.filter(Cartype.status != "deleted").all()
-            return render_template('car/selectCar.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN,
+            CarCat = Carcat.query.all()
+            return render_template('car/selectCar.html', data=CarType, cat=CarCat,imgDomain="http://%s" % QINIU_DOMAIN,
                                    )
         else:
             return redirect(url_for("web.wechatSign"))
@@ -175,7 +176,36 @@ def orderDetail(id):
     else:
         return redirect(url_for('web.wechatSign'))
 
+@web.route('/profile')
+def profile():
+    if current_user.is_authenticated:
+        if current_user.status == "normal":
+            openId = current_user.openid
+            customer = Customer.query.filter_by(openid=openId).first()
+            if customer:
+                return render_template("car/profile.html", data=customer, imgDomain="http://%s" % QINIU_DOMAIN)
+            else:
+                return redirect(url_for("web.wechatSign"))
+            # return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
+        else:
+            return redirect(url_for("web.wechatSign"))
 
+    else:
+        return redirect(url_for('web.wechatSign'))
+@web.route('/map')
+def map():
+    if current_user.is_authenticated:
+        if current_user.status == "normal":
+            url = current_app.config.get('WECHAT_HOST') + url_for("web.map")
+            wxJSSDKConfig = getJSSDK(url)
+
+            return render_template('car/map.html', wxJSSDKConfig=wxJSSDKConfig,
+                                   imgDomain="http://%s" % QINIU_DOMAIN)
+        else:
+            return redirect(url_for("web.wechatSign"))
+
+    else:
+        return redirect(url_for('web.wechatSign'))
 @web.route('/cart/<id>')
 def cart(id):
     if current_user.is_authenticated:

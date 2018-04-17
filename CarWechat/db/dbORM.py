@@ -17,7 +17,7 @@ class Cartype(db.Model):
     status = db.Column(db.String(800), default="pending")
     orders = db.relationship('Order', backref='Cartype', lazy='dynamic')
     preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
-
+    carcatid = db.Column(db.Integer, db.ForeignKey('carcat.id'))
     def __repr__(self):
         return u"%s,单价%s元" % (self.name, float(self.price) / 100)
 
@@ -111,7 +111,16 @@ class Mendhistory(db.Model):
 
     def __repr__(self):
         return "%s %s" % (self.created_at, self.type)
+class Serverstop(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name =db.Column(db.String(80))
+    phone = db.Column(db.String(80))
+    owner = db.Column(db.String(80))
+    lat = db.Column(db.Float)
+    lng = db.Column(db.Float)
 
+    def __repr__(self):
+        return self.name
 
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -153,7 +162,12 @@ class Error(db.Model):
 
     def __repr__(self):
         return self.id
-
+class Carcat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(8000))
+    cartypes = db.relationship('Cartype', backref='Carcat', lazy='dynamic')
+    def __repr__(self):
+        return self.name
 
 class Loginrecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
