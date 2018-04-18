@@ -136,7 +136,7 @@ class UserView(AdminModel):
 
 class PreferentialView(AdminModel):
     column_labels = dict(name=u'优惠名', password=u'密码', status=u'状态', mincount=u"最小购买数", minfee=u"最低消费额",
-                         cutfee=u"固定折扣金额", multicount=u"是否乘数量", maxcutfee=u"最大折扣金额", cartypes=u'车型', orders=u"订单",
+                         cutfee=u"固定折扣金额",discount=u"折扣率" ,multicount=u"是否乘数量", maxcutfee=u"最大折扣金额", cartypes=u'车型', orders=u"订单",
                          created_at=u"创建时间")
     form_extra_fields = {
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
@@ -147,18 +147,24 @@ class PreferentialView(AdminModel):
 class CartypeView(AdminModel):
     column_exclude_list = ('img')
     form_excluded_columns = ('orders')
-    column_labels = dict(Preferential=u"所用优惠",created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态', cars=u'该类车辆',Carcat=u"种类")
+    column_labels = dict(Preferential=u"所用优惠", created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态',
+                         cars=u'该类车辆', Carcat=u"种类")
     # column_formatters = dict(price=lambda v, c, m, p: float(m.price) / 100)
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
                            url_relative_path=QINIU_DOMAIN),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
+
+
 class CarcatView(AdminModel):
-    column_labels = dict(name=u"名称", cars=u'该类车型',Carcat=u"种类")
+    column_labels = dict(name=u"名称", cars=u'该类车型', Carcat=u"种类")
+
 
 class ServerstopView(AdminModel):
-    column_labels = dict(name=u"名称", owner=u'管理员',phone=u"电话",lat=u"纬度",lng=u"经度")
+    column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度")
+
+
 def formatPayAt(patAt):
     if patAt:
         return u"%s年%s月%s日，%s：%s：%s" % (
@@ -184,15 +190,16 @@ class OrderView(AdminModel):
                          , totalfee=u'总价', Customer=u'客户', status=u'订单状态', pay_at=u'付款时间', fromdate=u'起租时间',
                          todate=u'交还时间',
                          isrefund=u'是否退款', r_pay_at=u'退款时间', r_totalfee=u'退款金额', offlinefee=u'金额/元', cutfee=u"折扣价格",
-                         oldfee=u"原始价格", Preferential=u"所用优惠")
+                         oldfee=u"原始价格", Preferential=u"所用优惠", proofimg=u"存证图片", carbeforeimg=u"交车图片",
+                         carendimg=u"还车图片",Car=u"分配车辆",location=u"订车位置",Serverstop=u"所选服务站")
 
     edit_template = 'admin/order.html'
     column_list = (
         "id", "created_at", "tradetype", "Cartype", "totalfee", "Customer", "status", "pay_at", "fromdate", "todate",
-        "isrefund", "r_pay_at", "r_totalfee","cutfee","oldfee")
-    form_columns = ("offlinefee", "fromdate", "todate", "Customer", "Cartype")
+        "isrefund", "r_pay_at", "r_totalfee", "cutfee", "oldfee","Car","Serverstop","location")
+    form_columns = ("offlinefee", "fromdate", "todate", "Customer", "Cartype","Car","Serverstop","location", 'proofimg', 'carbeforeimg', 'carendimg')
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at))
-    column_editable_list = ("fromdate", "todate")
+    column_editable_list = ("fromdate", "todate","Car")
 
     @property
     def form_extra_fields(self):
@@ -202,6 +209,12 @@ class OrderView(AdminModel):
             Statuses.append((i, rawStatuses[i][0]))
         return {
             'status': SelectField(u'status', choices=Statuses),
+            'proofimg': ImageUpload(u'存证图片', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
+                                    url_relative_path=QINIU_DOMAIN),
+            'carbeforeimg': ImageUpload(u'交车图片', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
+                                        url_relative_path=QINIU_DOMAIN),
+            'carendimg': ImageUpload(u'还车图片', base_path=UPLOAD_URL, relative_path=thumb.relativePath(),
+                                     url_relative_path=QINIU_DOMAIN)
         }
 
     def on_model_change(self, form, model, is_created):

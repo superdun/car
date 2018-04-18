@@ -51,6 +51,7 @@
     <script>
         $(document).ready(function () {
             navSelect($('#nav-profile'));
+            $(".weui-cell_access").click(location='{{ url_for('web.order') }}')
         })
     </script>
 {% endblock %}

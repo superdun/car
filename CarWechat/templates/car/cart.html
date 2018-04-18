@@ -10,14 +10,14 @@
             margin-top: 1.5rem;
         }
 
-        #count {
-            height: 1rem !important;
-            border-bottom: none !important;
-            margin-left: 10px !important;
-            margin-top: 0 !important;
-            margin-bottom: 0 !important;
-
-        }
+        {#        #count {#}
+        {#            height: 1rem !important;#}
+        {#            border-bottom: none !important;#}
+        {#            margin-left: 10px !important;#}
+        {#            margin-top: 0 !important;#}
+        {#            margin-bottom: 0 !important;#}
+        {##}
+        {#        }#}
 
         .ui-spinner {
             width: 50% !important;
@@ -42,9 +42,8 @@
                 <div class="weui-wepay-detail__ft" id="price">{{ carData.price/100 }}</div>
             </div>
             <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">天数：</div>
-                <div class="weui-wepay-detail__ft"><input id="count" class="z-depth-3" name="value" min="1" max="15">
-                </div>
+                <div class="weui-wepay-detail__bd">原价￥</div>
+                <div class="weui-wepay-detail__ft" id="oldfee"></div>
             </div>
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">可用折扣：</div>
@@ -61,7 +60,32 @@
 
 
         </div>
+        <div class="weui-cells">
+            <div class="weui-cell ">
+                <div class="weui-cell__hd"><label class="weui-label">天数选择</label></div>
+                <div class="weui-cell__bd">
+                    <input class="weui-input" type="number" placeholder="选择租赁天数" id="count" value="1"
+                           contenteditable="false">
+                    {#                    <input id="count" class="z-depth-3" name="value" min="1" max="15">#}
+                </div>
+            </div>
+            <div class="weui-cell">
+                <div class="weui-cell__hd">
+                    <label class="weui-label">服务站选择</label>
+                </div>
+                <div class="weui-cell__bd">
+                    <input class="weui-input" type="text" placeholder="选择最近的服务站" id="locpicker"
+                           contenteditable="false">
+                </div>
+            </div>
+        </div>
 
+        <label for="weuiAgree" class="weui-agree">
+            <input id="weuiAgree" type="checkbox" class="weui-agree__checkbox">
+            <span class="weui-agree__text">
+        阅读并同意<a href="javascript:void(0);">《相关条款》</a>
+    </span>
+        </label>
         <div class="weui-wepay-details__ft">
             <a href="javascript:;" class="weui-btn weui-btn_primary" id="pay">支付</a>
         </div>
@@ -70,8 +94,10 @@
 
 {% endblock %}
 {% block script %}
-    <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    {#    <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>#}
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=3.0&ak=67CKhYZ0N7g1M0BLOHnOqsu6idBxN2vT"></script>
     <script>
 
         function getPrefer() {
@@ -89,10 +115,12 @@
                     if (data["isprefer"]) {
                         $("#prefername").text(data["name"]).css("color", 'red');
                         $("#cutfee").text("-" + data["cutfee"] / 100).css("color", 'red');
+                        $("#oldfee").text(data["oldfee"]/100);
                     }
                     else {
-                        $("#prefername").text("无");
-                        $("#cutfee").text("0");
+                        $("#prefername").text("无").css("color", 'black');
+                        $("#cutfee").text(data["cutfee"]).css("color", 'black');
+                        $("#oldfee").text(data["oldfee"]/100);
                     }
 
 
@@ -101,9 +129,15 @@
             })
         }
         function getOrder() {
+            if (!$("#weuiAgree").prop("checked")) {
+                alert("请阅读条款");
+                return
+            }
             var formData = new FormData();
             formData.append('id', {{ carData.id }});
             formData.append('count', $("#count").val());
+            formData.append('location', loc);
+            formData.append('serverstop', serverstop);
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/makeorder',
                 type: 'POST',
@@ -146,32 +180,73 @@
 
             })
         }
+        var serverstop;
+        var loc;
+        var convertor = new BMap.Convertor();
+        var myGeo = new BMap.Geocoder();
         $(document).ready(function () {
             navSelect($('#nav-order'));
+            var dayArray = [];
+            for (var k = 1; k < 16; k++) {
+                dayArray.push({label: '' + k, value: k})
+            }
+            $('#count').on('click', function () {
+                weui.picker(dayArray, {
+                    onChange: function (result) {
 
+                    },
+                    onConfirm: function (result) {
+                        $('#count').val(result[0]['value']);
+                        getPrefer();
+                        setSum();
+                        $('#sum').css("color", 'red');
+                    }
+                });
+            });
+            $('#locpicker').on('click', function () {
+                weui.picker([
+                    {% for s in serverstop %}
+                        {
+                            label: '{{ s.name }}',
+                            value: {{ s.id }}
+                        },
+                    {% endfor %}
+                ], {
+                    onChange: function (result) {
+
+                    },
+                    onConfirm: function (result) {
+                        alert(result[0]['value']);
+                        $('#locpicker').val(result[0]['label']);
+                        serverstop = result[0]['value']
+                    }
+                });
+            });
             function setSum() {
                 var v = $("#count").val() * $("#price").text() - Math.abs($("#cutfee").text() * 1)
-                $("#totalfee-top").html('￥'+v);
+                $("#totalfee-top").html('￥' + v);
                 $("#sum").html(v)
             }
 
-            var count = $("#count").spinner(
-                {
-                    change: function (event, ui) {
-                        getPrefer();
-                        setSum();
-                        $("#count").css("color", 'red');
-                    }
-                }
-            );
+
             $("#count").val(1);
             getPrefer();
             setSum();
-            $("#pay").click(function () {
-                getOrder();
-            })
+            $('#locpicker').val('{{ serverstop[0].name }}');
+            serverstop =
+            {{ serverstop[0].id }}
         });
+        translateCallback = function (data) {
+            if (data.status === 0) {
+                myGeo.getLocation(data.points[0], function (result) {
+                    if (result) {
+                        loc = result.address;
+                    }
 
+                });
+
+            }
+        };
 
         wx.config({
             debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
@@ -184,6 +259,23 @@
         wx.ready(function () {
             // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
             //alert("ok!")
+            wx.getLocation({
+                type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                success: function (res) {
+                    var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    var speed = res.speed; // 速度，以米/每秒计
+                    var accuracy = res.accuracy; // 位置精度
+
+                    var pointArr = [];
+                    var ggpoint = new BMap.Point(longitude, latitude);
+                    pointArr.push(ggpoint);
+                    convertor.translate(pointArr, 3, 5, translateCallback);
+                    $("#pay").click(function () {
+                        getOrder();
+                    })
+                }
+            });
         });
         wx.error(function (res) {
             // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。

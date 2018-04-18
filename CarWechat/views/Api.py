@@ -88,10 +88,10 @@ def profileApi():
             customer.idcode = idCode
             customer.status = 'normal'
         else:
-            customer = Customer(name=name, phone=phone,  driveage=driveage, idcode=idCode,
+            customer = Customer(name=name, phone=phone, driveage=driveage, idcode=idCode,
                                 status='normal', created_at=datetime.now())
     else:
-        customer = Customer(name=name, phone=phone,  driveage=driveage, idcode=idCode, status='normal',
+        customer = Customer(name=name, phone=phone, driveage=driveage, idcode=idCode, status='normal',
                             created_at=datetime.now())
     try:
         db.session.add(customer)
@@ -125,7 +125,7 @@ def getPayResult():
         wxPay.sandbox_api_key = sandKey
     try:
         r = wxPay.parse_payment_result(request.data)
-    except InvalidSignatureException,e:
+    except InvalidSignatureException, e:
         e = Error(msg=e.errmsg, type=3)
         db.session.add(e)
         db.session.commit()
@@ -157,6 +157,12 @@ def getPayResult():
 def getOrderApi():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
+    location = request.form.get("location")
+    serverstop = request.form.get("serverstop")
+    if serverstop:
+        serverstop = int(serverstop)
+    else:
+        serverstop = None
     if (not carTypeId) or (not count):
         return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
     car = Cartype.query.filter_by(id=int(carTypeId)).first()
@@ -172,7 +178,7 @@ def getOrderApi():
     oldfee = totalfee
     cutfee = 0
     prefer = getFees(carTypeId, count, totalfee)
-    preferentialid=None
+    preferentialid = None
     if prefer['isprefer']:
         totalfee = prefer['newfee']
         cutfee = prefer['cutfee']
@@ -181,7 +187,8 @@ def getOrderApi():
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
     open_id = flask_login.current_user.openid
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
-                  tradetype='JSAPI', count=int(count),oldfee=oldfee,cutfee=cutfee ,preferentialid=preferentialid)
+                  tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialid=preferentialid,
+                  location=location, serverstopid=serverstop)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
@@ -189,8 +196,9 @@ def getOrderApi():
         oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
                                      user_id=open_id, out_trade_no=out_trade_no)
 
-    except WeChatPayException,e:
+    except WeChatPayException, e:
         e = Error(msg=e.errmsg, type=4)
+        # db.session.add(order)
         db.session.add(e)
         db.session.commit()
         return jsonify({'status': 'failed', 'orderId': order.id, 'result': u"订单创建失败"})
@@ -264,9 +272,6 @@ def refundApplyApi(id):
     return jsonify({"status": 'ok'})
 
 
-
-
-
 @api.route('/preferential', methods=['POST'])
 @flask_login.login_required
 def getPreferential():
@@ -287,13 +292,11 @@ def getPreferential():
     return jsonify(prefer)
 
 
-
-
 @api.route('/serverstop')
 @flask_login.login_required
 def getserverstop():
-    r = {'status':'ok',"data":[]}
+    r = {'status': 'ok', "data": []}
     serverstop = Serverstop.query.all()
     for i in serverstop:
-        r['data'].append({'name':i.name,'phone':i.phone,'owner':i.owner,'lat':i.lat,'lng':i.lng})
+        r['data'].append({'name': i.name, 'phone': i.phone, 'owner': i.owner, 'lat': i.lat, 'lng': i.lng})
     return jsonify(r)

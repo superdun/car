@@ -42,7 +42,7 @@ class Car(db.Model):
     histories = db.relationship('History', backref='Car', lazy='dynamic')
     mendhistories = db.relationship('Mendhistory', backref='Car', lazy='dynamic')
     status = db.Column(db.String(80), default="pending")
-
+    orders = db.relationship('Order', backref='Car', lazy='dynamic')
     def __repr__(self):
         return self.name
 
@@ -118,7 +118,7 @@ class Serverstop(db.Model):
     owner = db.Column(db.String(80))
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
-
+    orders = db.relationship('Order', backref='Serverstop', lazy='dynamic')
     def __repr__(self):
         return self.name
 
@@ -149,7 +149,12 @@ class Order(db.Model):
     preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
     cutfee = db.Column(db.Integer)
     oldfee = db.Column(db.Integer)
-
+    location = db.Column(db.String(800))
+    currentcarid = db.Column(db.Integer, db.ForeignKey('car.id'))
+    serverstopid = db.Column(db.Integer, db.ForeignKey('serverstop.id'))
+    proofimg = db.Column(db.String(800))
+    carbeforeimg = db.Column(db.String(800))
+    carendimg = db.Column(db.String(800))
     def __repr__(self):
         return self.tradeno
 
@@ -207,7 +212,7 @@ class Preferential(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now())
     cartypes = db.relationship('Cartype', backref='Preferential', lazy='dynamic')
     orders = db.relationship('Order', backref='Preferential', lazy='dynamic')
-
+    discount = db.Column(db.Float)
     def __repr__(self):
         return self.name
 

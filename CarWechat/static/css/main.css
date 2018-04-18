@@ -5,7 +5,10 @@ html {
 body {
     height: 100%;
 }
-
+.weui-picker__item{
+    padding-top: 0;
+    padding-bottom: 0;
+ }
 .card .card-content .card-title {
     font-size: 14px!important;
 }

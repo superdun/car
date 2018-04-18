@@ -7,10 +7,14 @@ def getFees(cartypeId, count, totalFee):
     cartypeId = int(cartypeId)
     ct = Cartype.query.filter_by(id=cartypeId).first()
     prefer = ct.Preferential
+    cutfee = 0
+    newfee = totalFee
+    isprefer = False
     if prefer:
         if prefer.status == "normal":
             if prefer.mincount and not prefer.cutfee:
                 if count >= prefer.mincount:
+                    isprefer = True
                     cutfee = ct.price
                     if prefer.multicount == 1:
                         cutfee = cutfee * count
@@ -20,17 +24,13 @@ def getFees(cartypeId, count, totalFee):
                     newfee = totalFee - cutfee
                     if newfee < 0:
                         newfee = 0
+            if prefer.discount:
+                newfee = newfee * prefer.discount
+                cutfee = totalFee - newfee
 
-                    return {"name": prefer.name, 'preferid': prefer.id, "oldfee": totalFee, "cutfee": cutfee,
-                            "newfee": newfee, 'isprefer': True}
-                else:
-                    return {"name": "", 'preferid': -1, "oldfee": totalFee, "cutfee": 0, "newfee": totalFee,
-                            'isprefer': False}
+    if isprefer:
+        return {"name": prefer.name, 'preferid': prefer.id, "oldfee": totalFee, "cutfee": cutfee,
+                "newfee": newfee, 'isprefer': True}
 
-            else:
-                return {"name": "", 'preferid': -1, "oldfee": totalFee, "cutfee": 0, "newfee": totalFee,
-                        'isprefer': False}
-        else:
-            return {"name": "", 'preferid': -1, "oldfee": totalFee, "cutfee": 0, "newfee": totalFee, 'isprefer': False}
     else:
         return {"name": "", 'preferid': -1, "oldfee": totalFee, "cutfee": 0, "newfee": totalFee, 'isprefer': False}
