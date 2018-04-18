@@ -83,8 +83,10 @@
 {#<script src="https://cdn.bootcss.com/materialize/0.100.2/js/materialize.min.js"></script>#}
 <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-{#    alert(document.body.clientHeight)#}
-{#    $("weui-tabbar").height();#}
+    var bodyHeight = document.body.clientHeight;
+    var tabHeight = $(".weui-tabbar").height();
+    var navHeight = $("#tabitem").height();
+    $(".weui-tab__panel").height(bodyHeight-tabHeight-navHeight-20);
 </script>
 {% block script %}{% endblock %}
 </body>
