@@ -29,6 +29,8 @@ def getFees(cartypeId, count, totalFee):
                 cutfee = totalFee - newfee
 
     if isprefer:
+        cutfee=int(cutfee)
+        newfee=int(newfee)
         return {"name": prefer.name, 'preferid': prefer.id, "oldfee": totalFee, "cutfee": cutfee,
                 "newfee": newfee, 'isprefer': True}
 
