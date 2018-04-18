@@ -83,9 +83,8 @@
 {#<script src="https://cdn.bootcss.com/materialize/0.100.2/js/materialize.min.js"></script>#}
 <script type="text/javascript" src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-window.scrollBy(1, 1);
-window.scrollBy(-1, -1);
-
+{#    alert(document.body.clientHeight)#}
+{#    $("weui-tabbar").height();#}
 </script>
 {% block script %}{% endblock %}
 </body>
