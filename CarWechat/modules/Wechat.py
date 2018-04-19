@@ -1,7 +1,8 @@
+# -*- coding:utf-8 -*-
 from flask import current_app
 import time
 from wechatpy import oauth,client,pay
-
+from db.dbORM import User
 from helpers.other import getRandomStr
 def getAppId():
     return current_app.config.get('WECHAT_APP_ID', '')
@@ -64,3 +65,12 @@ def sendTemplate(openid,title,timeStr,orderType,customerInfo,carType,detail):
     }
     wxClent = getClient()
     wxClent.message.send_template(openid,template_id,data)
+def sendTemplateByOrder(order,description,type):
+    admin = User.query.all()
+    detail = order.Serverstop.name + "," + order.Cartype.name + "*" + str(order.count)
+
+    for i in admin:
+        openid = i.openid
+        if openid:
+            sendTemplate(order.customeropenid,description , order.created_at.strftime("%Y-%m-%d %H:%M:%S"), type,
+                    order.Customer.name, order.Cartype.name, detail)

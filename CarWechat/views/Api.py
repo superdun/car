@@ -143,9 +143,8 @@ def getPayResult():
                 order.status = "ok"
                 db.session.add(order)
                 db.session.commit()
-                detail = order.Serverstop.name + "," + order.Cartype.name + "X" + str(order.count)
-                wx.sendTemplate(r["openid"], u"通力新订单通知", order.created_at.strftime("%Y-%m-%d %H:%M:%S"), u"在线下单",
-                                order.Customer.name, order.Cartype.name, detail)
+                wx.sendTemplateByOrder(order,u"通力新订单通知",u"在线下单")
+
     else:
         rr = wxPay.close(r["out_trade_no"])
         order.status = "failed"
@@ -271,9 +270,7 @@ def refundApplyApi(id):
     order.isrefund = 1
     db.session.add(order)
     db.session.commit()
-    detail = order.Serverstop.name + "," + order.Cartype.name + "X" + str(order.count)
-    wx.sendTemplate(order.customeropenid, u"通力新订单通知", order.created_at.strftime("%Y-%m-%d %H:%M:%S"), u"在线下单",
-                    order.Customer.name, order.Cartype.name, detail)
+    wx.sendTemplateByOrder(order, u"通力退款通知", u"在线退款")
 
     return jsonify({"status": 'ok'})
 
