@@ -195,7 +195,7 @@ class User(db.Model):
     roleid = db.Column(db.Integer, db.ForeignKey('userrole.id'))
     orders = db.relationship('Order', backref='User', lazy='dynamic')
     loginrecords = db.relationship('Loginrecord', backref='User', lazy='dynamic')
-
+    openid = db.Column(db.String(80))
     def __repr__(self):
         return self.name
 
