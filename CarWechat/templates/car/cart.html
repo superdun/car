@@ -42,6 +42,11 @@
                 <div class="weui-wepay-detail__ft" id="price">{{ carData.price/100 }}</div>
             </div>
             <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">天数：</div>
+                <div class="weui-wepay-detail__ft"><input id="count" class="z-depth-3" name="value" min="1" max="15">
+                </div>
+            </div>
+            <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">原价￥</div>
                 <div class="weui-wepay-detail__ft" id="oldfee"></div>
             </div>
@@ -53,6 +58,7 @@
                 <div class="weui-wepay-detail__bd">折扣金额/￥</div>
                 <div class="weui-wepay-detail__ft" id="cutfee"></div>
             </div>
+
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">总价/￥</div>
                 <div class="weui-wepay-detail__ft" id="sum">0</div>
@@ -61,14 +67,6 @@
 
         </div>
         <div class="weui-cells">
-            <div class="weui-cell ">
-                <div class="weui-cell__hd"><label class="weui-label">天数选择</label></div>
-                <div class="weui-cell__bd">
-                    <input class="weui-input" type="number" placeholder="选择租赁天数" id="count" value="1"
-                           readonly>
-                    {#                    <input id="count" class="z-depth-3" name="value" min="1" max="15">#}
-                </div>
-            </div>
             <div class="weui-cell">
                 <div class="weui-cell__hd">
                     <label class="weui-label">服务站选择</label>
@@ -94,7 +92,7 @@
 
 {% endblock %}
 {% block script %}
-    {#    <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>#}
+    <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script type="text/javascript"
             src="http://api.map.baidu.com/api?v=3.0&ak=67CKhYZ0N7g1M0BLOHnOqsu6idBxN2vT"></script>
@@ -115,12 +113,12 @@
                     if (data["isprefer"]) {
                         $("#prefername").text(data["name"]).css("color", 'red');
                         $("#cutfee").text("-" + data["cutfee"] / 100).css("color", 'red');
-                        $("#oldfee").text(data["oldfee"]/100);
+                        $("#oldfee").text(data["oldfee"] / 100);
                     }
                     else {
                         $("#prefername").text("无").css("color", 'black');
                         $("#cutfee").text(data["cutfee"]).css("color", 'black');
-                        $("#oldfee").text(data["oldfee"]/100);
+                        $("#oldfee").text(data["oldfee"] / 100);
                     }
 
 
@@ -226,14 +224,21 @@
                 $("#totalfee-top").html('￥' + v);
                 $("#sum").html(v)
             }
-
+            var count = $("#count").spinner(
+                {
+                    change: function (event, ui) {
+                        getPrefer();
+                        setSum();
+                        $("#count").css("color", 'red');
+                    }
+                }
+            );
 
             $("#count").val(1);
             getPrefer();
             setSum();
             $('#locpicker').val('{{ serverstop[0].name }}');
-            serverstop =
-            {{ serverstop[0].id }}
+            serverstop = {{ serverstop[0].id }};
         });
         translateCallback = function (data) {
             if (data.status === 0) {

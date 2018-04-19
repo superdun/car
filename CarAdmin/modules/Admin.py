@@ -163,6 +163,7 @@ class CarcatView(AdminModel):
 
 class ServerstopView(AdminModel):
     column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度")
+    form_excluded_columns = ('orders')
 
 
 def formatPayAt(patAt):

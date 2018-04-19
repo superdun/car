@@ -34,3 +34,33 @@ def getPay():
     sandbox = current_app.config.get("WECAHT_PAY_SANDBOX")
     return pay.WeChatPay(appid=wxAppId, api_key=wxPayApiKey, mch_id= wxMchId,  mch_cert=mch_cert, mch_key=mch_key, timeout=None,
                            sandbox=sandbox)
+def sendTemplate(openid,title,timeStr,orderType,customerInfo,carType,detail):
+    template_id = current_app.config.get("WECHAT_MSG_MODEL_ID")
+    data={
+        "first": {
+            "value": title,
+            "color": "#173177"
+        },
+        "keyword1": {
+            "value": timeStr,
+            "color": "#173177"
+        },
+        "keyword2": {
+            "value": orderType,
+            "color": "#173177"
+        },
+        "keyword3": {
+            "value": customerInfo,
+            "color": "#173177"
+        },
+        "keyword4": {
+            "value": carType,
+            "color": "#173177"
+        },
+        "remark": {
+            "value": detail,
+            "color": "#173177"
+        }
+    }
+    wxClent = getClient()
+    wxClent.message.send_template(openid,template_id,data)
