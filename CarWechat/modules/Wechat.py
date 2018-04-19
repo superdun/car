@@ -72,5 +72,5 @@ def sendTemplateByOrder(order,description,type):
     for i in admin:
         openid = i.openid
         if openid:
-            sendTemplate(order.customeropenid,description , order.created_at.strftime("%Y-%m-%d %H:%M:%S"), type,
+            sendTemplate(openid,description , order.created_at.strftime("%Y-%m-%d %H:%M:%S"), type,
                     order.Customer.name, order.Cartype.name, detail)
