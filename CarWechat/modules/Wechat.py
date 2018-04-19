@@ -67,10 +67,10 @@ def sendTemplate(openid,title,timeStr,orderType,customerInfo,carType,detail):
     wxClent.message.send_template(openid,template_id,data)
 def sendTemplateByOrder(order,description,type):
     admin = User.query.all()
-    detail = order.Serverstop.name + "," + order.Cartype.name + "*" + str(order.count)
+    detail =u"电话："+order.Customer.phone+ u" 选择服务点："+order.Serverstop.name + u" 定位地点："+ order.location
 
     for i in admin:
         openid = i.openid
         if openid:
             sendTemplate(openid,description , order.created_at.strftime("%Y-%m-%d %H:%M:%S"), type,
-                    order.Customer.name, order.Cartype.name, detail)
+                    order.Customer.name, order.Cartype.name+"*" + str(order.count), detail)
