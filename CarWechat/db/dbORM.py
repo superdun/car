@@ -155,6 +155,10 @@ class Order(db.Model):
     proofimg = db.Column(db.String(800))
     carbeforeimg = db.Column(db.String(800))
     carendimg = db.Column(db.String(800))
+    insureid = db.Column(db.Integer, db.ForeignKey('insure.id'))
+
+    carfee = db.Column(db.Integer)
+    insurefee = db.Column(db.Integer)
     def __repr__(self):
         return self.tradeno
 
@@ -196,6 +200,7 @@ class User(db.Model):
     orders = db.relationship('Order', backref='User', lazy='dynamic')
     loginrecords = db.relationship('Loginrecord', backref='User', lazy='dynamic')
     openid = db.Column(db.String(80))
+
     def __repr__(self):
         return self.name
 
@@ -215,7 +220,15 @@ class Preferential(db.Model):
     discount = db.Column(db.Float)
     def __repr__(self):
         return self.name
+class Insure(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80))
+    detail = db.Column(db.String(8000))
+    price = db.Column(db.Integer)
+    orders = db.relationship('Order', backref='Insure', lazy='dynamic')
 
+    def __repr__(self):
+        return self.name
 
 class Userrole(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -161,11 +161,16 @@ def getOrderApi():
     count = request.form.get("count")
     location = request.form.get("location")
     serverstop = request.form.get("serverstop")
+    insureid = request.form.get("insureid")
+
+
+    insure = Insure.query.filter_by(id=insureid).first()
+
     if serverstop:
         serverstop = int(serverstop)
     else:
         serverstop = None
-    if (not carTypeId) or (not count):
+    if (not carTypeId) or (not count) :
         return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
     car = Cartype.query.filter_by(id=int(carTypeId)).first()
     if not car:
@@ -176,27 +181,36 @@ def getOrderApi():
         return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
     carName = car.name
     body = u"%s*%s天" % (carName, count)
-    totalfee = int(car.price) * int(count)
-    oldfee = totalfee
+    carfee = int(car.price) * int(count)
+    oldfee = carfee
     cutfee = 0
-    prefer = getFees(carTypeId, count, totalfee)
+    prefer = getFees(carTypeId, count, carfee)
     preferentialid = None
     if prefer['isprefer']:
-        totalfee = prefer['newfee']
+        carfee = prefer['newfee']
         cutfee = prefer['cutfee']
         oldfee = prefer['oldfee']
         preferentialid = prefer['preferid']
+
+
+    if insure:
+        ins_id = insureid
+        insurefee = int(insure.price)* int(count)
+    else:
+        ins_id=None
+        insurefee=0
+    totalfee = carfee+insurefee
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
     open_id = flask_login.current_user.openid
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
                   tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialid=preferentialid,
-                  location=location, serverstopid=serverstop)
+                  location=location, serverstopid=serverstop,carfee=carfee,insurefee=insurefee,insureid=ins_id)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
     try:
         oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
-                                     user_id=open_id, out_trade_no=out_trade_no)
+                                     user_id=open_id, out_trade_no=out_trade_no,)
 
     except WeChatPayException, e:
         e = Error(msg=e.errmsg, type=4)

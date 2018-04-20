@@ -62,6 +62,14 @@
                 <div class="weui-wepay-detail__ft">-￥{{ data.cutfee/100 }}</div>
             </div>
             <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">保险：</div>
+                {% if data.Insure %}
+                    <div class="weui-wepay-detail__ft">{{ data.Insure.name }}:￥{{ data.insurefee/100 }}</div>
+                {% else %}
+                    <div class="weui-wepay-detail__ft">无</div>
+                {% endif %}
+            </div>
+            <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">总价：</div>
                 <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ data.totalfee/100 }}</div>
             </div>

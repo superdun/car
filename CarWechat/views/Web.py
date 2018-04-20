@@ -215,10 +215,11 @@ def cart(id):
 
             CarType = Cartype.query.filter(Cartype.status != "deleted" and Cartype.id == id).first()
             ServerStop = Serverstop.query.all()
+            InSure = Insure.query.all()
             if not CarType:
                 return returnError("该车型暂时已满员，请选择其他车辆")
             return render_template('car/cart.html', carData=CarType, wxJSSDKConfig=wxJSSDKConfig,
-                                   imgDomain="http://%s" % QINIU_DOMAIN,serverstop=ServerStop)
+                                   imgDomain="http://%s" % QINIU_DOMAIN,serverstop=ServerStop,insure=InSure)
         else:
             return redirect(url_for("web.wechatSign"))
 

@@ -2,12 +2,12 @@
 {% block css %}
     <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
     <style type="text/css">
-        .container {
-            padding: 20px;
+        .weui-cell__bd {
+            font-size: 14px;
         }
 
-        .row {
-            margin-top: 1.5rem;
+        .weui-cell__hd {
+            font-size: 14px;
         }
 
         {#        #count {#}
@@ -63,9 +63,35 @@
                 <div class="weui-wepay-detail__bd">总价/￥</div>
                 <div class="weui-wepay-detail__ft" id="sum">0</div>
             </div>
+            <div class="weui-cells__title">选择保险</div>
+            <div class="weui-cells weui-cells_radio">
+                <label class="weui-cell weui-check__label" for="x0">
+                    <div class="weui-cell__bd">
+                        <a href="">不选择保险</a>
+                    </div>
+                    <div class="weui-cell__ft">
+                        <input type="radio" class="weui-check" name="radio1" id="x0" checked="checked" value="-1"
+                               onchange="setInsure(this)" price="0">
+                        <span class="weui-icon-checked"></span>
+                    </div>
+                </label>
+                {% for ins in insure %}
+                    <label class="weui-cell weui-check__label" for="x{{ loop.index }}">
 
+                        <div class="weui-cell__bd">
+                            <a href="#">{{ ins.name }} ￥{{ ins.price/100 }}/天</a>
+                        </div>
+                        <div class="weui-cell__ft">
+                            <input type="radio" name="radio1" class="weui-check" id="x{{ loop.index }}"
+                                   value="{{ ins.id }}" onchange="setInsure(this)" price="{{ ins.price }}">
+                            <span class="weui-icon-checked"></span>
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
 
         </div>
+        <div class="weui-cells__title">选择最近的服务站</div>
         <div class="weui-cells">
             <div class="weui-cell">
                 <div class="weui-cell__hd">
@@ -97,7 +123,14 @@
     <script type="text/javascript"
             src="http://api.map.baidu.com/api?v=3.0&ak=67CKhYZ0N7g1M0BLOHnOqsu6idBxN2vT"></script>
     <script>
-
+        function setInsure(obj) {
+            setSum();
+        }
+        function setSum() {
+            var v = $("#count").val() * ($("#price").text()*1 + $('input[name="radio1"]:checked').attr("price") / 100) - Math.abs($("#cutfee").text() * 1);
+            $("#totalfee-top").html('￥' + v);
+            $("#sum").html(v)
+        }
         function getPrefer() {
             var formDataPrefer = new FormData();
             formDataPrefer.append('id', {{ carData.id }});
@@ -136,6 +169,8 @@
             formData.append('count', $("#count").val());
             formData.append('location', loc);
             formData.append('serverstop', serverstop);
+            formData.append('insureid', $('input[name="radio1"]:checked').val() * 1);
+
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/makeorder',
                 type: 'POST',
@@ -219,11 +254,8 @@
                     }
                 });
             });
-            function setSum() {
-                var v = $("#count").val() * $("#price").text() - Math.abs($("#cutfee").text() * 1)
-                $("#totalfee-top").html('￥' + v);
-                $("#sum").html(v)
-            }
+
+
             var count = $("#count").spinner(
                 {
                     change: function (event, ui) {
