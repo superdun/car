@@ -2,7 +2,7 @@
 from flask import current_app
 from datetime import datetime
 
-from CarAdmin.app import db
+from app import db
 
 
 
