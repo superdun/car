@@ -200,8 +200,6 @@
                 processData: false,
                 async: false,
                 success: function (data) {
-                    alert(data['status'])
-                    alert(data['result'])
                     if (data['status'] === 'ok') {
                         result = data['result'];
                         wx.chooseWXPay({
