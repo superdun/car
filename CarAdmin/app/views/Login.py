@@ -4,7 +4,7 @@ from flask import current_app, render_template, request, redirect, url_for,Bluep
 import flask_login
 from ..models.dbORM import Loginrecord
 from ..models.dbORM import User as U
-from CarAdmin.app import db
+from app import db
 from CarWechat.app import login_manager
 login_bp = Blueprint('login',__name__)
 

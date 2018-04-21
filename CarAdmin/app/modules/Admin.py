@@ -16,7 +16,7 @@ from flask_qiniustorage import Qiniu
 from wtforms import SelectField, PasswordField
 from flask_admin import BaseView, expose
 import hashlib
-from CarAdmin.app import db,admin
+from app import db
 
 
 def getQiniuDomain():
