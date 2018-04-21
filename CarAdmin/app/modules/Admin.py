@@ -217,11 +217,11 @@ class OrderView(AdminModel):
         "offlinefee", "fromdate", "todate", "Customer", "Cartype", "Car", "Serverstop", "location", 'proofimg',
         'carbeforeimg', 'carendimg')
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
-                             offlinefee=lambda v, c, m, p: None if not m.offlinefee else int(m.offlinefee) / 100,
-                             oldfee=lambda v, c, m, p: None if not m.oldfee else int(m.oldfee) / 100,
-                             cutfee=lambda v, c, m, p: None if not m.cutfee else int(m.cutfee) / 100,
-                             insurefee=lambda v, c, m, p: None if not m.insurefee else int(m.insurefee) / 100,
-                             totalfee=lambda v, c, m, p: None if not m.totalfee else int(m.totalfee) / 100)
+                             offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
+                             oldfee=lambda v, c, m, p: None if not m.oldfee else float(m.oldfee) / 100,
+                             cutfee=lambda v, c, m, p: None if not m.cutfee else float(m.cutfee) / 100,
+                             insurefee=lambda v, c, m, p: None if not m.insurefee else float(m.insurefee) / 100,
+                             totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100)
 
     column_editable_list = ("fromdate", "todate", "Car")
 

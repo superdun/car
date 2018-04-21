@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block css %}
     <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <link href="{{ url_for('static',filename='css/numberstepper.css') }}" rel="stylesheet">
     <style type="text/css">
         .weui-cell__bd {
             font-size: 14px;
@@ -9,7 +10,9 @@
         .weui-cell__hd {
             font-size: 14px;
         }
-
+        .numstepper{
+            margin-bottom: 0!important;
+        }
         {#        #count {#}
         {#            height: 1rem !important;#}
         {#            border-bottom: none !important;#}
@@ -19,9 +22,7 @@
         {##}
         {#        }#}
 
-        .ui-spinner {
-            width: 50% !important;
-        }
+
     </style>
 {% endblock %}
 {% block content %}
@@ -41,11 +42,7 @@
                 <div class="weui-wepay-detail__bd">每日租金/￥：</div>
                 <div class="weui-wepay-detail__ft" id="price">{{ carData.price/100 }}</div>
             </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">天数：</div>
-                <div class="weui-wepay-detail__ft"><input id="count" class="z-depth-3" name="value" min="1" max="15">
-                </div>
-            </div>
+
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">原价￥</div>
                 <div class="weui-wepay-detail__ft" id="oldfee"></div>
@@ -63,6 +60,21 @@
                 <div class="weui-wepay-detail__bd">总价/￥</div>
                 <div class="weui-wepay-detail__ft" id="sum">0</div>
             </div>
+            <div class="weui-cells__title">选择租赁天数</div>
+            <div class="weui-cells">
+                <div class="weui-cell">
+                    <div class="weui-cell__hd">
+                        <label class="weui-label">天数：</label>
+                    </div>
+                    <div class="weui-cell__bd">
+
+                        <div class="js-numstepper">
+                            <input type="number" min="1" max="20" id="count">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="weui-cells__title">选择保险</div>
             <div class="weui-cells weui-cells_radio">
                 <label class="weui-cell weui-check__label" for="x0">
@@ -122,12 +134,21 @@
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script type="text/javascript"
             src="http://api.map.baidu.com/api?v=3.0&ak=67CKhYZ0N7g1M0BLOHnOqsu6idBxN2vT"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='js/numberstepper.js') }}"></script>
+
     <script>
+        $('.js-numstepper').numStepper();
+
+        $('body').on('change.numstep', '.js-numstepper', function (event, mode, value, valueOld) {
+            getPrefer();
+            setSum();
+            $("#sum").css("color", 'red');
+        });
         function setInsure(obj) {
             setSum();
         }
         function setSum() {
-            var v = $("#count").val() * ($("#price").text()*1 + $('input[name="radio1"]:checked').attr("price") / 100) - Math.abs($("#cutfee").text() * 1);
+            var v = $("#count").val() * ($("#price").text() * 1 + $('input[name="radio1"]:checked').attr("price") / 100) - Math.abs($("#cutfee").text() * 1);
             $("#totalfee-top").html('￥' + v);
             $("#sum").html(v)
         }
@@ -256,15 +277,15 @@
             });
 
 
-            var count = $("#count").spinner(
-                {
-                    change: function (event, ui) {
-                        getPrefer();
-                        setSum();
-                        $("#count").css("color", 'red');
-                    }
-                }
-            );
+            {#            var count = $("#count").spinner(#}
+            {#                {#}
+            {#                    change: function (event, ui) {#}
+            {#                        getPrefer();#}
+            {#                        setSum();#}
+            {#                        $("#count").css("color", 'red');#}
+            {#                    }#}
+            {#                }#}
+            {#            );#}
 
             $("#count").val(1);
             getPrefer();
