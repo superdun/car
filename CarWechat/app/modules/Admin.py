@@ -3,7 +3,7 @@
 import os
 import os.path as op
 import time
-from CarWechat.app import admin
+from app import admin
 import flask_login
 from flask_admin import form
 from flask_admin.contrib.sqla import ModelView

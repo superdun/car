@@ -2,7 +2,7 @@
 import hashlib
 from flask import  render_template, request, redirect, url_for,Blueprint
 import flask_login
-from CarWechat.app import login_manager
+from app import login_manager
 from ..models.dbORM import Customer
 login_bp = Blueprint('login',__name__)
 

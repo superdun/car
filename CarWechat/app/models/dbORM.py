@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from datetime import datetime
 
-from CarWechat.app import db
+from app import db
 
 
 class Cartype(db.Model):

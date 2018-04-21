@@ -5,7 +5,6 @@ import flask_login
 from ..models.dbORM import Loginrecord
 from ..models.dbORM import User as U
 from app import db,login_manager
-
 login_bp = Blueprint('login',__name__)
 
 

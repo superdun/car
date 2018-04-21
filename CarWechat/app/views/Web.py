@@ -14,7 +14,7 @@ from ..modules import  Wechat as wx
 import time
 import flask_login
 from datetime import datetime
-from CarWechat.app import login_manager
+from app import login_manager
 
 web = Blueprint('web', __name__)
 
