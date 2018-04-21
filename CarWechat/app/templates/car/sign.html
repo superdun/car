@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block css %}
+    <style type="text/css">
+        .container {
+            padding: 20px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="weui-cells__title">完善个人信息</div>
+    <div class="weui-cells weui-cells_form">
+        <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label">姓名</label></div>
+
+            <div class="weui-cell__bd">
+                <input id="name" class="weui-input" type="text" placeholder="请输入真实姓名"/>
+            </div>
+
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label">驾龄</label></div>
+            <div class="weui-cell__bd">
+                <div class="weui-slider-box">
+                    <div class="weui-slider">
+                        <div class="weui-slider__inner">
+                            <div style="width: 50%;" class="weui-slider__track"></div>
+                            <div style="left: 50%;" class="weui-slider__handler"></div>
+                        </div>
+                    </div>
+                    <div class="weui-slider-box__value" id="driveage">5</div>
+                </div>
+            </div>
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label">身份证 </label></div>
+
+            <div class="weui-cell__bd">
+                <input id="idCode" class="weui-input" type="text" placeholder="请输入身份证号码"/>
+            </div>
+
+        </div>
+        <div class="weui-cell weui-cell_vcode">
+            <div class="weui-cell__hd">
+                <label class="weui-label">手机号</label>
+            </div>
+            <div class="weui-cell__bd">
+                <input class="weui-input" type="tel" id="phone">
+            </div>
+            <div class="weui-cell__ft">
+                <a href="javascript:;" class="weui-vcode-btn" id="getvCode">获取验证码</a>
+            </div>
+        </div>
+
+        <div class="weui-cell weui-cell_vcode">
+            <div class="weui-cell__hd"><label class="weui-label" id="vCodeLable1">验证码</label></div>
+            <div class="weui-cell__bd">
+                <input class="weui-input" type="number" id="vCode" placeholder="请输入验证码"/>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="weui-btn-area">
+        <a class="weui-btn weui-btn_primary" href="javascript:" id="newProfile">确定</a>
+    </div>
+
+
+{% endblock %}
+{% block script %}
+    <script>
+        $(function () {
+            var $sliderTrack = $('.weui-slider__track'),
+                $sliderHandler = $('.weui-slider__handler'),
+                $sliderValue = $('.weui-slider-box__value');
+
+            var totalLen = $('.weui-slider__inner').width(),
+                startLeft = 0,
+                startX = 0;
+
+            $sliderHandler
+                .on('touchstart', function (e) {
+                    startLeft = parseInt($sliderHandler.css('left')) * totalLen / 100;
+                    startX = e.changedTouches[0].clientX;
+                })
+                .on('touchmove', function (e) {
+                    var dist = startLeft + e.changedTouches[0].clientX - startX,
+                        percent;
+                    dist = dist < 0 ? 0 : dist > totalLen ? totalLen : dist;
+                    percent = parseInt(dist / totalLen * 100);
+                    $sliderTrack.css('width', percent + '%');
+                    $sliderHandler.css('left', percent + '%');
+                    if (Math.ceil(percent / 10) == 10) {
+                        $sliderValue.text(Math.ceil(percent / 10) + "+");
+                    } else {
+                        $sliderValue.text(Math.ceil(percent / 10));
+                    }
+
+
+                    e.preventDefault();
+                })
+            ;
+        });
+        var IdCode = {
+
+            getIdCode: function (phone) {
+                $.ajax({
+                    type: 'POST',
+                    url: "api/idcode",
+                    dataType: 'json',
+                    data: {phone: phone},
+                    success: function (result) {
+                        $(IdCode.targetButton).attr('disabled', 'true');
+                        IdCode.time = 200;
+                        IdCode.timer = setInterval(IdCode.refreshTime, 1000)
+                    }
+                })
+
+            },
+            refreshTime: function () {
+                IdCode.time -= 1;
+                console.log(IdCode.time);
+                $(IdCode.targetButton).text(IdCode.time + "秒");
+                if (IdCode.time == 0) {
+                    clearInterval(IdCode.timer);
+                    $(IdCode.targetButton).removeAttr('disabled');
+                    $(IdCode.targetButton).text("获取验证码");
+                }
+            }
+        };
+        $(document).ready(function () {
+            $('#getvCode').click(function () {
+                re = /^1\d{10}$/;
+                if (re.test($('#phone').val())) {
+                    if ($('#getvCode').attr('disabled') != "disabled") {
+                        var idCodeObj1 = IdCode;
+                        idCodeObj1.targetLable = '#vCodeLable1';
+                        idCodeObj1.targetButton = '#getvCode';
+                        idCodeObj1.getIdCode($('#phone').val());
+                    }
+
+                }
+                else {
+                    $('#phone').parent().parent().addClass('weui-cell_warn')
+                }
+
+            });
+            $('#newProfile').click(function () {
+{#                if (!$("#weuiAgree").prop("checked")) {#}
+{#                    return#}
+{#                }#}
+                if (!$('#vCode').val()) {
+                    $('#vCode').parent().parent().addClass('weui-cell_warn')
+                }
+                else {
+                    if ($('#password').val() != $('#confirm-password').val()) {
+                        alert("密码输入不一致");
+                        $('#password').parent().parent().addClass('weui-cell_warn');
+                        $('#confirm-password').parent().parent().addClass('weui-cell_warn')
+                    }
+                    else {
+                        var formData = new FormData();
+
+                        formData.append('name', $('#name').removeClass('weui-cell_warn').val());
+                        formData.append('driveage', $('#driveage').parent().parent().removeClass('weui-cell_warn').text() * 1);
+                        {#                        formData.append('password', $('#password').parent().parent().removeClass('weui-cell_warn').val());#}
+                        formData.append('idCode', $('#idCode').removeClass('weui-cell_warn').val());
+                        formData.append('vCode', $('#vCode').removeClass('weui-cell_warn').val());
+                        formData.append('phone', $('#phone').removeClass('weui-cell_warn').val());
+                        $('#name').parent().parent().removeClass('weui-cell_warn');
+                        $('#driveage').parent().parent().removeClass('weui-cell_warn');
+                        $('#idCode').parent().parent().removeClass('weui-cell_warn');
+                        $('#vCode').parent().parent().removeClass('weui-cell_warn');
+                        $('#phone').parent().parent().removeClass('weui-cell_warn');
+                        $.ajax({
+                            url: 'api/sign',
+                            type: 'POST',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: function (result) {
+                                if (result['status'] == 'lacked') {
+                                    alert("信息填写有误");
+                                    result['msg'].forEach(function (v, k) {
+                                        $('#' + v).parent().parent().addClass('weui-cell_warn')
+                                    })
+                                }
+
+                                if (result['status'] == 'ok') {
+                                    alert('信息录入成功');
+                                    window.location = "{{url_for('web.selectCar')}}"
+                                }
+
+                                if (result['status'] == 'alert') {
+                                    alert(result['msg']);
+
+                                }
+                            }
+
+                        })
+                    }
+
+
+                }
+            });
+        })
+    </script>
+{% endblock %}
