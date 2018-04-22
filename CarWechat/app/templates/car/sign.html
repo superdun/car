@@ -163,7 +163,7 @@
                         var formData = new FormData();
 
                         formData.append('name', $('#name').removeClass('weui-cell_warn').val());
-                        formData.append('driveage', $('#driveage').parent().parent().removeClass('weui-cell_warn').text() * 1);
+                        formData.append('driveage', parseInt($('#driveage').parent().parent().removeClass('weui-cell_warn').text()) * 1);
                         {#                        formData.append('password', $('#password').parent().parent().removeClass('weui-cell_warn').val());#}
                         formData.append('idCode', $('#idCode').removeClass('weui-cell_warn').val());
                         formData.append('vCode', $('#vCode').removeClass('weui-cell_warn').val());
