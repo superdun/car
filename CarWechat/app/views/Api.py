@@ -17,6 +17,7 @@ import time
 import json
 import random
 from  ..modules.Preferential import getFees
+from app import db
 
 api = Blueprint('api', __name__)
 

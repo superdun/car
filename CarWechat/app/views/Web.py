@@ -14,7 +14,7 @@ from ..modules import  Wechat as wx
 import time
 import flask_login
 from datetime import datetime
-from app import login_manager
+from app import login_manager,db
 
 web = Blueprint('web', __name__)
 
@@ -234,6 +234,10 @@ def cart(id):
     else:
         return redirect(url_for('web.wechatSign'))
 
+
+@web.route('/contract')
+def wxContract():
+    return render_template("car/inform.html")
 
 @web.route('/MP_verify_KaJXT0CWMzGQXy1c.txt')
 def wxVerufy():
