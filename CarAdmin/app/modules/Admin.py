@@ -209,7 +209,7 @@ class OrderView(AdminModel):
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "created_at", "tradetype", "Cartype", "count", "oldfee", "cutfee", "insurefee", "totalfee", "Customer",
+        "id", "tradeno","created_at", "tradetype", "Cartype", "count", "oldfee", "cutfee", "insurefee", "totalfee", "Customer",
         "status", "pay_at", "fromdate",
         "todate",
         "isrefund", "r_pay_at", "r_totalfee", "Car", "Serverstop", "location", "Insure")
