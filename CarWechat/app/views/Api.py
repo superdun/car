@@ -165,7 +165,7 @@ def getOrderApi():
     location = request.form.get("location")
     serverstop = request.form.get("serverstop")
     insureid = request.form.get("insureid")
-
+    book_at =  request.form.get("book_at")
 
     insure = Insure.query.filter_by(id=insureid).first()
 
@@ -173,6 +173,8 @@ def getOrderApi():
         serverstop = int(serverstop)
     else:
         serverstop = None
+    if not book_at:
+        book_at=""
     if (not carTypeId) or (not count) :
         return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
     car = Cartype.query.filter_by(id=int(carTypeId)).first()
@@ -182,6 +184,8 @@ def getOrderApi():
         return jsonify({'status': 'error', 'code': 3, 'msg': "数量错误"})
     if not flask_login.current_user.is_authenticated:
         return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
+    if car.count==0:
+        return jsonify({'status': 'error', 'code': 5, 'msg': "此车已经订完，请选择其他车辆"})
     carName = car.name
     body = u"%s*%s天" % (carName, count)
     carfee = int(car.price) * int(count)
@@ -205,9 +209,11 @@ def getOrderApi():
     totalfee = carfee+insurefee
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
     open_id = flask_login.current_user.openid
+
+
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
                   tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialid=preferentialid,
-                  location=location, serverstopid=serverstop,carfee=carfee,insurefee=insurefee,insureid=ins_id)
+                  location=location, serverstopid=serverstop,carfee=carfee,insurefee=insurefee,insureid=ins_id,book_at=book_at)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
@@ -227,7 +233,9 @@ def getOrderApi():
         order.tradeno = out_trade_no
         order.status = 'waiting'
         order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
+        car.count = car.count - 1
         db.session.add(order)
+        db.session.add(car)
         db.session.commit()
         return jsonify({'status': 'ok', 'orderId': order.id, 'result': wxPay.jsapi.get_jsapi_params(prepay_id)})
     else:
@@ -253,8 +261,8 @@ def cancelOrderApi(id):
     if rr['result_code'] == "SUCCESS":
         order.status = "canceled"
         order.detail = json.dumps(rr)
+        order.Cartype.count = order.Cartype.count+1
         db.session.add(order)
-
         db.session.commit()
         return jsonify({"status": 'ok'})
     else:
@@ -320,3 +328,12 @@ def getserverstop():
     for i in serverstop:
         r['data'].append({'name': i.name, 'phone': i.phone, 'owner': i.owner, 'lat': i.lat, 'lng': i.lng})
     return jsonify(r)
+
+@api.route('/getrecount')
+@flask_login.login_required
+def getrecount():
+    carTypeId = request.args.get("id")
+    car = Cartype.query.filter_by(id=int(carTypeId)).first()
+    if car.count == 0:
+        return jsonify({'status':'failed'})
+    return jsonify({'status':'ok'})

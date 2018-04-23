@@ -88,6 +88,25 @@
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script>
+    function cancel() {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelorder/{{ data.id }}',
+                type: 'get',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        alert("已取消")
+                    }
+                    else {
+                        alert("取消失败，请重试")
+                    }
+                    location.reload()
+
+                }
+
+            })
+        }
         function cancel() {
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelorder/{{ data.id }}',

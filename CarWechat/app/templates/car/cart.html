@@ -10,9 +10,11 @@
         .weui-cell__hd {
             font-size: 14px;
         }
-        .numstepper{
-            margin-bottom: 0!important;
+
+        .numstepper {
+            margin-bottom: 0 !important;
         }
+
         {#        #count {#}
         {#            height: 1rem !important;#}
         {#            border-bottom: none !important;#}
@@ -91,7 +93,8 @@
                     <label class="weui-cell weui-check__label" for="x{{ loop.index }}">
 
                         <div class="weui-cell__bd">
-                            <a href="javascript:weui.alert('{{ ins.detail }}');" >{{ ins.name }} ￥{{ ins.price/100 }}/天</a>
+                            <a href="javascript:weui.alert('{{ ins.detail }}');">{{ ins.name }}
+                                ￥{{ ins.price/100 }}/天</a>
                         </div>
                         <div class="weui-cell__ft">
                             <input type="radio" name="radio1" class="weui-check" id="x{{ loop.index }}"
@@ -102,6 +105,16 @@
                 {% endfor %}
             </div>
 
+        </div>
+        <div class="weui-cells__title">选择您要预约的时间</div>
+        <div class="weui-cells">
+            <div class="weui-cell">
+
+                <div class="weui-cell__hd"><label for="" class="weui-label">预约时间</label></div>
+                <div class="weui-cell__bd">
+                    <input class="weui-input" type="datetime-local" value="" placeholder="" id="book_at">
+                </div>
+            </div>
         </div>
         <div class="weui-cells__title">选择最近的服务站</div>
         <div class="weui-cells">
@@ -137,6 +150,26 @@
     <script type="text/javascript" src="{{ url_for('static',filename='js/numberstepper.js') }}"></script>
 
     <script>
+            function cancel(id) {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelorder/'+id,
+                type: 'get',
+                contentType: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        alert("已取消")
+                    }
+                    else {
+                        alert("取消失败，请重试")
+                    }
+                    location.reload()
+
+                }
+
+            })
+        }
         $('.js-numstepper').numStepper();
 
         $('body').on('change.numstep', '.js-numstepper', function (event, mode, value, valueOld) {
@@ -191,7 +224,7 @@
             formData.append('location', loc);
             formData.append('serverstop', serverstop);
             formData.append('insureid', $('input[name="radio1"]:checked').val() * 1);
-
+            formData.append('book_at', $('#book_at').val());
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/makeorder',
                 type: 'POST',
@@ -210,10 +243,12 @@
                             paySign: result['paySign'], // 支付签名
                             success: function (res) {
                                 if (res.errMsg == "chooseWXPay:ok") {
-                                    alert('支付成功！')// 支付成功后的回调函数
+                                    alert('支付成功！');// 支付成功后的回调函数
 
                                 } else {
+
                                     alert(res.errMsg);
+                                    cancel(data["orderId"])
                                 }
                                 setTimeout(1000);
                                 window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]
@@ -226,9 +261,9 @@
 
                     }
                     else {
-                        alert(data['result']);
+                        alert(data['msg']);
                         setTimeout(3000);
-                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]
+{#                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/selectcar'#}
                     }
                 }
 

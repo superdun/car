@@ -154,13 +154,14 @@ class CartypeView(AdminModel):
     column_exclude_list = ('img')
     form_excluded_columns = ('orders')
     column_labels = dict(Preferential=u"所用优惠", created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态',
-                         cars=u'该类车辆', Carcat=u"种类")
+                         cars=u'该类车辆', Carcat=u"种类",count=u"剩余数量")
     # column_formatters = dict(price=lambda v, c, m, p: None if not m.price else int(m.price) / 100)
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=getUploadUrl(), relative_path=thumb.relativePath(),
                            url_relative_path=getQiniuDomain()),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
+    column_editable_list = ("count",)
 
 
 class InsureView(AdminModel):
@@ -205,14 +206,14 @@ class OrderView(AdminModel):
                          isrefund=u'是否退款', r_pay_at=u'退款时间', r_totalfee=u'退款金额', offlinefee=u'金额/分', cutfee=u"折扣价格",
                          oldfee=u"原始价格", Preferential=u"所用优惠", proofimg=u"存证图片", carbeforeimg=u"交车图片",
                          carendimg=u"还车图片", Car=u"分配车辆", location=u"订车位置", Serverstop=u"所选服务站", count=u"天数",
-                         Insure=u"保险", insurefee=u"保险价格", carfee=u"车费")
+                         Insure=u"保险", insurefee=u"保险价格", carfee=u"车费",tradeno=u"订单号",book_at=u"预约时间")
 
     edit_template = 'admin/order.html'
     column_list = (
         "id", "tradeno","created_at", "tradetype", "Cartype", "count", "oldfee", "cutfee", "insurefee", "totalfee", "Customer",
         "status", "pay_at", "fromdate",
         "todate",
-        "isrefund", "r_pay_at", "r_totalfee", "Car", "Serverstop", "location", "Insure")
+        "isrefund", "r_pay_at", "r_totalfee", "Car", "Serverstop", "location", "Insure","book_at")
     form_columns = (
         "offlinefee", "fromdate", "todate", "Customer", "Cartype", "Car", "Serverstop", "location", 'proofimg',
         'carbeforeimg', 'carendimg')

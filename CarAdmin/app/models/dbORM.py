@@ -17,6 +17,7 @@ class Cartype(db.Model):
     orders = db.relationship('Order', backref='Cartype', lazy='dynamic')
     preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
     carcatid = db.Column(db.Integer, db.ForeignKey('carcat.id'))
+    count = db.Column(db.Integer)
     def __repr__(self):
         return u"%s,单价%s元" % (self.name, float(self.price) / 100)
 
@@ -158,6 +159,7 @@ class Order(db.Model):
 
     carfee = db.Column(db.Integer)
     insurefee = db.Column(db.Integer)
+    book_at = db.Column(db.String(800))
     def __repr__(self):
         return self.tradeno
 
