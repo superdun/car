@@ -150,9 +150,9 @@
     <script type="text/javascript" src="{{ url_for('static',filename='js/numberstepper.js') }}"></script>
 
     <script>
-            function cancel(id) {
+        function cancel(id) {
             $.ajax({
-                url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelorder/'+id,
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelorder/' + id,
                 type: 'get',
                 contentType: false,
                 processData: false,
@@ -254,6 +254,11 @@
                                 window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]
 
 
+                            },
+                            cancel: function (res) {
+                                //支付取消
+                                 alert("支付取消");
+                                cancel(data["orderId"])
                             }
                         });
                         {#                        setTimeout(1000);#}
@@ -263,7 +268,7 @@
                     else {
                         alert(data['msg']);
                         setTimeout(3000);
-{#                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/selectcar'#}
+                        {#                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/selectcar'#}
                     }
                 }
 
