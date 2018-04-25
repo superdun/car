@@ -16,7 +16,8 @@ from wechatpy.utils import timezone
 import time
 import json
 import random
-from  ..modules.Preferential import getFees
+from ..modules.Preferential import getFees
+from ..modules.Limit import checkLimit
 from app import db
 
 api = Blueprint('api', __name__)
@@ -144,9 +145,10 @@ def getPayResult():
                 order.wxtradeno = r["transaction_id"]
                 order.pay_at = r["time_end"]
                 order.status = "ok"
+                order.Customer.olduser = 1
                 db.session.add(order)
                 db.session.commit()
-                wx.sendTemplateByOrder(order,u"通力新订单通知",u"在线下单")
+                wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单")
 
     else:
         rr = wxPay.close(r["out_trade_no"])
@@ -162,10 +164,13 @@ def getPayResult():
 def getOrderApi():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
+
+
+
     location = request.form.get("location")
     serverstop = request.form.get("serverstop")
     insureid = request.form.get("insureid")
-    book_at =  request.form.get("book_at")
+    book_at = request.form.get("book_at")
 
     insure = Insure.query.filter_by(id=insureid).first()
 
@@ -174,8 +179,12 @@ def getOrderApi():
     else:
         serverstop = None
     if not book_at:
-        book_at=""
-    if (not carTypeId) or (not count) :
+        book_at = ""
+
+    checkResult = checkLimit(carTypeId, count, book_at)
+    if checkResult["limit"]:
+        return  jsonify({'status': 'error', 'code': 6, 'msg': checkResult['msg']})
+    if (not carTypeId) or (not count):
         return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
     car = Cartype.query.filter_by(id=int(carTypeId)).first()
     if not car:
@@ -184,14 +193,15 @@ def getOrderApi():
         return jsonify({'status': 'error', 'code': 3, 'msg': "数量错误"})
     if not flask_login.current_user.is_authenticated:
         return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
-    if car.count==0:
+    if car.count == 0:
         return jsonify({'status': 'error', 'code': 5, 'msg': "此车已经订完，请选择其他车辆"})
     carName = car.name
     body = u"%s*%s天" % (carName, count)
     carfee = int(car.price) * int(count)
     oldfee = carfee
     cutfee = 0
-    prefer = getFees(carTypeId, count, carfee)
+    open_id = flask_login.current_user.openid
+    prefer = getFees(carTypeId, count, carfee,open_id)
     preferentialid = None
     if prefer['isprefer']:
         carfee = prefer['newfee']
@@ -199,34 +209,33 @@ def getOrderApi():
         oldfee = prefer['oldfee']
         preferentialid = prefer['preferid']
 
-
     if insure:
         ins_id = insureid
-        insurefee = int(insure.price)* int(count)
+        insurefee = int(insure.price) * int(count)
     else:
-        ins_id=None
-        insurefee=0
-    totalfee = carfee+insurefee
+        ins_id = None
+        insurefee = 0
+    totalfee = carfee + insurefee
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
-    open_id = flask_login.current_user.openid
 
 
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
                   tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialid=preferentialid,
-                  location=location, serverstopid=serverstop,carfee=carfee,insurefee=insurefee,insureid=ins_id,book_at=book_at)
+                  location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
+                  book_at=book_at)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
     try:
         oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
-                                     user_id=open_id, out_trade_no=out_trade_no,)
+                                     user_id=open_id, out_trade_no=out_trade_no, )
 
     except WeChatPayException, e:
         e = Error(msg=e.errmsg, type=4)
         # models.session.add(order)
         db.session.add(e)
         db.session.commit()
-        return jsonify({'status': 'failed', 'orderId': order.id, 'result': u"订单创建失败"})
+        return jsonify({'status': 'failed', 'orderId': order.id, 'msg': u"订单创建失败"})
     if oresult['return_code'] == 'SUCCESS':
         prepay_id = oresult['prepay_id']
         order.prepayid = prepay_id
@@ -261,7 +270,7 @@ def cancelOrderApi(id):
     if rr['result_code'] == "SUCCESS":
         order.status = "canceled"
         order.detail = json.dumps(rr)
-        order.Cartype.count = order.Cartype.count+1
+        order.Cartype.count = order.Cartype.count + 1
         db.session.add(order)
         db.session.commit()
         return jsonify({"status": 'ok'})
@@ -314,9 +323,9 @@ def getPreferential():
         return jsonify({'status': 'error', 'code': 3, 'msg': "数量错误"})
     if not flask_login.current_user.is_authenticated:
         return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
-
+    openid = flask_login.current_user.openid
     totalfee = int(car.price) * int(count)
-    prefer = getFees(carTypeId, count, totalfee)
+    prefer = getFees(carTypeId, count, totalfee,openid)
     return jsonify(prefer)
 
 
@@ -329,11 +338,12 @@ def getserverstop():
         r['data'].append({'name': i.name, 'phone': i.phone, 'owner': i.owner, 'lat': i.lat, 'lng': i.lng})
     return jsonify(r)
 
+
 @api.route('/getrecount')
 @flask_login.login_required
 def getrecount():
     carTypeId = request.args.get("id")
     car = Cartype.query.filter_by(id=int(carTypeId)).first()
     if car.count == 0:
-        return jsonify({'status':'failed'})
-    return jsonify({'status':'ok'})
+        return jsonify({'status': 'failed'})
+    return jsonify({'status': 'ok'})

@@ -18,9 +18,21 @@ class Cartype(db.Model):
     preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
     carcatid = db.Column(db.Integer, db.ForeignKey('carcat.id'))
     count = db.Column(db.Integer)
+    limitid = db.Column(db.Integer, db.ForeignKey('limit.id'))
     def __repr__(self):
         return u"%s,单价%s元" % (self.name, float(self.price) / 100)
 
+class Limit(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    start_at = db.Column(db.DateTime)
+    end_at = db.Column(db.DateTime)
+    name = db.Column(db.String(800))
+    mincount = db.Column(db.Integer)
+    maxcount = db.Column(db.Integer)
+    cartypes = db.relationship('Cartype', backref='Limit', lazy='dynamic')
+
+    def __repr__(self):
+        return self.name
 
 class Gps(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -62,7 +74,7 @@ class Customer(db.Model):
     driveage = db.Column(db.Integer)
     phone = db.Column(db.String(800), unique=True)
     status = db.Column(db.String(800), default="pending")
-
+    olduser =  db.Column(db.Integer, default=0)
     @property
     def is_authenticated(self):
         return True
@@ -219,6 +231,7 @@ class Preferential(db.Model):
     cartypes = db.relationship('Cartype', backref='Preferential', lazy='dynamic')
     orders = db.relationship('Order', backref='Preferential', lazy='dynamic')
     discount = db.Column(db.Float)
+    justnew = db.Column(db.Integer)
     def __repr__(self):
         return self.name
 class Insure(db.Model):

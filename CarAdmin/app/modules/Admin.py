@@ -48,6 +48,8 @@ def dashboard():
     admin.add_view(ServerstopView(Serverstop, db.session, name=u"服务站管理"))
     # admin.add_view(OrderAdminView(name=u'订单管理', endpoint='refund'))
     admin.add_view(InsureView(Insure, db.session, name=u"保险管理"))
+    admin.add_view(LimitView(Limit, db.session, name=u"限制管理"))
+
 
 
 class UploadWidget(form.ImageUploadInput):
@@ -169,6 +171,10 @@ class InsureView(AdminModel):
     form_excluded_columns = ('orders')
     # column_formatters = dict(price=lambda v, c, m, p: None if not m.price else int(m.price) / 100)
 
+class LimitView(AdminModel):
+    column_labels = dict(name=u"描述", start_at=u'起始时间', end_at=u'终止时间',mincount=u'起租天数',maxcount=u'最大天数')
+
+    # column_formatters = dict(price=lambda v, c, m, p: None if not m.price else int(m.price) / 100)
 
 class CarcatView(AdminModel):
     column_labels = dict(name=u"名称", cars=u'该类车型', Carcat=u"种类")

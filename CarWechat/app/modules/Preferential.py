@@ -1,7 +1,7 @@
 from ..models.dbORM import *
 
 
-def getFees(cartypeId, count, totalFee):
+def getFees(cartypeId, count, totalFee, openid):
     count = int(count)
     totalFee = int(totalFee)
     cartypeId = int(cartypeId)
@@ -12,6 +12,7 @@ def getFees(cartypeId, count, totalFee):
     isprefer = False
     if prefer:
         if prefer.status == "normal":
+
             if prefer.mincount and not prefer.cutfee:
                 if count >= prefer.mincount:
                     isprefer = True
@@ -28,9 +29,16 @@ def getFees(cartypeId, count, totalFee):
                 newfee = newfee * prefer.discount
                 cutfee = totalFee - newfee
 
+    if prefer.justnew == 1:
+        customer = Customer.query.filter_by(openid=openid).first()
+        if customer:
+            if customer.olduser == 1:
+                isprefer = False
+        else:
+            isprefer = False
     if isprefer:
-        cutfee=int(cutfee)
-        newfee=int(newfee)
+        cutfee = int(cutfee)
+        newfee = int(newfee)
         return {"name": prefer.name, 'preferid': prefer.id, "oldfee": totalFee, "cutfee": cutfee,
                 "newfee": newfee, 'isprefer': True}
 
