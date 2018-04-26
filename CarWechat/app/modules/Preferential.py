@@ -26,6 +26,7 @@ def getFees(cartypeId, count, totalFee, openid):
                     if newfee < 0:
                         newfee = 0
             if prefer.discount:
+                isprefer = True
                 newfee = newfee * prefer.discount
                 cutfee = totalFee - newfee
 
