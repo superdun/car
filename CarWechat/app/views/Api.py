@@ -228,7 +228,7 @@ def getOrderApi():
 
 
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
-                  tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialid=json.dumps(preferentialid),
+                  tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialdetail=json.dumps(prefer),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
                   book_at=book_at)
 
