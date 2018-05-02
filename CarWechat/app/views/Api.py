@@ -178,8 +178,15 @@ def getOrderApi():
         serverstop = int(serverstop)
     else:
         serverstop = None
+    import datetime as dt
     if not book_at:
         book_at = ""
+    else:
+        try:
+            if book_at<datetime.now()-dt.timedelta(hours=1):
+                return jsonify({'status': 'error', 'code': 7, 'msg': "预约时间有误"})
+        except :
+            return jsonify({'status': 'error', 'code': 7, 'msg': "预约时间有误"})
 
     checkResult = checkLimit(carTypeId, count, book_at)
     if checkResult["limit"]:

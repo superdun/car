@@ -170,6 +170,11 @@
 
             })
         }
+        $("#book_at").change(function () {
+            getPrefer();
+            setSum();
+            $("#sum").css("color", 'red');
+        });
         $('.js-numstepper').numStepper();
 
         $('body').on('change.numstep', '.js-numstepper', function (event, mode, value, valueOld) {
@@ -214,6 +219,7 @@
 
             })
         }
+
         function getOrder() {
             if (!$("#weuiAgree").prop("checked")) {
                 alert("请阅读条款");
