@@ -155,7 +155,7 @@ class PreferentialView(AdminModel):
 class CartypeView(AdminModel):
     column_exclude_list = ('img')
     form_excluded_columns = ('orders')
-    column_labels = dict(Preferential=u"所用优惠", created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态',
+    column_labels = dict(preferentials=u"所用优惠", created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态',
                          cars=u'该类车辆', Carcat=u"种类",count=u"剩余数量",Limit=u'限制类型')
     # column_formatters = dict(price=lambda v, c, m, p: None if not m.price else int(m.price) / 100)
     form_extra_fields = {

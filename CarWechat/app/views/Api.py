@@ -201,7 +201,7 @@ def getOrderApi():
     oldfee = carfee
     cutfee = 0
     open_id = flask_login.current_user.openid
-    prefer = getFees(carTypeId, count, carfee,open_id)
+    prefer = getFees(carTypeId, count, carfee,open_id,book_at)
     preferentialid = None
     if prefer['isprefer']:
         carfee = prefer['newfee']
@@ -314,6 +314,9 @@ def refundApplyApi(id):
 def getPreferential():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
+    book_at = request.form.get("book_at")
+    if not book_at:
+        book_at = ""
     if (not carTypeId) or (not count):
         return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
     car = Cartype.query.filter_by(id=int(carTypeId)).first()
@@ -325,7 +328,7 @@ def getPreferential():
         return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
     openid = flask_login.current_user.openid
     totalfee = int(car.price) * int(count)
-    prefer = getFees(carTypeId, count, totalfee,openid)
+    prefer = getFees(carTypeId, count, totalfee,openid,book_at)
     return jsonify(prefer)
 
 

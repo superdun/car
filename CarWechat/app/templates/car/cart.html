@@ -189,6 +189,7 @@
             var formDataPrefer = new FormData();
             formDataPrefer.append('id', {{ carData.id }});
             formDataPrefer.append('count', $("#count").val());
+            formDataPrefer.append('book_at', $('#book_at').val());
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/preferential',
                 type: 'POST',

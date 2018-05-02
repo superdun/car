@@ -5,7 +5,12 @@ from datetime import datetime
 from app import db
 
 
-
+class Cartypeprefer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cartypeid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
+    preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
+    def __repr__(self):
+        return self.id
 class Cartype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -15,10 +20,11 @@ class Cartype(db.Model):
     img = db.Column(db.String(200))
     status = db.Column(db.String(800), default="pending")
     orders = db.relationship('Order', backref='Cartype', lazy='dynamic')
-    preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
+    preferentials = db.relationship("Preferential" , secondary="cartypeprefer", backref='Cartype', lazy='dynamic')
     carcatid = db.Column(db.Integer, db.ForeignKey('carcat.id'))
     count = db.Column(db.Integer)
     limitid = db.Column(db.Integer, db.ForeignKey('limit.id'))
+
     def __repr__(self):
         return u"%s,单价%s元" % (self.name, float(self.price) / 100)
 
@@ -228,10 +234,14 @@ class Preferential(db.Model):
     maxcutfee = db.Column(db.Integer)
     status = db.Column(db.String(80), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.now())
-    cartypes = db.relationship('Cartype', backref='Preferential', lazy='dynamic')
+    cartypes = db.relationship('Cartype', secondary="cartypeprefer", backref='Preferential', lazy='dynamic')
     orders = db.relationship('Order', backref='Preferential', lazy='dynamic')
     discount = db.Column(db.Float)
     justnew = db.Column(db.Integer)
+    prior = db.Column(db.Integer)
+    weekday = db.Column(db.Integer)
+    weekend = db.Column(db.Integer)
+
     def __repr__(self):
         return self.name
 class Insure(db.Model):

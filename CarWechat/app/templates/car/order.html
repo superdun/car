@@ -14,6 +14,10 @@
     <div class="weui-wepay-lists">
         <div class="weui-wepay-lists__bd">
             <div class="weui-cells">
+                {% if datal|count==0 %}
+                    <p style="color: gray;text-align: center">对不起，您还没有订单<a href="{{ url_for('web.selectCar') }}" style="text-align: center"> 去订车</a></p>
+
+                {% endif %}
                 {% for d in data %}
                     <a href="{{ url_for('web.orderDetail',id=d.id) }}" class="weui-cell weui-cell_primary">
                         <div class="weui-cell__hd">
