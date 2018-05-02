@@ -184,7 +184,7 @@ def getOrderApi():
         book_at = ""
     else:
         try:
-            if dateCounvert(book_at)<datetime.now()-dt.timedelta(hours=1):
+            if book_at<datetime.now()-dt.timedelta(hours=1):
                 return jsonify({'status': 'error', 'code': 7, 'msg': "预约时间有误"})
         except :
             return jsonify({'status': 'error', 'code': 7, 'msg': "预约时间有误"})
@@ -228,7 +228,7 @@ def getOrderApi():
 
 
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
-                  tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialid=preferentialid,
+                  tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialid=json.dumps(preferentialid),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
                   book_at=book_at)
 
