@@ -163,7 +163,7 @@ class CartypeView(AdminModel):
                            url_relative_path=getQiniuDomain()),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
-    column_editable_list = ("count","Limit")
+    column_editable_list = ("count","Limit","preferentials")
 
 
 class InsureView(AdminModel):
