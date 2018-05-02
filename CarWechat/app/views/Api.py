@@ -179,11 +179,12 @@ def getOrderApi():
     else:
         serverstop = None
     import datetime as dt
+    from ..modules.Limit import dateCounvert
     if not book_at:
         book_at = ""
     else:
         try:
-            if book_at<datetime.now()-dt.timedelta(hours=1):
+            if dateCounvert(book_at)<datetime.now()-dt.timedelta(hours=1):
                 return jsonify({'status': 'error', 'code': 7, 'msg': "预约时间有误"})
         except :
             return jsonify({'status': 'error', 'code': 7, 'msg': "预约时间有误"})
