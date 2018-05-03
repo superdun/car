@@ -83,7 +83,7 @@ def sendTemplate(openid, title, timeStr, orderType, customerInfo, carType, detai
 
 def sendTemplateByOrder(order, description, type):
     admin = User.query.all()
-    if order.Insure.name:
+    if order.Insure:
         insureName = order.Insure.name
     else:
         insureName = u"无"
