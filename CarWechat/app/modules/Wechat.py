@@ -83,7 +83,11 @@ def sendTemplate(openid, title, timeStr, orderType, customerInfo, carType, detai
 
 def sendTemplateByOrder(order, description, type):
     admin = User.query.all()
-    detail = u"电话：" + order.Customer.phone + u" 选择服务点：" + order.Serverstop.name + u" 定位地点：" + order.location + u" 预约时间：" + order.book_at + u"保险：" +order.Insure.name
+    if order.Insure.name:
+        insureName = order.Insure.name
+    else:
+        insureName = u"无"
+    detail = u"电话：" + order.Customer.phone + u" 选择服务点：" + order.Serverstop.name + u" 定位地点：" + order.location + u" 预约时间：" + order.book_at + u"保险：" +insureName
 
     for i in admin:
         openid = i.openid
