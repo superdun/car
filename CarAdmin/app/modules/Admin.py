@@ -107,6 +107,7 @@ class CarView(AdminModel):
                            url_relative_path=getQiniuDomain()),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
+    column_searchable_list = ("name",)
 
 
 class GpsView(AdminModel):
@@ -116,7 +117,7 @@ class GpsView(AdminModel):
 class CustomerView(AdminModel):
     column_labels = dict(created_at=u'创建时间', name=u'姓名', gender=u'性别', idcode=u'身份证'
                          , comment=u'备注', driveage=u'驾龄', phone=u'电话', status=u'状态', histories=u"历史", orders=u'订单',
-                         image=u"头像")
+                         image=u"头像",olduser=u"老用户")
     column_exclude_list = ('img', 'password', '')
     form_extra_fields = {
         'img': ImageUpload(u"头像", base_path=getUploadUrl(), relative_path=thumb.relativePath(),
@@ -124,7 +125,7 @@ class CustomerView(AdminModel):
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
     form_excluded_columns = ('img', 'password', 'openid', '')
-
+    column_searchable_list = ("name","phone")
 
 class UserView(AdminModel):
     form_extra_fields = {
@@ -205,6 +206,7 @@ class OrderView(AdminModel):
                 return False
         else:
             return False
+    column_searchable_list = ("Customer.name",)
 
     column_labels = dict(created_at=u'创建时间', tradetype=u'交易类型', Cartype=u'车辆型号'
                          , totalfee=u'总价', Customer=u'客户', status=u'订单状态', pay_at=u'付款时间', fromdate=u'起租时间',

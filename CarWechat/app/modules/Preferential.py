@@ -16,6 +16,26 @@ def checkWeekDay(prefer,book_at,count):
         return True
     return False
 
+def checkDateRange(prefer,book_at,count):
+    if prefer.start_at and  prefer.end_at:
+        for i in range(count + 1):
+            tmpDT = book_at + datetime.timedelta(days=i)
+            if tmpDT >= prefer.start_at or tmpDT <= prefer.end_at:
+                return True
+    else:
+        return True
+    return False
+
+def checkOldUser(openid,prefer):
+    isOld = False
+    customer = Customer.query.filter_by(openid=openid).first()
+    if customer:
+        if customer.olduser == 1:
+            isOld = True
+    if  prefer.justnew == 1 and isOld:
+        return False
+    else:
+        return True
 def getFees(cartypeId, count, totalFee, openid,book_at):
     count = int(count)
     totalFee = int(totalFee)
@@ -35,7 +55,7 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
     for prefer in prefers:
         hasCurrentPrefer = False
         if prefer:
-            if prefer.status == "normal" and checkWeekDay(prefer,book_at,count):
+            if prefer.status == "normal" and checkOldUser(openid,prefer) and checkWeekDay(prefer,book_at,count) and checkDateRange(prefer,book_at,count):
 
                 if prefer.mincount and not prefer.cutfee :
                     if count >= prefer.mincount:
@@ -51,23 +71,25 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
                         if newfee < 0:
                             newfee = 0
                 if prefer.discount:
-                    isprefer = True
-                    hasCurrentPrefer = True
-                    cutfee = newfee * (1.0 - prefer.discount)
-                    newfee = newfee - cutfee
-                    if newfee < 0:
-                        newfee = 0
+                    if prefer.multicount == 1:
+                        isprefer = True
+                        hasCurrentPrefer = True
+                        cutfee = newfee * (1.0 - prefer.discount)
+                        newfee = newfee - cutfee
+                        if newfee < 0:
+                            newfee = 0
+                    else:
+                        isprefer = True
+                        hasCurrentPrefer = True
+                        cutfee = ct.price * (1.0 - prefer.discount)
+                        newfee = newfee - cutfee
+                        if newfee < 0:
+                            newfee = 0
 
             if hasCurrentPrefer:
                 preferName = preferName+"\n"+prefer.name
                 preferId.append(prefer.id)
-        if prefer.justnew == 1:
-            customer = Customer.query.filter_by(openid=openid).first()
-            if customer:
-                if customer.olduser == 1:
-                    isprefer = False
-            else:
-                isprefer = False
+
 
     if isprefer:
         cutfee = int(round(cutfee))

@@ -241,7 +241,8 @@ class Preferential(db.Model):
     prior = db.Column(db.Integer)
     weekday = db.Column(db.Integer)
     weekend = db.Column(db.Integer)
-
+    start_at = db.Column(db.DateTime)
+    end_at = db.Column(db.DateTime)
     def __repr__(self):
         return self.name
 class Insure(db.Model):
