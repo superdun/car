@@ -20,7 +20,7 @@ def checkDateRange(prefer,book_at,count):
     if prefer.start_at and  prefer.end_at:
         for i in range(count + 1):
             tmpDT = book_at + datetime.timedelta(days=i)
-            if tmpDT >= prefer.start_at or tmpDT <= prefer.end_at:
+            if tmpDT >= prefer.start_at and tmpDT <= prefer.end_at:
                 return True
     else:
         return True
@@ -40,6 +40,7 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
     count = int(count)
     totalFee = int(totalFee)
     cartypeId = int(cartypeId)
+    book_at = "2018-05-04T21:53:26.835"
     if book_at=="":
         book_at=dtt.now()
     else:

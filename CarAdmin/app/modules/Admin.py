@@ -146,11 +146,11 @@ class PreferentialView(AdminModel):
     column_labels = dict(name=u'优惠名', password=u'密码', status=u'状态', mincount=u"最小购买数", minfee=u"最低消费额",
                          cutfee=u"固定折扣金额", discount=u"折扣率", multicount=u"是否乘数量", maxcutfee=u"最大折扣金额", cartypes=u'车型',
                          orders=u"订单",
-                         created_at=u"创建时间",justnew=u"只针对新用户",prior=u"优先级",weekday=u"只限工作日",weekend=u"只限日",start_at=u"开始时间",end_at=u"结束时间")
+                         created_at=u"创建时间",justnew=u"只针对新用户",prior=u"优先级",weekday=u"只限工作日",weekend=u"只限周末",start_at=u"开始时间",end_at=u"结束时间")
     form_extra_fields = {
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
-    form_excluded_columns = ('orders', 'created_at')
+    form_excluded_columns = ('orders', 'created_at','Cartype')
 
 
 class CartypeView(AdminModel):
