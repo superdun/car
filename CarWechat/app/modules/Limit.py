@@ -3,7 +3,12 @@ from datetime import datetime
 
 def dateCounvert(datetimeStr):
      #    2018-05-31T21:29:42
-     return datetime.strptime(datetimeStr.split('.')[0], '%Y-%m-%dT%H:%M:%S')
+     if len(datetimeStr)==16:
+        return datetime.strptime(datetimeStr.split('.')[0], '%Y-%m-%dT%H:%M')
+     elif len(datetimeStr)>=19:
+        return datetime.strptime(datetimeStr.split('.')[0], '%Y-%m-%dT%H:%M:%S')
+     else:
+        return datetime.strptime(datetimeStr.split('T')[0], '%Y-%m-%d')
 
 
 def checkLimit(cartypeId, count,book_at=""):
