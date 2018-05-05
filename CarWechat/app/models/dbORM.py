@@ -11,6 +11,13 @@ class Cartypeprefer(db.Model):
     preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
     def __repr__(self):
         return self.id
+
+class Insurecartype(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cartypeid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
+    insureid = db.Column(db.Integer, db.ForeignKey('insure.id'))
+    def __repr__(self):
+        return self.id
 class Cartype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -24,7 +31,7 @@ class Cartype(db.Model):
     carcatid = db.Column(db.Integer, db.ForeignKey('carcat.id'))
     count = db.Column(db.Integer)
     limitid = db.Column(db.Integer, db.ForeignKey('limit.id'))
-
+    insures = db.relationship("Insure", secondary="insurecartype", backref='Cartype', lazy='dynamic')
     def __repr__(self):
         return u"%s,单价%s元" % (self.name, float(self.price) / 100)
 
@@ -251,7 +258,7 @@ class Insure(db.Model):
     detail = db.Column(db.String(8000))
     price = db.Column(db.Integer)
     orders = db.relationship('Order', backref='Insure', lazy='dynamic')
-
+    cartypes = db.relationship("Cartype", secondary="insurecartype", backref='Insure', lazy='dynamic')
     def __repr__(self):
         return self.name
 
