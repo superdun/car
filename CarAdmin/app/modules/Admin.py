@@ -126,7 +126,7 @@ class CustomerView(AdminModel):
     }
     form_excluded_columns = ('img', 'password', 'openid', '')
     column_searchable_list = ("name","phone")
-    column_editable_list = ("olduser")
+    column_editable_list = ("olduser",)
 class UserView(AdminModel):
     form_extra_fields = {
         'password': PasswordField(u'密码')
