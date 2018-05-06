@@ -118,7 +118,7 @@ class CustomerView(AdminModel):
     column_labels = dict(created_at=u'创建时间', name=u'姓名', gender=u'性别', idcode=u'身份证'
                          , comment=u'备注', driveage=u'驾龄', phone=u'电话', status=u'状态', histories=u"历史", orders=u'订单',
                          image=u"头像",olduser=u"老用户")
-    column_exclude_list = ('img', 'password', '')
+    column_exclude_list = ('img', 'password')
     form_extra_fields = {
         'img': ImageUpload(u"头像", base_path=getUploadUrl(), relative_path=thumb.relativePath(),
                            url_relative_path=getQiniuDomain()),
@@ -126,7 +126,7 @@ class CustomerView(AdminModel):
     }
     form_excluded_columns = ('img', 'password', 'openid', '')
     column_searchable_list = ("name","phone")
-
+    column_editable_list = ("olduser")
 class UserView(AdminModel):
     form_extra_fields = {
         'password': PasswordField(u'密码')
