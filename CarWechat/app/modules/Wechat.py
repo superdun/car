@@ -28,7 +28,12 @@ def getAuth():
     return oauth.WeChatOAuth(app_id=wxAppId, secret=wxAppsecret,
                              redirect_uri=current_app.config.get('WECHAT_URL') + current_app.config.get(
                                  'WECHAT_AUTH_REDIRECT_URL'), scope="snsapi_userinfo")
-
+def getAuthForAgent():
+    wxAppId = getAppId()
+    wxAppsecret = getAppSecret()
+    return oauth.WeChatOAuth(app_id=wxAppId, secret=wxAppsecret,
+                             redirect_uri=current_app.config.get('WECHAT_URL') + current_app.config.get(
+                                 'WECHAT_AUTH_REDIRECT_URL_FOR_AGENT'), scope="snsapi_userinfo")
 
 def getClient():
     wxAppId = getAppId()

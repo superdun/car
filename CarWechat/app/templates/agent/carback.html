@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% block css %}
+    <style type="text/css">
+        .container {
+            padding: 20px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="weui-wepay-details">
+        <div class="weui-wepay-details__hd">
+            <div class="weui-wepay-details__state">
+                <h2 class="weui-wepay-details__title">
+                    待收车</h2>
+                <p class="weui-wepay-details__desc">￥{{ data.totalfee/100 }}</p>
+            </div>
+        </div>
+        <div class="weui-wepay-details__bd">
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">单号：</div>
+                <div class="weui-wepay-detail__ft">{{ data.tradeno |cutstring }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">代理：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Serverstop.User.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">客户：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Customer.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">客户电话：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Customer.phone }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">时间：</div>
+                <div class="weui-wepay-detail__ft">{{ data.created_at }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">支付状态：</div>
+                <div class="weui-wepay-detail__ft">{{ orderConfig[data.status][0] }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">车型：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Cartype.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">车牌：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Car.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">天数：</div>
+                <div class="weui-wepay-detail__ft">{{ data.count }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">折扣：</div>
+                <div class="weui-wepay-detail__ft">-￥{{ data.cutfee/100 }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">保险：</div>
+                {% if data.Insure %}
+                    <div class="weui-wepay-detail__ft">{{ data.Insure.name }}:￥{{ data.insurefee/100 }}</div>
+                {% else %}
+                    <div class="weui-wepay-detail__ft">无</div>
+                {% endif %}
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">总价：</div>
+                <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ data.totalfee/100 }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">车牌号：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Car.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">发车时间：</div>
+                <div class="weui-wepay-detail__ft">{{ data.fromdate }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">发车油量：</div>
+                <div class="weui-wepay-detail__ft">{{ data.oilbefore }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">发车公里：</div>
+                <div class="weui-wepay-detail__ft">{{ data.kmbefore }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">合同编号：</div>
+                <div class="weui-wepay-detail__ft">{{ data.contractid }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">是否出省：</div>
+                <div class="weui-wepay-detail__ft">{% if data.outprovince==1 %}是{% else %}否{% endif %}</div>
+            </div>
+        </div>
+        {#        {% if data.status=="ok" %}#}
+        {#            <div class="weui-wepay-details__ft">#}
+        {#                <a href="javascript:;" class="weui-btn weui-btn_primary" id="refund">申请退款</a>#}
+        {#            </div>#}
+        {##}
+        {#        {% endif %}#}
+    </div>
+    <div class="weui-cells__title">收车登记</div>
+    <div class="weui-cells weui-cells_form">
+
+
+        <div class="weui-cell">
+
+            <div class="weui-cell__hd"><label for="" class="weui-label">收车时间</label></div>
+            <div class="weui-cell__bd">
+                <input class="weui-input" type="datetime-local" value="" placeholder="" id="back_time">
+            </div>
+        </div>
+
+        <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label">收车油量</label></div>
+            <div class="weui-cell__bd">
+                <div class="weui-slider-box">
+                    <div class="weui-slider">
+                        <div class="weui-slider__inner">
+                            <div style="width: 50%;" class="weui-slider__track"></div>
+                            <div style="left: 50%;" class="weui-slider__handler"></div>
+                        </div>
+                    </div>
+                    <div class="weui-slider-box__value" id="oil">5</div>
+                </div>
+            </div>
+        </div>
+        <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label">收车公里 </label></div>
+
+            <div class="weui-cell__bd">
+                <input id="kmafter" class="weui-input" type="text" placeholder="收车公里/km"/>
+            </div>
+
+        </div>
+
+        <div class="weui-cell">
+            <div class="weui-cell__hd">
+                <label class="weui-label">是否事故</label>
+            </div>
+            <div class="weui-cell__bd">
+                <input class="weui-input" type="text" placeholder="是否事故" id="isaccident"
+                       readonly>
+            </div>
+        </div>
+        {#        <div class="weui-uploader">#}
+        {#            <div class="weui-uploader__hd">#}
+        {#                <p class="weui-uploader__title">存证上传</p>#}
+        {#            </div>#}
+        {#            <div class="weui-uploader__bd">#}
+        {#                <ul class="weui-uploader__files" id="uploaderFiles">#}
+        {#                    <li class="weui-uploader__file"></li>#}
+        {#                    <li class="weui-uploader__file"></li>#}
+        {#                    <li class="weui-uploader__file"></li>#}
+        {#                </ul>#}
+        {#                <div class="weui-uploader__input-box">#}
+        {#                    <input id="uploaderInput" class="weui-uploader__input" type="file" accept="image/*" multiple/>#}
+        {#                </div>#}
+        {#            </div>#}
+        {#        </div>#}
+
+
+    </div>
+
+
+
+
+    <div class="weui-btn-area">
+        <a class="weui-btn weui-btn_primary" href="javascript:" id="depart">确定</a>
+    </div>
+
+
+{% endblock %}
+{% block script %}
+    <script>
+        weui.uploader('#uploader', {
+            url: 'http://localhost:8081',
+            auto: false,
+            type: 'file',
+            fileVal: 'fileVal',
+            compress: {
+                width: 1600,
+                height: 1600,
+                quality: 1
+            },
+            onBeforeQueued: function (files) {
+                // `this` 是轮询到的文件, `files` 是所有文件
+
+                if (["image/jpg", "image/jpeg", "image/png"].indexOf(this.type) < 0) {
+                    weui.alert('请上传图片');
+                    return false; // 阻止文件添加
+                }
+                if (this.size > 10 * 1024 * 1024) {
+                    weui.alert('请上传不超过10M的图片');
+                    return false;
+                }
+                if (files.length > 3) { // 防止一下子选择过多文件
+                    weui.alert('最多只能上传3张图片，请重新选择');
+                    return false;
+                }
+                if (uploadCount + 1 > 3) {
+                    weui.alert('最多只能上传3张图片');
+                    return false;
+                }
+
+                ++uploadCount;
+
+                // return true; // 阻止默认行为，不插入预览图的框架
+            },
+            onQueued: function () {
+                console.log(this);
+
+                // console.log(this.status); // 文件的状态：'ready', 'progress', 'success', 'fail'
+                // console.log(this.base64); // 如果是base64上传，file.base64可以获得文件的base64
+
+                // this.upload(); // 如果是手动上传，这里可以通过调用upload来实现；也可以用它来实现重传。
+                // this.stop(); // 中断上传
+
+                // return true; // 阻止默认行为，不显示预览图的图像
+            },
+            onBeforeSend: function (data, headers) {
+                console.log(this, data, headers);
+                // $.extend(data, { test: 1 }); // 可以扩展此对象来控制上传参数
+                // $.extend(headers, { Origin: 'http://127.0.0.1' }); // 可以扩展此对象来控制上传头部
+
+                // return false; // 阻止文件上传
+            },
+            onProgress: function (procent) {
+                console.log(this, procent);
+                // return true; // 阻止默认行为，不使用默认的进度显示
+            },
+            onSuccess: function (ret) {
+                console.log(this, ret);
+                // return true; // 阻止默认行为，不使用默认的成功态
+            },
+            onError: function (err) {
+                console.log(this, err);
+                // return true; // 阻止默认行为，不使用默认的失败态
+            }
+        });
+        var isaccident = "";
+
+        $('#isaccident').on('click', function () {
+            weui.picker([
+
+                {
+                    label: '是',
+                    value: 1
+                }, {
+                    label: '否',
+                    value: 0
+                }
+
+            ], {
+                onChange: function (result) {
+
+                },
+                onConfirm: function (result) {
+                    $('#isaccident').val(result[0]['label']);
+                    isaccident = result[0]['value'];
+                }
+            });
+        });
+        $(function () {
+            var $sliderTrack = $('.weui-slider__track'),
+                $sliderHandler = $('.weui-slider__handler'),
+                $sliderValue = $('.weui-slider-box__value');
+
+            var totalLen = $('.weui-slider__inner').width(),
+                startLeft = 0,
+                startX = 0;
+
+            $sliderHandler
+                .on('touchstart', function (e) {
+                    startLeft = parseInt($sliderHandler.css('left')) * totalLen / 100;
+                    startX = e.changedTouches[0].clientX;
+                })
+                .on('touchmove', function (e) {
+                    var dist = startLeft + e.changedTouches[0].clientX - startX,
+                        percent;
+                    dist = dist < 0 ? 0 : dist > totalLen ? totalLen : dist;
+                    percent = parseInt(dist / totalLen * 100);
+                    $sliderTrack.css('width', percent + '%');
+                    $sliderHandler.css('left', percent + '%');
+
+                    $sliderValue.text(Math.ceil(percent * 8 / 100));
+
+
+                    e.preventDefault();
+                })
+            ;
+        });
+
+        $(document).ready(function () {
+
+            $('#depart').click(function () {
+                {#                if (!$("#weuiAgree").prop("checked")) {#}
+                {#                    return#}
+                {#                }#}
+
+                var formData = new FormData();
+
+                formData.append('back_time', $('#back_time').val());
+                formData.append('oilafter', parseInt($('#oil').parent().parent().text()) * 1);
+                formData.append('carid', {{ data.Car.id }});
+                formData.append('orderid', {{ data.id }});
+                formData.append('kmafter', $('#kmafter').val());
+                formData.append('isaccident', isaccident);
+                $.ajax({
+                    url: window.location.protocol + "//" + window.location.host + '/wx/api/agent/back',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result['status'] == 'lacked') {
+                            alert("信息填写有误");
+
+                        }
+
+                        if (result['status'] == 'ok') {
+                            alert('信息录入成功');
+                            window.location = "{{url_for('agentweb.order')}}"
+                        }
+                        if (result['status'] == 'error') {
+                            alert('权限错误');
+                            {#                            window.location = "{{url_for('web.selectCar')}}"#}
+                        }
+                        {#                        if (result['status'] == 'alert') {#}
+                        {#                            alert(result['msg']);#}
+                        {##}
+                        {#                        }#}
+                    }
+
+                })
+
+            });
+        })
+    </script>
+{% endblock %}

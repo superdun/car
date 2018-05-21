@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block css %}
+    <style type="text/css">
+        .container {
+            padding: 20px;
+        }
+
+        .collection-item {
+            height: 150px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="weui-wepay-lists">
+        <div class="weui-wepay-lists__bd">
+            <div class="weui-cells">
+                {% if data|count==0 %}
+                    <p style="color: gray;text-align: center">对不起，您还没有订单</p>
+
+                {% endif %}
+                {% for d in data %}
+                    <a href="{{ url_for('agentweb.orderDetail',id=d.id) }}" class="weui-cell weui-cell_primary">
+                        <div class="weui-cell__hd">
+                            <img src="{{ imgDomain }}{{ d.Cartype.img }}!fang" alt="" width="34" height="34">
+
+                        </div>
+                        <div class="weui-cell__bd">
+                            <div class="weui-cell__title">
+                                {{ d.Cartype.name }}
+                            </div>
+                            <div class="weui-cell__info">
+                                {{ d.created_at }}<br>
+                                {{ d.Customer.name }}/{{ d.Customer.phone }}/{{ d.Insure.name }}
+
+                            </div>
+                        </div>
+                        <div class="weui-cell__ft">
+                            {% if  d.status=="ok" %}
+                                <div class="weui-cell__title weui-wepay-color-green">
+                                    ￥{{ d.totalfee/100 }}
+                                </div>
+                            {% else %}
+                                <div class="weui-cell__title weui-wepay-color-orange">
+                                    ￥{{ d.totalfee/100 }}
+                                </div>
+                            {% endif %}
+                            <div class="weui-cell__info">
+                                {% if d.fromdate %}
+                                    {% if d.todate %}
+                                        已结束<br>{{ d.Car.name }}
+                                    {% else %}
+                                        已发车<br>{{ d.Car.name }}
+                                    {% endif %}
+                                {% else %}
+                                    未发车
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {#    <div class="container">#}
+    {#        <ul class="collection">#}
+    {#            {% for d in data %}#}
+    {#                <li class="collection-item avatar">#}
+    {#                    <img src="{{ imgDomain }}{{ d.Cartype.img }}!fang" alt="" class="circle">#}
+    {#                    <span class="title">{{ d.Cartype.name }}</span>#}
+    {#                    <p>订单金额：{{ d.totalfee/100 }} 元</p>#}
+    {#                    <p>生成时间：{{ d.created_at }}</p>#}
+    {#                    <p class="truncate">订单编号：{{ d.tradeno }}</p>#}
+    {#                    <p style="color: {{ orderConfig[d.status][2] }}">#}
+    {#                        订单状态：{{ orderConfig[d.status][0] }}#}
+    {#                    </p>#}
+    {##}
+    {#                    <a class="dropdown-button secondary-content" data-activates='dropdown{{ loop.index }}'><i#}
+    {#                            class="material-icons">list</i></a>#}
+    {#                    <ul id='dropdown{{ loop.index }}' class='dropdown-content'>#}
+    {#                        {% for o in orderConfig[d.status][1] %}#}
+    {#                            <li><a href="{{ url_for('web.orderDetail',id=d.id) }}">{{ o }}</a></li>#}
+    {#                        {% endfor %}#}
+    {#                    </ul>#}
+    {#                </li>#}
+    {#            {% endfor %}#}
+    {##}
+    {#        </ul>#}
+    {#    </div>#}
+{% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function () {
+            navSelect($('#nav-order'));
+        });
+
+
+    </script>
+{% endblock %}

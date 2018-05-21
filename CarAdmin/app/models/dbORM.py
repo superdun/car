@@ -144,6 +144,7 @@ class Serverstop(db.Model):
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
     orders = db.relationship('Order', backref='Serverstop', lazy='dynamic')
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
     def __repr__(self):
         return self.name
 
@@ -185,6 +186,12 @@ class Order(db.Model):
     carfee = db.Column(db.Integer)
     insurefee = db.Column(db.Integer)
     book_at = db.Column(db.String(800))
+    oilbefore = db.Column(db.Integer)
+    oilafter = db.Column(db.Integer)
+    outprovince = db.Column(db.Integer)
+    contractid = db.Column(db.String(800))
+    kmbefore = db.Column(db.String(800))
+    kmafter = db.Column(db.String(800))
     def __repr__(self):
         return self.tradeno
 
@@ -226,7 +233,9 @@ class User(db.Model):
     orders = db.relationship('Order', backref='User', lazy='dynamic')
     loginrecords = db.relationship('Loginrecord', backref='User', lazy='dynamic')
     openid = db.Column(db.String(80))
-
+    upid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    down = db.relationship('User', foreign_keys=upid)
+    serverstop = db.relationship('Serverstop', backref='User', lazy='dynamic')
     def __repr__(self):
         return self.name
 
@@ -266,7 +275,7 @@ class Userrole(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
     stage = db.Column(db.Integer)
-    loginrecords = db.relationship('User', backref='Userrole', lazy='dynamic')
+    users = db.relationship('User', backref='Userrole', lazy='dynamic')
 
     def __repr__(self):
         return self.name

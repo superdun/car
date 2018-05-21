@@ -29,11 +29,12 @@ def create_app():
     def user_loader(id):
         return Customer.query.filter_by(id=int(id)).first()
     # 注册蓝本
-    from views import Web,Api
+    from views import Web,Api,AgentWeb,AgentApi
 
     app.register_blueprint(Web.web, url_prefix='/wx')
     app.register_blueprint(Api.api, url_prefix='/wx/api')
-
+    app.register_blueprint(AgentWeb.agentweb, url_prefix='/wx/agent')
+    app.register_blueprint(AgentApi.agentapi, url_prefix='/wx/api/agent')
     @app.template_filter('cutstring')
     def reverse_filter(s):
         return u'%s******%s' % (s[0:4], s[-4:])
