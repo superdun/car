@@ -20,4 +20,4 @@ ORDER_STATUS={"ok":[u"已支付",[u"查看订单",u"申请退款"],'black'],"wai
 VERIFYIDCODEURL = "http://aliyunverifyidcard.haoservice.com/idcard/VerifyIdcardv2"
 VERIFYIDCODE_APPCODE = "422c011beb6f4b1b96a8de7c3330b464"
 
-ORDER_LIMIT = 30
+ORDER_LIMIT = 130
