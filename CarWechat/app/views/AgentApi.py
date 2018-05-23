@@ -1,31 +1,19 @@
 # -*- coding:utf-8 -*-
 import os, sys
-from  flask import Blueprint, request,render_template, current_app, url_for, jsonify
+from  flask import Blueprint, request, render_template, current_app, url_for, jsonify
 from flask_login import login_required, current_user
 
 from ..models.dbORM import *
-from sqlalchemy import exc
-from ..modules.CarSDK import CarOlineApi
-import hashlib
-import flask_login
-from ..modules import Wechat as wx
+
 from wechatpy.exceptions import (
     InvalidSignatureException,
     WeChatPayException
 )
 from datetime import datetime
-from wechatpy.utils import timezone
-import time
-import json
-import random
-from ..modules.Preferential import getFees
-from ..modules.Limit import checkLimit
+
 from app import db
 
 agentapi = Blueprint('agentapi', __name__)
-
-
-
 
 
 @agentapi.route('/depart', methods=['POST'])
@@ -37,7 +25,7 @@ def departApi():
     carid = request.form.get("carid")
     orderid = request.form.get("orderid")
     kmbefore = request.form.get("kmbefore")
-    if not depart_time :
+    if not depart_time:
         depart_time = datetime.now()
     else:
         from ..modules.Limit import dateCounvert
@@ -50,13 +38,13 @@ def departApi():
         import AgentWeb
         user = AgentWeb.getAdmin(current_user.openid)
     except:
-        return jsonify({"status":"error"})
+        return jsonify({"status": "error"})
     order = Order.query.filter_by(id=orderid).first()
     if current_user.is_authenticated and user and order:
         admins = AgentWeb.getDownerAdmin(user)
         if order.Serverstop.userid not in ([x.id for x in admins]):
-            return jsonify({"status":"error"})
-        order.fromdate =depart_time
+            return jsonify({"status": "error"})
+        order.fromdate = depart_time
         order.oilbefore = oilbefore
         order.outprovince = outprovince
         order.contractid = contractid
@@ -68,6 +56,7 @@ def departApi():
     else:
         return jsonify({"status": "error"})
 
+
 @agentapi.route('/back', methods=['POST'])
 def backApi():
     back_time = request.form.get("back_time")
@@ -76,12 +65,12 @@ def backApi():
     carid = request.form.get("carid")
     orderid = request.form.get("orderid")
     kmafter = request.form.get("kmafter")
-    if not back_time :
+    if not back_time:
         back_time = datetime.now()
     else:
         from ..modules.Limit import dateCounvert
         back_time = dateCounvert(back_time)
-    if not carid or  not oilafter or not isaccident or not kmafter:
+    if not carid or not oilafter or not isaccident or not kmafter:
         return jsonify({"status": "lacked"})
     carid = int(carid)
     orderid = int(orderid)
@@ -89,13 +78,13 @@ def backApi():
         import AgentWeb
         user = AgentWeb.getAdmin(current_user.openid)
     except:
-        return jsonify({"status":"error"})
+        return jsonify({"status": "error"})
     order = Order.query.filter_by(id=orderid).first()
     if current_user.is_authenticated and user and order:
         admins = AgentWeb.getDownerAdmin(user)
         if order.Serverstop.userid not in ([x.id for x in admins]):
-            return jsonify({"status":"error"})
-        order.todate =back_time
+            return jsonify({"status": "error"})
+        order.todate = back_time
         order.oilafter = oilafter
 
         order.currentcarid = carid

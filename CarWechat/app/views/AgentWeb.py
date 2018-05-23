@@ -9,33 +9,28 @@ from wechatpy.utils import check_signature
 from wechatpy.exceptions import (
     InvalidSignatureException,
 )
-from ..modules import  Wechat as wx
+from ..modules import Wechat as wx
 
 import time
 import flask_login
 from datetime import datetime
-from app import login_manager,db
+from ..helpers.getAdmin import getAdmin, getDownerAdmin
+from app import login_manager, db
 
 agentweb = Blueprint('agentweb', __name__)
-
-
 
 
 @login_manager.user_loader
 def user_loader(id):
     return Customer.query.filter_by(id=int(id)).first()
 
+
 def getQiniuDomain():
     return current_app.config.get('QINIU_BUCKET_DOMAIN', '')
 
+
 def wxAuth():
-
     return wx.getAuthForAgent()
-
-
-
-
-
 
 
 @agentweb.route('/', methods=['GET', 'POST'])
@@ -90,8 +85,11 @@ def getJSSDK(url):
     return {'url': url, 'signature': signature, 'nonceStr': wxNonceStr, 'timestamp': wxTimeStamp,
             "appId": wx.getAppId()}
 
+
 def getOrderConfig():
     return current_app.config.get("ORDER_STATUS")
+
+
 # @web.route('/index')
 # def wechatIndex():
 #     if
@@ -101,40 +99,8 @@ def wechatCode():
     wxauth = wxAuth()
     print wxauth.authorize_url
     return redirect(wxauth.authorize_url)
-def getAdmin(openid):
 
-    user = User.query.filter_by(openid=openid).first()
-    return user
-def getConstruct():
-    pass
-def getUperAdmin(user):
-    result = []
-    admins = Userrole.query.filter_by(stage=1).first().users
-    for i in admins:
-        result.append(i)
-    if user.Userrole.stage == 2:
-        result.append(user)
-    if user.Userrole.stage == 3:
-        result.append(user)
-        up = User.query.filter_by(id=user.upid).first()
-        if up:
-            result.append(up)
-    return result
-def getDownerAdmin(user):
-    result = []
 
-    if user.Userrole.stage == 1:
-        admins =  User.query.all()
-        for i in admins:
-            result.append(i)
-    if user.Userrole.stage == 2:
-        result.append(user)
-        downs = user.down
-        for i in downs:
-            result.append(i)
-    if user.Userrole.stage == 3:
-        result.append(user)
-    return result
 @agentweb.route('/wx_authorize')
 def wechatAuthorize():
     wx_code = request.args.get("code")
@@ -147,9 +113,8 @@ def wechatAuthorize():
     flask_login.login_user(customer)
 
     if not getAdmin(customer.openid):
-        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员' })
+        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
     return redirect(url_for("agentweb.order"))
-
 
 
 @agentweb.route('/order')
@@ -160,11 +125,16 @@ def order():
     except:
         return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
     if current_user.is_authenticated and user:
-
+        orderCount = current_app.config.get("ORDER_LIMIT")
+        if not orderCount:
+            orderCount=30
         admins = getDownerAdmin(user)
         orderConfig = getOrderConfig()
-        orders = db.session.query(Order).filter(Order.Serverstop.has(Serverstop.userid.in_([x.id for x in admins])  )).filter(Order.status == "ok").order_by(Order.id.desc()).all()
-        return render_template("agent/order.html", data=orders,imgDomain="http://%s" % getQiniuDomain(),orderConfig=orderConfig)
+        orders = db.session.query(Order).filter(
+            Order.Serverstop.has(Serverstop.userid.in_([x.id for x in admins]))).filter(Order.status == "ok").order_by(
+            Order.id.desc()).limit(orderCount).all()
+        return render_template("agent/order.html", data=orders, imgDomain="http://%s" % getQiniuDomain(),
+                               orderConfig=orderConfig)
     else:
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
 
@@ -185,9 +155,12 @@ def orderDetail(id):
             return render_template("agent/error.html", data={'msg': u'抱歉，未找到订单'})
         if order.fromdate:
             if order.todate:
-                return render_template("agent/orderDetail.html",data=order, imgDomain="http://%s" % getQiniuDomain(),orderConfig=orderConfig)
+                return render_template("agent/orderDetail.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
+                                       orderConfig=orderConfig)
             else:
-                return render_template("agent/carback.html",data=order, imgDomain="http://%s" % getQiniuDomain(),orderConfig=orderConfig)
+                return render_template("agent/carback.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
+                                       orderConfig=orderConfig)
 
         else:
-            return render_template("agent/depart.html",data=order, imgDomain="http://%s" % getQiniuDomain(),orderConfig=orderConfig,car=car)
+            return render_template("agent/depart.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
+                                   orderConfig=orderConfig, car=car)

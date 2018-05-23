@@ -4,6 +4,7 @@ import time
 from wechatpy import oauth, client, pay
 from ..models.dbORM import User
 from ..helpers.other import getRandomStr
+from ..helpers.getAdmin import getAdmin, getUperAdmin
 
 
 def getAppId():
@@ -28,12 +29,15 @@ def getAuth():
     return oauth.WeChatOAuth(app_id=wxAppId, secret=wxAppsecret,
                              redirect_uri=current_app.config.get('WECHAT_URL') + current_app.config.get(
                                  'WECHAT_AUTH_REDIRECT_URL'), scope="snsapi_userinfo")
+
+
 def getAuthForAgent():
     wxAppId = getAppId()
     wxAppsecret = getAppSecret()
     return oauth.WeChatOAuth(app_id=wxAppId, secret=wxAppsecret,
                              redirect_uri=current_app.config.get('WECHAT_URL') + current_app.config.get(
                                  'WECHAT_AUTH_REDIRECT_URL_FOR_AGENT'), scope="snsapi_userinfo")
+
 
 def getClient():
     wxAppId = getAppId()
@@ -87,12 +91,14 @@ def sendTemplate(openid, title, timeStr, orderType, customerInfo, carType, detai
 
 
 def sendTemplateByOrder(order, description, type):
-    admin = User.query.all()
+    user = order.Serverstop.User
+    admin =getUperAdmin(user)
+    # admin = User.query.all()
     if order.Insure:
         insureName = order.Insure.name
     else:
         insureName = u"无"
-    detail = u"电话：" + order.Customer.phone + u" 选择服务点：" + order.Serverstop.name + u" 定位地点：" + order.location + u" 预约时间：" + order.book_at + u"保险：" +insureName
+    detail = u"电话：" + order.Customer.phone + u" 选择服务点：" + order.Serverstop.name + u" 定位地点：" + order.location + u" 预约时间：" + order.book_at + u"保险：" + insureName
 
     for i in admin:
         openid = i.openid
