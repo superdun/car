@@ -33,6 +33,10 @@
                 <div class="weui-wepay-detail__ft">{{ data.Customer.phone }}</div>
             </div>
             <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">服务点：</div>
+                <div class="weui-wepay-detail__ft">{{ data.Serverstop.name }}</div>
+            </div>
+            <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">时间：</div>
                 <div class="weui-wepay-detail__ft">{{ data.created_at }}</div>
             </div>
@@ -93,7 +97,7 @@
 
         <div class="weui-cell">
 
-            <div class="weui-cell__hd"><label for="" class="weui-label">收车时间</label></div>
+            <div class="weui-cell__hd"><label for="" class="weui-label">发车时间</label></div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="datetime-local" value="" placeholder="" id="depart_time">
             </div>
@@ -233,8 +237,8 @@
                 // return true; // 阻止默认行为，不使用默认的失败态
             }
         });
-        var carid="";
-        var outprovince="";
+        var carid = "";
+        var outprovince = "";
         $(function () {
             var $sliderTrack = $('.weui-slider__track'),
                 $sliderHandler = $('.weui-slider__handler'),
@@ -265,13 +269,14 @@
             ;
         });
         $('#carCode').on('click', function () {
+
             weui.picker([
 
                 {% for c in car %}
-                {
-                    label: {{ c.name }},
-                    value: {{ c.id }}
-                },
+                    {
+                        label: "{{ c.name }}",
+                        value: {{ c.id }}
+                    },
                 {% endfor %}
             ], {
                 onChange: function (result) {
@@ -338,12 +343,12 @@
                         }
                         if (result['status'] == 'error') {
                             alert('权限错误');
-{#                            window.location = "{{url_for('web.selectCar')}}"#}
+                            {#                            window.location = "{{url_for('web.selectCar')}}"#}
                         }
-{#                        if (result['status'] == 'alert') {#}
-{#                            alert(result['msg']);#}
-{##}
-{#                        }#}
+                        {#                        if (result['status'] == 'alert') {#}
+                        {#                            alert(result['msg']);#}
+                        {##}
+                        {#                        }#}
                     }
 
                 })
