@@ -259,6 +259,7 @@ class Preferential(db.Model):
     weekend = db.Column(db.Integer)
     start_at = db.Column(db.DateTime)
     end_at = db.Column(db.DateTime)
+    newpricecut = db.Column(db.Integer)
     def __repr__(self):
         return self.name
 class Insure(db.Model):

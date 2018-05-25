@@ -180,7 +180,7 @@ def getOrderApi():
         serverstop = None
     import datetime as dt
     from ..modules.Limit import dateCounvert
-
+    book_at = "2018-05-27T08:30:45"
     if not book_at:
         book_at = ""
     else:
@@ -324,6 +324,7 @@ def getPreferential():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
     book_at = request.form.get("book_at")
+    book_at = "2018-05-27T08:30:45"
     if not book_at:
         book_at = ""
     if (not carTypeId) or (not count):
