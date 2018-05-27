@@ -63,8 +63,9 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
     isprefer = False
     preferName = ""
     preferId = []
+    tmpprice = ct.price
     for prefer in prefers:
-        tmpprice = ct.price
+
         hasCurrentPrefer = False
         if prefer:
             if prefer.status == "normal" and checkOldUser(openid,prefer) and checkWeekDay(prefer,book_at,count) and checkDateRange(prefer,book_at,count):
@@ -73,9 +74,9 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
                     if count >= prefer.mincount:
                         isprefer = True
                         hasCurrentPrefer = True
-                        cutfee = tmpprice
+                        cutfee = cutfee+tmpprice
                         if prefer.multicount == 1:
-                            cutfee = cutfee * count
+                            cutfee = cutfee+cutfee * count
                         if prefer.maxcutfee:
                             if cutfee > prefer.maxcutfee:
                                 cutfee = prefer.maxcutfee
@@ -96,12 +97,12 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
                     if prefer.multicount == 1:
                         isprefer = True
                         hasCurrentPrefer = True
-                        cutfee = newfee * (1.0 - prefer.discount)
+                        cutfee = cutfee+newfee * (1.0 - prefer.discount)
 
                     else:
                         isprefer = True
                         hasCurrentPrefer = True
-                        cutfee = tmpprice * (1.0 - prefer.discount)
+                        cutfee = cutfee+tmpprice * (1.0 - prefer.discount)
 
 
             if hasCurrentPrefer:
