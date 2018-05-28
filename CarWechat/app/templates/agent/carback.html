@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "agentbase.html" %}
 {% block css %}
     <style type="text/css">
         .container {
@@ -325,7 +325,11 @@
 
                         if (result['status'] == 'ok') {
                             alert('信息录入成功');
-                            window.location = "{{url_for('agentweb.order')}}"
+                            if (isaccident == "1") {
+                                window.location = "{{url_for('agentweb.accident')}}"+"?orderid="+"{{ data.id }}"+"&carid="+"{{ data.Car.id }}"
+                            } else {
+                                window.location = "{{url_for('agentweb.order')}}"
+                            }
                         }
                         if (result['status'] == 'error') {
                             alert('权限错误');

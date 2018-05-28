@@ -17,6 +17,7 @@ agentapi = Blueprint('agentapi', __name__)
 
 
 @agentapi.route('/depart', methods=['POST'])
+@login_required
 def departApi():
     depart_time = request.form.get("depart_time")
     oilbefore = request.form.get("oilbefore")
@@ -34,6 +35,7 @@ def departApi():
         return jsonify({"status": "lacked"})
     carid = int(carid)
     orderid = int(orderid)
+
     try:
         import AgentWeb
         user = AgentWeb.getAdmin(current_user.openid)
@@ -58,6 +60,7 @@ def departApi():
 
 
 @agentapi.route('/back', methods=['POST'])
+@login_required
 def backApi():
     back_time = request.form.get("back_time")
     oilafter = request.form.get("oilafter")
@@ -72,6 +75,7 @@ def backApi():
         back_time = dateCounvert(back_time)
     if not carid or not oilafter or not isaccident or not kmafter:
         return jsonify({"status": "lacked"})
+
     carid = int(carid)
     orderid = int(orderid)
     try:
@@ -94,3 +98,55 @@ def backApi():
         return jsonify({"status": "ok"})
     else:
         return jsonify({"status": "error"})
+
+
+@agentapi.route('/accident', methods=['POST'])
+@login_required
+def accidentApi():
+    carid = request.form.get("carid")
+    created_at = request.form.get("created_at")
+    theircarcode = request.form.get("theircarcode")
+    isureaompany = request.form.get("isureaompany")
+    isureprice = request.form.get("isureprice")
+    theirprice = request.form.get("theirprice")
+    repaircompany = request.form.get("repaircompany")
+    orderid = request.form.get("orderid")
+    if not created_at:
+        created_at = datetime.now()
+    else:
+        from ..modules.Limit import dateCounvert
+        created_at = dateCounvert(created_at)
+    if not carid or not isureaompany or not isureprice or not repaircompany:
+        return jsonify({"status": "lacked"})
+
+    carid = int(carid)
+    if orderid:
+        orderid = int(orderid)
+    if isureprice:
+        isureprice = float(isureprice)
+    if theirprice:
+        theirprice = float(theirprice)
+    try:
+        import AgentWeb
+        user = AgentWeb.getAdmin(current_user.openid)
+    except:
+        return jsonify({"status": "error"})
+
+    accident = Accident(carid=carid, created_at=created_at, theircarcode=theircarcode, isureaompany=isureaompany,
+                        isureprice=isureprice,theirprice=theirprice,repaircompany=repaircompany,orderid=orderid,userid=user.id)
+    db.session.add(accident)
+    db.session.commit()
+    return jsonify({"status": "ok"})
+
+@agentapi.route('/carsbycartype', methods=['POST'])
+@login_required
+def carsbycartypeApi():
+    cartypeid = request.form.get("cartypeid")
+    if not cartypeid:
+        return jsonify([])
+
+    cars = Cartype.query.filter_by(id=cartypeid).first().cars
+    result = []
+    for i in cars:
+        result.append({'value':i.id,'label':i.name})
+    return jsonify(result)

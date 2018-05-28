@@ -164,3 +164,45 @@ def orderDetail(id):
         else:
             return render_template("agent/depart.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
                                    orderConfig=orderConfig, car=car)
+
+@agentweb.route('/accident')
+@flask_login.login_required
+def accident():
+    try:
+        user = getAdmin(current_user.openid)
+    except:
+        return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
+    if current_user.is_authenticated and user:
+        orderid = request.args.get("orderid")
+        carid = request.args.get("carid")
+        car = Car.query.filter_by(id=carid).first()
+        cartypes = Cartype.query.all()
+        return render_template("agent/accident.html",car=car,orderid=orderid,cartypes = cartypes)
+    else:
+        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
+
+@agentweb.route('/move')
+@flask_login.login_required
+def move():
+    try:
+        user = getAdmin(current_user.openid)
+    except:
+        return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
+    if current_user.is_authenticated and user:
+
+        return render_template("agent/move.html")
+    else:
+        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
+
+@agentweb.route('/apply')
+@flask_login.login_required
+def apply():
+    try:
+        user = getAdmin(current_user.openid)
+    except:
+        return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
+    if current_user.is_authenticated and user:
+
+        return render_template("agent/apply.html")
+    else:
+        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
