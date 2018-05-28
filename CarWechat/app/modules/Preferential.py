@@ -5,7 +5,7 @@ from .Limit import dateCounvert
 def checkWeekDay(prefer,book_at,count):
     isWeekend = False
     isWeekDay = False
-    for i in range(count+1):
+    for i in range(1,count+1):
         tmpDT = book_at + datetime.timedelta(days=i)
         if tmpDT.weekday() in (4, 5, 6):
             isWeekend = True
@@ -21,7 +21,7 @@ def checkWeekDay(prefer,book_at,count):
 
 def checkDateRange(prefer,book_at,count):
     if prefer.start_at and  prefer.end_at:
-        for i in range(count + 1):
+        for i in range(1,count + 1):
             tmpDT = book_at + datetime.timedelta(days=i)
             if tmpDT >= prefer.start_at and tmpDT <= prefer.end_at:
                 return True
@@ -30,7 +30,7 @@ def checkDateRange(prefer,book_at,count):
     return False
 def getDayCount(prefer,book_at,count):
     result = {"weekday":0,"weekend":0}
-    for i in range(count+1):
+    for i in range(1,count+1):
         tmpDT = book_at + datetime.timedelta(days=i)
         if tmpDT.weekday() in (5, 6):
             result['weekend'] = result['weekend']+1
