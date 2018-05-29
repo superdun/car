@@ -7,7 +7,7 @@ def checkWeekDay(prefer,book_at,count):
     isWeekDay = False
     for i in range(1,count+1):
         tmpDT = book_at + datetime.timedelta(days=i)
-        if tmpDT.weekday() in (4, 5, 6):
+        if tmpDT.weekday() in ( 5, 6):
             isWeekend = True
         else:
             isWeekDay = True
