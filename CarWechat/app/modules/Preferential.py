@@ -45,6 +45,8 @@ def checkOldUser(openid,prefer):
             isOld = True
     if  prefer.justnew == 1 and isOld:
         return False
+    if prefer.justnew == -1 and not isOld:
+        return False
     else:
         return True
 def getFees(cartypeId, count, totalFee, openid,book_at):
@@ -90,14 +92,22 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
                         hasCurrentPrefer = True
                         if prefer.weekend==1:
                             cutfee = cutfee+prefer.newpricecut*days["weekend"]
-                        else:
+                        elif prefer.weekday==1:
                             cutfee = cutfee+prefer.newpricecut * days["weekday"]
+                        else:
+                            cutfee = cutfee+prefer.newpricecut*count
 
                 if prefer.discount:
                     if prefer.multicount == 1:
                         isprefer = True
                         hasCurrentPrefer = True
-                        cutfee = cutfee+newfee * (1.0 - prefer.discount)
+                        if prefer.weekend==1:
+                            cutfee = cutfee + tmpprice * (1.0 - prefer.discount) * days["weekend"]
+                        elif prefer.weekday == 1:
+                            cutfee = cutfee + tmpprice * (1.0 - prefer.discount) * days["weekday"]
+                        else:
+                            cutfee = cutfee + tmpprice * (1.0 - prefer.discount) * count
+
 
                     else:
                         isprefer = True

@@ -172,21 +172,21 @@
         }
         $("#book_at").change(function () {
             getPrefer();
-            setSum();
+{#            setSum();#}
             $("#sum").css("color", 'red');
         });
         $('.js-numstepper').numStepper();
 
         $('body').on('change.numstep', '.js-numstepper', function (event, mode, value, valueOld) {
             getPrefer();
-            setSum();
+{#            setSum();#}
             $("#sum").css("color", 'red');
         });
         function setInsure(obj) {
             setSum();
         }
-        function setSum() {
-            var v = $("#count").val() * ($("#price").text() * 1 + $('input[name="radio1"]:checked').attr("price") / 100) - Math.abs($("#cutfee").text() * 1);
+        function setSum(v) {
+{#            var v = (100*($("#count").val() * ($("#price").text() * 1.0 + $('input[name="radio1"]:checked').attr("price") / 100.0)) - Math.abs($("#cutfee").text() * 100))/100;#}
             $("#totalfee-top").html('￥' + v);
             $("#sum").html(v)
         }
@@ -213,7 +213,7 @@
                         $("#cutfee").text(data["cutfee"]).css("color", 'black');
                         $("#oldfee").text(data["oldfee"] / 100);
                     }
-
+                    setSum(data["newfee"]/100);
 
                 }
 
@@ -299,7 +299,7 @@
                     onConfirm: function (result) {
                         $('#count').val(result[0]['value']);
                         getPrefer();
-                        setSum();
+{#                        setSum();#}
                         $('#sum').css("color", 'red');
                     }
                 });
@@ -336,7 +336,7 @@
 
             $("#count").val(1);
             getPrefer();
-            setSum();
+{#            setSum();#}
             $('#locpicker').val('{{ serverstop[0].name }}');
             serverstop = {{ serverstop[0].id }};
         });
