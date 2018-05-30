@@ -7,141 +7,47 @@
     </style>
 {% endblock %}
 {% block content %}
-    <div class="weui-wepay-details">
-        <div class="weui-wepay-details__hd">
-            <div class="weui-wepay-details__state">
-                <h2 class="weui-wepay-details__title">
-                    待发车</h2>
-                <p class="weui-wepay-details__desc">￥{{ data.totalfee/100 }}</p>
-            </div>
-        </div>
-        <div class="weui-wepay-details__bd">
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">单号：</div>
-                <div class="weui-wepay-detail__ft">{{ data.tradeno |cutstring }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">代理：</div>
-                <div class="weui-wepay-detail__ft">{{ data.Serverstop.User.name }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">客户：</div>
-                <div class="weui-wepay-detail__ft">{{ data.Customer.name }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">客户电话：</div>
-                <div class="weui-wepay-detail__ft">{{ data.Customer.phone }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">服务点：</div>
-                <div class="weui-wepay-detail__ft">{{ data.Serverstop.name }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">时间：</div>
-                <div class="weui-wepay-detail__ft">{{ data.created_at }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">支付状态：</div>
-                <div class="weui-wepay-detail__ft">{{ orderConfig[data.status][0] }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">车型：</div>
-                <div class="weui-wepay-detail__ft">{{ data.Cartype.name }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">车牌：</div>
-                <div class="weui-wepay-detail__ft">{{ data.Car.name }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">天数：</div>
-                <div class="weui-wepay-detail__ft">{{ data.count }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">折扣：</div>
-                <div class="weui-wepay-detail__ft">-￥{{ data.cutfee/100 }}</div>
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">保险：</div>
-                {% if data.Insure %}
-                    <div class="weui-wepay-detail__ft">{{ data.Insure.name }}:￥{{ data.insurefee/100 }}</div>
-                {% else %}
-                    <div class="weui-wepay-detail__ft">无</div>
-                {% endif %}
-            </div>
-            <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">总价：</div>
-                <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ data.totalfee/100 }}</div>
-            </div>
-
-        </div>
-        {#        {% if data.status=="ok" %}#}
-        {#            <div class="weui-wepay-details__ft">#}
-        {#                <a href="javascript:;" class="weui-btn weui-btn_primary" id="refund">申请退款</a>#}
-        {#            </div>#}
-        {##}
-        {#        {% endif %}#}
-    </div>
-    <div class="weui-cells__title">发车登记</div>
+    <div class="weui-cells__title"> 用车申请</div>
     <div class="weui-cells weui-cells_form">
 
+        <div class="weui-cell">
+            <div class="weui-cell__hd">
+                <label class="weui-label">车型</label>
+            </div>
+            <div class="weui-cell__bd">
+                <input class="weui-input" type="text" placeholder="选择车型" id="carType"
+                       readonly value="">
+            </div>
+        </div>
         <div class="weui-cell">
             <div class="weui-cell__hd">
                 <label class="weui-label">车牌号</label>
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="text" placeholder="选择车牌号" id="carCode"
-                       readonly>
-            </div>
-        </div>
-
-
-        <div class="weui-cell">
-
-            <div class="weui-cell__hd"><label for="" class="weui-label">发车时间</label></div>
-            <div class="weui-cell__bd">
-                <input class="weui-input" type="datetime-local" value="" placeholder="" id="depart_time">
-            </div>
-        </div>
-
-        <div class="weui-cell">
-            <div class="weui-cell__hd"><label class="weui-label">发车油量</label></div>
-            <div class="weui-cell__bd">
-                <div class="weui-slider-box">
-                    <div class="weui-slider">
-                        <div class="weui-slider__inner">
-                            <div style="width: 50%;" class="weui-slider__track"></div>
-                            <div style="left: 50%;" class="weui-slider__handler"></div>
-                        </div>
-                    </div>
-                    <div class="weui-slider-box__value" id="oil">5</div>
-                </div>
+                       readonly value="">
             </div>
         </div>
         <div class="weui-cell">
-            <div class="weui-cell__hd"><label class="weui-label">发车公里 </label></div>
 
+            <div class="weui-cell__hd"><label for="" class="weui-label">时间</label></div>
             <div class="weui-cell__bd">
-                <input id="kmbefore" class="weui-input" type="text" placeholder="发车公里/km"/>
+                <input class="weui-input" type="datetime-local" value="" placeholder="" id="created_at">
             </div>
-
         </div>
-        <div class="weui-cell">
-            <div class="weui-cell__hd"><label class="weui-label">合同编号 </label></div>
 
-            <div class="weui-cell__bd">
-                <input id="contractId" class="weui-input" type="text" placeholder="请输入合同编号"/>
-            </div>
-
-        </div>
         <div class="weui-cell">
             <div class="weui-cell__hd">
-                <label class="weui-label">是否出省</label>
+                <label class="weui-label">用途</label>
             </div>
             <div class="weui-cell__bd">
-                <input class="weui-input" type="text" placeholder="是否出省" id="isOutProvince"
-                       readonly>
+                <input class="weui-input" type="text" placeholder="用途" id="comment"
+                       >
             </div>
         </div>
+
+
+
         {#        <div class="weui-uploader">#}
         {#            <div class="weui-uploader__hd">#}
         {#                <p class="weui-uploader__title">存证上传</p>#}
@@ -165,7 +71,7 @@
 
 
     <div class="weui-btn-area">
-        <a class="weui-btn weui-btn_primary" href="javascript:" id="depart">确定</a>
+        <a class="weui-btn weui-btn_primary" href="javascript:" id="apply">确定</a>
     </div>
 
 
@@ -238,47 +144,53 @@
             }
         });
         var carid = "";
-        var outprovince = "";
-        $(function () {
-            var $sliderTrack = $('.weui-slider__track'),
-                $sliderHandler = $('.weui-slider__handler'),
-                $sliderValue = $('.weui-slider-box__value');
+        var cartype = "";
+        var cars = [];
 
-            var totalLen = $('.weui-slider__inner').width(),
-                startLeft = 0,
-                startX = 0;
-
-            $sliderHandler
-                .on('touchstart', function (e) {
-                    startLeft = parseInt($sliderHandler.css('left')) * totalLen / 100;
-                    startX = e.changedTouches[0].clientX;
-                })
-                .on('touchmove', function (e) {
-                    var dist = startLeft + e.changedTouches[0].clientX - startX,
-                        percent;
-                    dist = dist < 0 ? 0 : dist > totalLen ? totalLen : dist;
-                    percent = parseInt(dist / totalLen * 100);
-                    $sliderTrack.css('width', percent + '%');
-                    $sliderHandler.css('left', percent + '%');
-
-                    $sliderValue.text(Math.ceil(percent * 8 / 100));
+        function getcars(id) {
 
 
-                    e.preventDefault();
-                })
-            ;
-        });
-        $('#carCode').on('click', function () {
+            var formData = new FormData();
+
+            formData.append('cartypeid', id);
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/agent/carsbycartype',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    cars = result;
+
+                }
+
+            })
+
+        }
+        $('#carType').on('click', function () {
 
             weui.picker([
 
-                {% for c in car %}
+                {% for ct in cartypes %}
                     {
-                        label: "{{ c.name }}",
-                        value: {{ c.id }}
+                        label: "{{ ct.name }}",
+                        value: {{ ct.id }}
                     },
                 {% endfor %}
             ], {
+                onChange: function (result) {
+
+                },
+                onConfirm: function (result) {
+                    $('#carType').val(result[0]['label']);
+                    cartype = result[0]['value'];
+                    getcars(cartype)
+                }
+            });
+        });
+        $('#carCode').on('click', function () {
+
+            weui.picker(cars, {
                 onChange: function (result) {
 
                 },
@@ -288,45 +200,21 @@
                 }
             });
         });
-        $('#isOutProvince').on('click', function () {
-            weui.picker([
-
-                {
-                    label: '是',
-                    value: 1
-                }, {
-                    label: '否',
-                    value: 0
-                }
-
-            ], {
-                onChange: function (result) {
-
-                },
-                onConfirm: function (result) {
-                    $('#isOutProvince').val(result[0]['label']);
-                    outprovince = result[0]['value'];
-                }
-            });
-        });
         $(document).ready(function () {
 
-            $('#depart').click(function () {
+            $('#apply').click(function () {
                 {#                if (!$("#weuiAgree").prop("checked")) {#}
                 {#                    return#}
                 {#                }#}
 
                 var formData = new FormData();
 
-                formData.append('depart_time', $('#depart_time').val());
-                formData.append('oilbefore', parseInt($('#oil').parent().parent().text()) * 1);
-                formData.append('contractId', $('#contractId').val());
-                formData.append('isOutProvince', outprovince);
                 formData.append('carid', carid);
-                formData.append('orderid', {{ data.id }});
-                formData.append('kmbefore', $('#kmbefore').val());
+                formData.append('comment', $('#comment').val());
+                formData.append('created_at', $('#created_at').val());
+
                 $.ajax({
-                    url: window.location.protocol + "//" + window.location.host + '/wx/api/agent/depart',
+                    url: window.location.protocol + "//" + window.location.host + '/wx/api/agent/apply',
                     type: 'POST',
                     data: formData,
                     contentType: false,

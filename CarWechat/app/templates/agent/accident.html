@@ -9,8 +9,9 @@
 {% block content %}
     <div class="weui-cells__title"> 事故登记</div>
     <div class="weui-cells weui-cells_form">
-        <input class="weui-input" type="text" id="orderid" hidden value="{{ orderid }}">
-        <input class="weui-input" type="text" id="carid" hidden value="{{ car.id }}">
+
+        <input class="weui-input" type="text" id="orderid" hidden value="{{ orderid if orderid }}">
+        <input class="weui-input" type="text" id="carid" hidden value="{{ car.id if car }}">
 
         <div class="weui-cell">
             <div class="weui-cell__hd">
@@ -18,7 +19,7 @@
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="text" placeholder="选择车型" id="carType"
-                       readonly value="{{ car.Cartype.name }}">
+                       readonly value="{{ car.Cartype.name if car }}">
             </div>
         </div>
         <div class="weui-cell">
@@ -27,7 +28,15 @@
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="text" placeholder="选择车牌号" id="carCode"
-                       readonly value="{{ car.name }}">
+                       readonly value="{{ car.name if car }}">
+            </div>
+        </div>
+
+        <div class="weui-cell">
+
+            <div class="weui-cell__hd"><label for="" class="weui-label">时间</label></div>
+            <div class="weui-cell__bd">
+                <input class="weui-input" type="datetime-local" value="" placeholder="" id="created_at">
             </div>
         </div>
 
@@ -37,7 +46,7 @@
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="text" placeholder="对方车牌号" id="theircarcode"
-                       >
+                >
             </div>
         </div>
         <div class="weui-cell">
@@ -46,7 +55,7 @@
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="text" placeholder="保险公司" id="isureaompany"
-                       >
+                >
             </div>
         </div>
         <div class="weui-cell">
@@ -55,7 +64,7 @@
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="number" placeholder="理赔金额" id="isureprice"
-                       >
+                >
             </div>
         </div>
         <div class="weui-cell">
@@ -64,7 +73,7 @@
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="text" placeholder="对方车辆维修费用" id="theirprice"
-                       >
+                >
             </div>
         </div>
         <div class="weui-cell">
@@ -73,7 +82,7 @@
             </div>
             <div class="weui-cell__bd">
                 <input class="weui-input" type="text" placeholder="修车单位" id="repaircompany"
-                       >
+                >
             </div>
         </div>
 
@@ -172,8 +181,8 @@
                 // return true; // 阻止默认行为，不使用默认的失败态
             }
         });
-        var carid = "{{ car.id }}";
-        var cartype = "{{ car.Cartype.id }}";
+        var carid = "{{ car.id if car }}";
+        var cartype = "{{ car.Cartype.id if car}}";
         var cars = [];
         function getcars(id) {
 
@@ -188,7 +197,7 @@
                 contentType: false,
                 processData: false,
                 success: function (result) {
-                   cars = result;
+                    cars = result;
 
                 }
 
@@ -244,6 +253,7 @@
                 formData.append('isureprice', $('#isureprice').val());
                 formData.append('theirprice', $('#theirprice').val());
                 formData.append('repaircompany', $('#repaircompany').val());
+                formData.append('created_at', $('#created_at').val());
                 $.ajax({
                     url: window.location.protocol + "//" + window.location.host + '/wx/api/agent/accident',
                     type: 'POST',

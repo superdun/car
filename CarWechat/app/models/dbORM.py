@@ -146,6 +146,8 @@ class Serverstop(db.Model):
     lng = db.Column(db.Float)
     orders = db.relationship('Order', backref='Serverstop', lazy='dynamic')
     userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    mfroms = db.relationship('Move', backref='fromServerstop', lazy='dynamic',foreign_keys="Move.fromid")
+    mtos = db.relationship('Move', backref='toServerstop', lazy='dynamic',foreign_keys="Move.toid")
     def __repr__(self):
         return self.name
 
@@ -238,6 +240,8 @@ class User(db.Model):
     down = db.relationship('User', foreign_keys=upid)
     serverstop = db.relationship('Serverstop', backref='User', lazy='dynamic')
     accidents = db.relationship('Accident', backref='User', lazy='dynamic')
+    moves = db.relationship('Move', backref='User', lazy='dynamic')
+    applies = db.relationship('Apply', backref='User', lazy='dynamic')
     def __repr__(self):
         return self.name
 
@@ -302,7 +306,7 @@ class Move(db.Model):
     toid = db.Column(db.Integer, db.ForeignKey('serverstop.id'))
     fromkm = db.Column(db.Integer)
     tokm = db.Column(db.Integer)
-
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
         return self.id
@@ -312,7 +316,7 @@ class Apply(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now())
     carid = db.Column(db.Integer, db.ForeignKey('car.id'))
     comment = db.Column(db.String(800))
-
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
         return self.id

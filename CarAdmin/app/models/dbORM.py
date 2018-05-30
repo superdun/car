@@ -68,6 +68,7 @@ class Car(db.Model):
     mendhistories = db.relationship('Mendhistory', backref='Car', lazy='dynamic')
     status = db.Column(db.String(80), default="pending")
     orders = db.relationship('Order', backref='Car', lazy='dynamic')
+    accidents = db.relationship('Accident', backref='Car', lazy='dynamic')
     def __repr__(self):
         return self.name
 
@@ -133,7 +134,7 @@ class Mendhistory(db.Model):
     type = db.Column(db.String(80))
     price = db.Column(db.String(80))
     status = db.Column(db.String(80))
-
+    location = db.Column(db.String(80))
     def __repr__(self):
         return "%s %s" % (self.created_at, self.type)
 class Serverstop(db.Model):
@@ -145,6 +146,8 @@ class Serverstop(db.Model):
     lng = db.Column(db.Float)
     orders = db.relationship('Order', backref='Serverstop', lazy='dynamic')
     userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    mfroms = db.relationship('Move', backref='fromServerstop', lazy='dynamic',foreign_keys="Move.fromid")
+    mtos = db.relationship('Move', backref='toServerstop', lazy='dynamic',foreign_keys="Move.toid")
     def __repr__(self):
         return self.name
 
@@ -236,6 +239,9 @@ class User(db.Model):
     upid = db.Column(db.Integer, db.ForeignKey('user.id'))
     down = db.relationship('User', foreign_keys=upid)
     serverstop = db.relationship('Serverstop', backref='User', lazy='dynamic')
+    accidents = db.relationship('Accident', backref='User', lazy='dynamic')
+    moves = db.relationship('Move', backref='User', lazy='dynamic')
+    applies = db.relationship('Apply', backref='User', lazy='dynamic')
     def __repr__(self):
         return self.name
 
@@ -271,6 +277,52 @@ class Insure(db.Model):
     cartypes = db.relationship("Cartype", secondary="insurecartype", backref='Insure', lazy='dynamic')
     def __repr__(self):
         return self.name
+
+class Accident(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('car.id'))
+    img1 = db.Column(db.String(800))
+    img2 = db.Column(db.String(800))
+    img3 = db.Column(db.String(800))
+    img4 = db.Column(db.String(800))
+    img5 = db.Column(db.String(800))
+    img6 = db.Column(db.String(800))
+    repaircompany = db.Column(db.String(800))
+    theircarcode = db.Column(db.String(800))
+    isureaompany = db.Column(db.String(800))
+    isureprice = db.Column(db.Float)
+    theirprice = db.Column(db.Float)
+    orderid = db.Column(db.Integer, db.ForeignKey('order.id'))
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    def __repr__(self):
+        return self.id
+
+class Move(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('car.id'))
+    fromid = db.Column(db.Integer, db.ForeignKey('serverstop.id'))
+    toid = db.Column(db.Integer, db.ForeignKey('serverstop.id'))
+    fromkm = db.Column(db.Integer)
+    tokm = db.Column(db.Integer)
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return self.id
+
+class Apply(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('car.id'))
+    comment = db.Column(db.String(800))
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+    def __repr__(self):
+        return self.id
+
+
+
 
 class Userrole(db.Model):
     id = db.Column(db.Integer, primary_key=True)

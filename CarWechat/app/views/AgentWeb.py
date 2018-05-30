@@ -189,8 +189,9 @@ def move():
     except:
         return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
     if current_user.is_authenticated and user:
-
-        return render_template("agent/move.html")
+        cartypes = Cartype.query.all()
+        serverstops = Serverstop.query.all()
+        return render_template("agent/move.html",cartypes = cartypes,serverstops=serverstops)
     else:
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
 
@@ -202,7 +203,7 @@ def apply():
     except:
         return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
     if current_user.is_authenticated and user:
-
-        return render_template("agent/apply.html")
+        cartypes = Cartype.query.all()
+        return render_template("agent/apply.html",cartypes = cartypes)
     else:
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})

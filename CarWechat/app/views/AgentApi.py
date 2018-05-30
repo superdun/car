@@ -138,6 +138,71 @@ def accidentApi():
     db.session.commit()
     return jsonify({"status": "ok"})
 
+
+@agentapi.route('/move', methods=['POST'])
+@login_required
+def moveApi():
+    carid = request.form.get("carid")
+    created_at = request.form.get("created_at")
+    fromid = request.form.get("fromid")
+    toid = request.form.get("toid")
+    fromkm = request.form.get("fromkm")
+    tokm = request.form.get("tokm")
+
+    if not created_at:
+        created_at = datetime.now()
+    else:
+        from ..modules.Limit import dateCounvert
+        created_at = dateCounvert(created_at)
+    if not carid or not fromid or not toid or not fromkm or not tokm:
+        return jsonify({"status": "lacked"})
+
+    carid = int(carid)
+    fromid = int(fromid)
+    toid = int(toid)
+    fromkm = int(fromkm)
+    tokm = int(tokm)
+    try:
+        import AgentWeb
+        user = AgentWeb.getAdmin(current_user.openid)
+    except:
+        return jsonify({"status": "error"})
+
+    move = Move(carid=carid, created_at=created_at, fromid=fromid, toid=toid,
+                    fromkm=fromkm,tokm=tokm,userid=user.id)
+    db.session.add(move)
+    db.session.commit()
+    return jsonify({"status": "ok"})
+
+@agentapi.route('/apply', methods=['POST'])
+@login_required
+def applyApi():
+    carid = request.form.get("carid")
+    created_at = request.form.get("created_at")
+    comment = request.form.get("comment")
+
+
+    if not created_at:
+        created_at = datetime.now()
+    else:
+        from ..modules.Limit import dateCounvert
+        created_at = dateCounvert(created_at)
+    if not carid or not comment :
+        return jsonify({"status": "lacked"})
+
+    carid = int(carid)
+
+    try:
+        import AgentWeb
+        user = AgentWeb.getAdmin(current_user.openid)
+    except:
+        return jsonify({"status": "error"})
+
+    apply = Apply(carid=carid, created_at=created_at, comment=comment,userid=user.id)
+    db.session.add(apply)
+    db.session.commit()
+    return jsonify({"status": "ok"})
+
 @agentapi.route('/carsbycartype', methods=['POST'])
 @login_required
 def carsbycartypeApi():

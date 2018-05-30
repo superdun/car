@@ -49,7 +49,9 @@ def dashboard():
     # admin.add_view(OrderAdminView(name=u'订单管理', endpoint='refund'))
     admin.add_view(InsureView(Insure, db.session, name=u"保险管理"))
     admin.add_view(LimitView(Limit, db.session, name=u"限制管理"))
-
+    admin.add_view(AccidentView(Accident, db.session, name=u"事故"))
+    admin.add_view(MoveView(Move, db.session, name=u"调车"))
+    admin.add_view(ApplyView(Apply, db.session, name=u"用车"))
 
 
 class UploadWidget(form.ImageUploadInput):
@@ -94,6 +96,16 @@ class AdminModel(ModelView):
 
 
 # super admin models
+class AccidentView(AdminModel):
+    can_edit = False
+    column_labels = dict(Car=u"车牌",User=u"管理员",repaircompany=u"维修公司",theircarcode=u"对方车牌",isureaompany=u"保险公司",isureprice=u"理赔金额",theirprice=u"对方修车费用",created_at=u'创建时间')
+    column_exclude_list = ('img1','img2','img3','img4','img5','img6')
+class MoveView(AdminModel):
+    can_edit = False
+    column_labels = dict(created_at=u'创建时间',User=u"管理员",Car=u'车牌',fromServerstop=u'从',toServerstop=u'到',fromkm=u'发车里程',tokm=u'到达里程')
+class ApplyView(AdminModel):
+    can_edit = False
+    column_labels = dict(created_at=u'创建时间',User=u"管理员",Car=u'车牌',comment=u'用途')
 class CarView(AdminModel):
     # Override displayed fields
     # column_list = ("title", "create_at", "view_count",
