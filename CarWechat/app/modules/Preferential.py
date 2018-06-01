@@ -45,6 +45,8 @@ def checkOldUser(openid,prefer):
             isOld = True
     if  prefer.justnew == 1 and isOld:
         return False
+    if prefer.justnew == -1 and not isOld:
+        return False
     else:
         return True
 def getFees(cartypeId, count, totalFee, openid,book_at):
