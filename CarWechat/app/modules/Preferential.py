@@ -7,7 +7,7 @@ def checkWeekDay(prefer,book_at,count):
     isWeekDay = False
     for i in range(1,count+1):
         tmpDT = book_at + datetime.timedelta(days=i)
-        if tmpDT.weekday() in ( 5, 6):
+        if tmpDT.weekday() in (4, 5, 6):
             isWeekend = True
         else:
             isWeekDay = True
@@ -21,7 +21,7 @@ def checkWeekDay(prefer,book_at,count):
 
 def checkDateRange(prefer,book_at,count):
     if prefer.start_at and  prefer.end_at:
-        for i in range(1,count + 1):
+        for i in range(0,count + 1):
             tmpDT = book_at + datetime.timedelta(days=i)
             if tmpDT >= prefer.start_at and tmpDT <= prefer.end_at:
                 return True
@@ -44,8 +44,6 @@ def checkOldUser(openid,prefer):
         if customer.olduser == 1:
             isOld = True
     if  prefer.justnew == 1 and isOld:
-        return False
-    if prefer.justnew == -1 and not isOld:
         return False
     else:
         return True
@@ -83,6 +81,13 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
                             if cutfee > prefer.maxcutfee:
                                 cutfee = prefer.maxcutfee
 
+                if  prefer.cutfee :
+                    isprefer = True
+                    hasCurrentPrefer = True
+                    cutfee = cutfee + prefer.cutfee
+                    if prefer.maxcutfee:
+                        if cutfee > prefer.maxcutfee:
+                            cutfee = prefer.maxcutfee
 
                 if prefer.newpricecut:
                     tmpprice = ct.price-prefer.newpricecut
@@ -92,22 +97,14 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
                         hasCurrentPrefer = True
                         if prefer.weekend==1:
                             cutfee = cutfee+prefer.newpricecut*days["weekend"]
-                        elif prefer.weekday==1:
-                            cutfee = cutfee+prefer.newpricecut * days["weekday"]
                         else:
-                            cutfee = cutfee+prefer.newpricecut*count
+                            cutfee = cutfee+prefer.newpricecut * days["weekday"]
 
                 if prefer.discount:
                     if prefer.multicount == 1:
                         isprefer = True
                         hasCurrentPrefer = True
-                        if prefer.weekend==1:
-                            cutfee = cutfee + tmpprice * (1.0 - prefer.discount) * days["weekend"]
-                        elif prefer.weekday == 1:
-                            cutfee = cutfee + tmpprice * (1.0 - prefer.discount) * days["weekday"]
-                        else:
-                            cutfee = cutfee + tmpprice * (1.0 - prefer.discount) * count
-
+                        cutfee = cutfee+newfee * (1.0 - prefer.discount)
 
                     else:
                         isprefer = True
