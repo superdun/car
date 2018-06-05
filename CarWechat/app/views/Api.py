@@ -174,10 +174,10 @@ def getOrderApi():
 
     insure = Insure.query.filter_by(id=insureid).first()
 
-    if serverstop:
+    if serverstop and serverstop.isnumeric():
         serverstop = int(serverstop)
     else:
-        serverstop = None
+        return jsonify({'status': 'error', 'code': 7, 'msg': "请选择最近的服务站"})
     import datetime as dt
     from ..modules.Limit import dateCounvert
     # book_at = "2018-05-27T08:30:45"
