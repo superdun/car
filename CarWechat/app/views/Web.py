@@ -168,13 +168,17 @@ def orderDetail(id):
             wxJSSDKConfig = getJSSDK(url)
             openId = current_user.openid
             order = Order.query.filter_by(id=id).first()
+            if order.ordertype=="continue":
+                order = Order.query.filter_by(id = order.sourceid).first()
+                id = order.id
             continueOrders = Order.query.filter_by(sourceid=id).filter_by(status="ok").all()
             if not order:
                 return returnError("未找到相关订单")
             OrderSumData=getOrderSumData(order,continueOrders)
             orderConfig = getOrderConfig()
             import json
-            if order.status == "waiting":
+
+            if order.status == "waiting" :
                 wxJSSDKPayConfig = json.loads(order.detail)
                 return render_template("car/repay.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
                                        wxJSSDKPayConfig=wxJSSDKPayConfig, wxJSSDKConfig=wxJSSDKConfig,
