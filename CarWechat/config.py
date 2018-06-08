@@ -21,3 +21,7 @@ VERIFYIDCODEURL = "http://aliyunverifyidcard.haoservice.com/idcard/VerifyIdcardv
 VERIFYIDCODE_APPCODE = "422c011beb6f4b1b96a8de7c3330b464"
 
 ORDER_LIMIT = 130
+
+SMS_URL = "dysmsapi.aliyuncs.com"
+SMS_REGION = "cn-hangzhou"
+SMS_PRODUCT_NAME = "Dysmsapi"
