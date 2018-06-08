@@ -52,6 +52,7 @@ def departApi():
         order.contractid = contractid
         order.currentcarid = carid
         order.kmbefore = kmbefore
+        order.orderstatus = "depart"
         db.session.add(order)
         db.session.commit()
         return jsonify({"status": "ok"})
@@ -84,6 +85,8 @@ def backApi():
     except:
         return jsonify({"status": "error"})
     order = Order.query.filter_by(id=orderid).first()
+    cartype = order.Cartype
+    cartype.count = cartype.count+1
     if current_user.is_authenticated and user and order:
         admins = AgentWeb.getDownerAdmin(user)
         if order.Serverstop.userid not in ([x.id for x in admins]):
@@ -93,7 +96,10 @@ def backApi():
 
         order.currentcarid = carid
         order.kmafter = kmafter
+        order.orderstatus = "finish"
         db.session.add(order)
+        db.session.add(cartype)
+
         db.session.commit()
         return jsonify({"status": "ok"})
     else:

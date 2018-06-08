@@ -31,7 +31,7 @@
     <div class="weui-wepay-details">
         <div class="weui-wepay-details__hd">
             <div class="weui-wepay-details__state">
-                <h2 class="weui-wepay-details__title">在线下单</h2>
+                <h2 class="weui-wepay-details__title">续租</h2>
                 <p class="weui-wepay-details__desc" id="totalfee-top">￥0.0</p>
             </div>
         </div>
@@ -57,7 +57,19 @@
                 <div class="weui-wepay-detail__bd">折扣金额/￥</div>
                 <div class="weui-wepay-detail__ft" id="cutfee"></div>
             </div>
-
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">保险</div>
+                <div class="weui-wepay-detail__ft" id="insure" price="{{ sourceOrder.Insure.price if sourceOrder.Insure else 0 }}">
+                    <a href="javascript:weui.alert('{{ sourceOrder.Insure.detail if sourceOrder.Insure else "无"}}');">{{ sourceOrder.Insure.name if sourceOrder.Insure else "无"}}
+                        ￥{{ sourceOrder.Insure.price/100 if sourceOrder.Insure else 0}}/天</a>
+                </div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">服务点</div>
+                <div class="weui-wepay-detail__ft" id="insure">
+                    {{ sourceOrder.Serverstop.name }}
+                </div>
+            </div>
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">总价/￥</div>
                 <div class="weui-wepay-detail__ft" id="sum">0</div>
@@ -77,57 +89,9 @@
                 </div>
             </div>
 
-            <div class="weui-cells__title">选择保险</div>
-            <div class="weui-cells weui-cells_radio">
-                <label class="weui-cell weui-check__label" for="x0">
-                    <div class="weui-cell__bd">
-                        <a href="">不选择保险</a>
-                    </div>
-                    <div class="weui-cell__ft">
-                        <input type="radio" class="weui-check" name="radio1" id="x0" checked="checked" value="-1"
-                               onchange="setInsure(this)" price="0">
-                        <span class="weui-icon-checked"></span>
-                    </div>
-                </label>
-                {% for ins in carData.insures %}
-                    <label class="weui-cell weui-check__label" for="x{{ loop.index }}">
-
-                        <div class="weui-cell__bd">
-                            <a href="javascript:weui.alert('{{ ins.detail }}');">{{ ins.name }}
-                                ￥{{ ins.price/100 }}/天</a>
-                        </div>
-                        <div class="weui-cell__ft">
-                            <input type="radio" name="radio1" class="weui-check" id="x{{ loop.index }}"
-                                   value="{{ ins.id }}" onchange="setInsure(this)" price="{{ ins.price }}">
-                            <span class="weui-icon-checked"></span>
-                        </div>
-                    </label>
-                {% endfor %}
-            </div>
 
         </div>
-        <div class="weui-cells__title">选择您要预约的时间</div>
-        <div class="weui-cells">
-            <div class="weui-cell">
 
-                <div class="weui-cell__hd"><label for="" class="weui-label">预约时间</label></div>
-                <div class="weui-cell__bd">
-                    <input class="weui-input" type="datetime-local" value="" placeholder="" id="book_at">
-                </div>
-            </div>
-        </div>
-        <div class="weui-cells__title">选择最近的服务站</div>
-        <div class="weui-cells">
-            <div class="weui-cell">
-                <div class="weui-cell__hd">
-                    <label class="weui-label">服务站选择</label>
-                </div>
-                <div class="weui-cell__bd">
-                    <input class="weui-input" type="text" placeholder="选择最近的服务站" id="locpicker"
-                           readonly>
-                </div>
-            </div>
-        </div>
 
         <label for="weuiAgree" class="weui-agree">
             <input id="weuiAgree" type="checkbox" class="weui-agree__checkbox">
@@ -170,11 +134,7 @@
 
             })
         }
-        $("#book_at").change(function () {
-            getPrefer();
-            {#            setSum();#}
-            $("#sum").css("color", 'red');
-        });
+
         $('.js-numstepper').numStepper();
 
         $('body').on('change.numstep', '.js-numstepper', function (event, mode, value, valueOld) {
@@ -187,15 +147,15 @@
         }
         function setSum(v) {
             {#            var v = (100*($("#count").val() * ($("#price").text() * 1.0 + $('input[name="radio1"]:checked').attr("price") / 100.0)) - Math.abs($("#cutfee").text() * 100))/100;#}
-            var value = v + ($("#count").val() * $('input[name="radio1"]:checked').attr("price") ) / 100.0;
-            $("#totalfee-top").html('￥' + v);
+            var value = v+($("#count").val()*$('#insure').attr("price") )/ 100.0;
+            $("#totalfee-top").html('￥' + value);
             $("#sum").html(value)
         }
         function getPrefer() {
             var formDataPrefer = new FormData();
             formDataPrefer.append('id', {{ carData.id }});
             formDataPrefer.append('count', $("#count").val());
-            formDataPrefer.append('book_at', $('#book_at').val());
+            formDataPrefer.append('book_at', "");
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/preferential',
                 type: 'POST',
@@ -231,8 +191,10 @@
             formData.append('count', $("#count").val());
             formData.append('location', loc);
             formData.append('serverstop', serverstop);
-            formData.append('insureid', $('input[name="radio1"]:checked').val() * 1);
-            formData.append('book_at', $('#book_at').val());
+            formData.append('insureid', "{{ sourceOrder.Insure.id }}" * 1);
+            formData.append('book_at', "");
+            formData.append('iscontinue', true);
+            formData.append('orderid', "{{ sourceOrder.id }}");
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/makeorder',
                 type: 'POST',
@@ -282,8 +244,8 @@
 
             })
         }
-        var serverstop;
-        var loc = "";
+        var serverstop = "{{ sourceOrder.Serverstop.id }}";
+        var loc="";
         var convertor = new BMap.Convertor();
         var myGeo = new BMap.Geocoder();
         $(document).ready(function () {
@@ -305,41 +267,11 @@
                     }
                 });
             });
-            $('#locpicker').on('click', function () {
-                weui.picker([
-                    {% for s in serverstop %}
-                        {
-                            label: '{{ s.name }}',
-                            value: {{ s.id }}
-                        },
-                    {% endfor %}
-                ], {
-                    onChange: function (result) {
 
-                    },
-                    onConfirm: function (result) {
-                        $('#locpicker').val(result[0]['label']);
-                        serverstop = result[0]['value']
-                    }
-                });
-            });
-
-
-            {#            var count = $("#count").spinner(#}
-            {#                {#}
-            {#                    change: function (event, ui) {#}
-            {#                        getPrefer();#}
-            {#                        setSum();#}
-            {#                        $("#count").css("color", 'red');#}
-            {#                    }#}
-            {#                }#}
-            {#            );#}
 
             $("#count").val(1);
             getPrefer();
-            {#            setSum();#}
-            {#            $('#locpicker').val('{{ serverstop[0].name }}');#}
-            {#            serverstop = {{ serverstop[0].id }};#}
+
         });
         translateCallback = function (data) {
             if (data.status === 0) {

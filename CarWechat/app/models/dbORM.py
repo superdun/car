@@ -195,6 +195,10 @@ class Order(db.Model):
     contractid = db.Column(db.String(800))
     kmbefore = db.Column(db.String(800))
     kmafter = db.Column(db.String(800))
+    orderstatus = db.Column(db.String(800))
+    ordertype = db.Column(db.String(800))
+    sourceid = db.Column(db.Integer)
+    hascontinue = db.Column(db.Integer, default=0)
     def __repr__(self):
         return self.tradeno
 

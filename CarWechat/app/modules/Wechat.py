@@ -38,6 +38,13 @@ def getAuthForAgent():
                              redirect_uri=current_app.config.get('WECHAT_URL') + current_app.config.get(
                                  'WECHAT_AUTH_REDIRECT_URL_FOR_AGENT'), scope="snsapi_userinfo")
 
+def getAuthForAgentOrder(orderid):
+    wxAppId = getAppId()
+    wxAppsecret = getAppSecret()
+    return oauth.WeChatOAuth(app_id=wxAppId, secret=wxAppsecret,
+                             redirect_uri=current_app.config.get('WECHAT_URL') + current_app.config.get(
+                                 'WECHAT_AUTH_REDIRECT_URL_FOR_AGENT_ORDER')+str(orderid), scope="snsapi_userinfo")
+
 
 def getClient():
     wxAppId = getAppId()
@@ -58,7 +65,7 @@ def getPay():
                          sandbox=sandbox)
 
 
-def sendTemplate(openid, title, timeStr, orderType, customerInfo, carType, detail):
+def sendTemplate(openid, title, timeStr, orderType, customerInfo, carType, detail,url=""):
     template_id = current_app.config.get("WECHAT_MSG_MODEL_ID")
     data = {
         "first": {
@@ -87,10 +94,10 @@ def sendTemplate(openid, title, timeStr, orderType, customerInfo, carType, detai
         }
     }
     wxClent = getClient()
-    wxClent.message.send_template(openid, template_id, data)
+    wxClent.message.send_template(openid, template_id, data,url=url )
 
 
-def sendTemplateByOrder(order, description, type):
+def sendTemplateByOrder(order, description, type,url=""):
     user = order.Serverstop.User
     admin =getUperAdmin(user)
     # admin = User.query.all()
@@ -99,9 +106,10 @@ def sendTemplateByOrder(order, description, type):
     else:
         insureName = u"无"
     detail = u"电话：" + order.Customer.phone + u" 选择服务点：" + order.Serverstop.name + u" 定位地点：" + order.location + u" 预约时间：" + order.book_at + u"保险：" + insureName
-
+    if order.ordertype=="continue":
+        type = type+u" 续租"
     for i in admin:
         openid = i.openid
         if openid:
             sendTemplate(openid, description, order.created_at.strftime("%Y-%m-%d %H:%M:%S"), type,
-                         order.Customer.name, order.Cartype.name + "*" + str(order.count), detail)
+                         order.Customer.name, order.Cartype.name + "*" + str(order.count), detail,url)

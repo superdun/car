@@ -8,6 +8,9 @@
         .collection-item {
             height: 150px;
         }
+    .green{
+        background-color: #4abb44!important;
+    }
     </style>
 {% endblock %}
 {% block content %}
@@ -15,7 +18,8 @@
         <div class="weui-wepay-lists__bd">
             <div class="weui-cells">
                 {% if data|count==0 %}
-                    <p style="color: gray;text-align: center">对不起，您还没有订单<a href="{{ url_for('web.selectCar') }}" style="text-align: center"> 去订车</a></p>
+                    <p style="color: gray;text-align: center">对不起，您还没有订单<a href="{{ url_for('web.selectCar') }}"
+                                                                           style="text-align: center"> 去订车</a></p>
 
                 {% endif %}
                 {% for d in data %}
@@ -26,10 +30,25 @@
                         </div>
                         <div class="weui-cell__bd">
                             <div class="weui-cell__title">
-                                {{ d.Cartype.name }}
+                                <span>{{ d.Cartype.name }}</span>
+                                {% if d.status=="ok" and d.hascontinue==1 %}
+                                    <span class="weui-badge" style="margin-left: 5px;">含续租单</span>
+                                {% endif %}
+                                {% if d.status=="ok" and( d.orderstatus=="depart" or d.orderstatus=="start" )%}
+                                    <span class="weui-badge green" style="margin-left: 5px;">正在进行</span>
+                                {% endif %}
                             </div>
                             <div class="weui-cell__info">
-                                {{ d.created_at }}
+                                {{ d.created_at }}<br>
+                                {% if d.fromdate %}
+                                    {% if d.todate %}
+                                        已结束--{{ d.Car.name }}
+                                    {% else %}
+                                        已发车--{{ d.Car.name }}
+                                    {% endif %}
+                                {% else %}
+                                    未发车
+                                {% endif %}
                             </div>
                         </div>
                         <div class="weui-cell__ft">
@@ -43,7 +62,8 @@
                                 </div>
                             {% endif %}
                             <div class="weui-cell__info">
-                                {{ orderConfig[d.status][0] }}
+                                {{ orderConfig[d.status][0] }}<br>
+
                             </div>
                         </div>
 

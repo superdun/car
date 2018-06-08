@@ -8,6 +8,10 @@
         .collection-item {
             height: 150px;
         }
+
+        .green {
+            background-color: #4abb44 !important;
+        }
     </style>
 {% endblock %}
 {% block content %}
@@ -27,6 +31,12 @@
                         <div class="weui-cell__bd">
                             <div class="weui-cell__title">
                                 {{ d.Cartype.name }}
+                                {% if d.status=="ok" and d.hascontinue==1 %}
+                                    <span class="weui-badge" style="margin-left: 5px;">含续租单</span>
+                                {% endif %}
+                                {% if d.status=="ok" and( d.orderstatus=="depart" or d.orderstatus=="start" ) %}
+                                    <span class="weui-badge green" style="margin-left: 5px;">正在进行</span>
+                                {% endif %}
                             </div>
                             <div class="weui-cell__info">
                                 {{ d.created_at }}<br>

@@ -9,7 +9,7 @@
 {% block content %}
 <div class="container">
     <div>
-        <h6 class="greyWords">{{ data.msg }}</h6>
+        <h6 class="greyWords">{{ data.msg |safe}}</h6>
     </div>
 </div>
 {% endblock %}

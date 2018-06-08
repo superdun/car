@@ -2,6 +2,7 @@
 from  flask import Blueprint, render_template, redirect, request, abort, url_for, current_app, session
 from flask_login import login_required, current_user
 from ..helpers.thumb import upLoadFromUrl
+from ..helpers.GetAllRealteOrders import getOrderSumData
 from ..helpers.other import getRandomStr
 from ..models.dbORM import *
 from wechatpy import parse_message, create_reply
@@ -31,7 +32,8 @@ def getQiniuDomain():
 
 def wxAuth():
     return wx.getAuthForAgent()
-
+def wxAuthOrder(orderid):
+    return wx.getAuthForAgentOrder(orderid)
 
 @agentweb.route('/', methods=['GET', 'POST'])
 def wechatIndex():
@@ -97,7 +99,12 @@ def getOrderConfig():
 @agentweb.route('/wx_getcode')
 def wechatCode():
     wxauth = wxAuth()
-    print wxauth.authorize_url
+
+    return redirect(wxauth.authorize_url)
+@agentweb.route('/wx_getcode_order/<id>')
+def wechatCodeOrder(id):
+    wxauth = wxAuthOrder(id)
+
     return redirect(wxauth.authorize_url)
 
 
@@ -115,7 +122,20 @@ def wechatAuthorize():
     if not getAdmin(customer.openid):
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
     return redirect(url_for("agentweb.order"))
+@agentweb.route('/wx_authorize_order/<id>')
+def wechatAuthorizeOrder(id):
+    wx_code = request.args.get("code")
+    wxauth = wxAuthOrder(id)
+    wxauth.fetch_access_token(wx_code)
+    openId = wxauth.open_id
+    customer = Customer.query.filter_by(openid=openId).first()
+    if not customer:
+        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
+    flask_login.login_user(customer)
 
+    if not getAdmin(customer.openid):
+        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
+    return redirect(url_for("agentweb.orderDetail",id=id))
 
 @agentweb.route('/order')
 @flask_login.login_required
@@ -131,8 +151,9 @@ def order():
         admins = getDownerAdmin(user)
         orderConfig = getOrderConfig()
         orders = db.session.query(Order).filter(
-            Order.Serverstop.has(Serverstop.userid.in_([x.id for x in admins]))).filter(Order.status == "ok").order_by(
+            Order.Serverstop.has(Serverstop.userid.in_([x.id for x in admins]))).filter(Order.status == "ok").filter(Order.ordertype!="continue").order_by(
             Order.id.desc()).limit(orderCount).all()
+
         return render_template("agent/order.html", data=orders, imgDomain="http://%s" % getQiniuDomain(),
                                orderConfig=orderConfig)
     else:
@@ -147,23 +168,26 @@ def orderDetail(id):
     except:
         return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
     order = Order.query.filter_by(id=id).first()
+
     car = order.Cartype.cars
     if current_user.is_authenticated and user and order:
         admins = getDownerAdmin(user)
+        continueOrders = Order.query.filter_by(sourceid=id).filter_by(status="ok").all()
+        OrderSumData = getOrderSumData(order, continueOrders)
         orderConfig = getOrderConfig()
         if order.Serverstop.userid not in ([x.id for x in admins]):
             return render_template("agent/error.html", data={'msg': u'抱歉，未找到订单'})
         if order.fromdate:
             if order.todate:
                 return render_template("agent/orderDetail.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
-                                       orderConfig=orderConfig)
+                                       orderConfig=orderConfig,OrderSumData=OrderSumData,continueOrders=continueOrders)
             else:
                 return render_template("agent/carback.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
-                                       orderConfig=orderConfig)
+                                       orderConfig=orderConfig,OrderSumData=OrderSumData,continueOrders=continueOrders)
 
         else:
             return render_template("agent/depart.html", data=order, imgDomain="http://%s" % getQiniuDomain(),
-                                   orderConfig=orderConfig, car=car)
+                                   orderConfig=orderConfig, car=car,OrderSumData=OrderSumData,continueOrders=continueOrders)
 
 @agentweb.route('/accident')
 @flask_login.login_required

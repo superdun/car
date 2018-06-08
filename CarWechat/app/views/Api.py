@@ -145,10 +145,20 @@ def getPayResult():
                 order.wxtradeno = r["transaction_id"]
                 order.pay_at = r["time_end"]
                 order.status = "ok"
+
                 order.Customer.olduser = 1
+                sourceOrderId =order.id
+                if order.ordertype=="continue":
+                    sourceOrder = Order.query.filter_by(id = order.sourceid).first()
+                    sourceOrder.hascontinue = 1
+                    db.session.add(sourceOrder)
+                    sourceOrderId = sourceOrder.id
+                else:
+                    order.orderstatus = "start"
+
                 db.session.add(order)
                 db.session.commit()
-                wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单")
+                wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单",current_app.config.get('WECHAT_HOST') +url_for("agentweb.wechatCodeOrder",id=sourceOrderId))
 
     else:
         rr = wxPay.close(r["out_trade_no"])
@@ -226,12 +236,16 @@ def getOrderApi():
         insurefee = 0
     totalfee = carfee + insurefee
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
-
-
+    if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
+        ordertype="continue"
+        sourceid = int(request.form.get("orderid"))
+    else:
+        ordertype="normal"
+        sourceid = None
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
                   tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialdetail=json.dumps(prefer),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
-                  book_at=book_at)
+                  book_at=book_at,ordertype=ordertype,sourceid=sourceid)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
