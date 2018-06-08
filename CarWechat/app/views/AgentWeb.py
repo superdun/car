@@ -150,8 +150,8 @@ def order():
             orderCount=30
         admins = getDownerAdmin(user)
         orderConfig = getOrderConfig()
-        orders = db.session.query(Order).filter(
-            Order.Serverstop.has(Serverstop.userid.in_([x.id for x in admins]))).filter(Order.status == "ok").filter(Order.ordertype!="continue").order_by(
+        orders = Order.query.filter(
+            Order.Serverstop.has(Serverstop.userid.in_([x.id for x in admins]))).filter(Order.status == "ok").filter((Order.ordertype==None)|(Order.ordertype!="continue")).order_by(
             Order.id.desc()).limit(orderCount).all()
 
         return render_template("agent/order.html", data=orders, imgDomain="http://%s" % getQiniuDomain(),

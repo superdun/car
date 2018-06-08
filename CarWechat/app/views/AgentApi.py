@@ -122,24 +122,28 @@ def accidentApi():
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
-    if not carid or not isureaompany or not isureprice or not repaircompany:
+    if not carid  or not isureprice :
         return jsonify({"status": "lacked"})
 
     carid = int(carid)
-    if orderid:
-        orderid = int(orderid)
-    if isureprice:
-        isureprice = float(isureprice)
-    if theirprice:
-        theirprice = float(theirprice)
+    iorderid = None
+    iisureprice=None
+    itheirprice=None
     try:
+        if orderid:
+            iorderid = int(orderid)
+        if isureprice:
+            iisureprice = float(isureprice)
+        if theirprice:
+            itheirprice = float(theirprice)
+
         import AgentWeb
         user = AgentWeb.getAdmin(current_user.openid)
     except:
         return jsonify({"status": "error"})
 
     accident = Accident(carid=carid, created_at=created_at, theircarcode=theircarcode, isureaompany=isureaompany,
-                        isureprice=isureprice,theirprice=theirprice,repaircompany=repaircompany,orderid=orderid,userid=user.id)
+                        isureprice=iisureprice,theirprice=itheirprice,repaircompany=repaircompany,orderid=iorderid,userid=user.id)
     db.session.add(accident)
     db.session.commit()
     return jsonify({"status": "ok"})
