@@ -100,13 +100,13 @@ def getFees(cartypeId, count, totalFee, openid,book_at):
                             if cutfee > prefer.maxcutfee:
                                 cutfee = prefer.maxcutfee
 
-                # if  prefer.cutfee :
-                #     isprefer = True
-                #     hasCurrentPrefer = True
-                #     cutfee = cutfee + prefer.cutfee
-                #     if prefer.maxcutfee:
-                #         if cutfee > prefer.maxcutfee:
-                #             cutfee = prefer.maxcutfee
+                if  prefer.cutfee  and weekcount>0:
+                    isprefer = True
+                    hasCurrentPrefer = True
+                    cutfee = cutfee + prefer.cutfee
+                    if prefer.maxcutfee:
+                        if cutfee > prefer.maxcutfee:
+                            cutfee = prefer.maxcutfee
 
                 if prefer.newpricecut and weekcount>0:
                     tmpprice = ct.price-prefer.newpricecut
