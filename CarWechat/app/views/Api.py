@@ -191,8 +191,17 @@ def getOrderApi():
     import datetime as dt
     from ..modules.Limit import dateCounvert
     # book_at = "2018-05-27T08:30:45"
+    import datetime as dt
+    if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
+        ordertype="continue"
+        sourceid = int(request.form.get("orderid"))
+        sourceCount = Order.query.filter_by(id = sourceid).first().count
+        book_at = (datetime.now()+ dt.timedelta(days=sourceCount)).strftime('%Y-%m-%dT%H:%M:%S')
+    else:
+        ordertype="normal"
+        sourceid = None
     if not book_at:
-        book_at = ""
+        book_at = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     else:
         try:
             if dateCounvert(book_at)<datetime.now()-dt.timedelta(hours=1):
@@ -236,12 +245,7 @@ def getOrderApi():
         insurefee = 0
     totalfee = carfee + insurefee
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
-    if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
-        ordertype="continue"
-        sourceid = int(request.form.get("orderid"))
-    else:
-        ordertype="normal"
-        sourceid = None
+
     order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
                   tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialdetail=json.dumps(prefer),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
@@ -265,7 +269,8 @@ def getOrderApi():
         order.tradeno = out_trade_no
         order.status = 'waiting'
         order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
-        car.count = car.count - 1
+        if order.ordertype!="continue":
+            car.count = car.count - 1
         db.session.add(order)
         db.session.add(car)
         db.session.commit()
@@ -338,7 +343,7 @@ def getPreferential():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
     book_at = request.form.get("book_at")
-    # book_at = "2018-06-10T13:59:47"
+    # book_at = "2018-06-15T09:59:47"
     if not book_at:
         book_at = ""
     if (not carTypeId) or (not count):

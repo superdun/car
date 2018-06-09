@@ -30,22 +30,27 @@ def checkDateRange(prefer,book_at,count):
     return False
 def getDayCount(prefer,book_at,count):
     result = {"weekday":0,"weekend":0}
-    for i in range(1,count+1):
-        tmpDT = book_at + datetime.timedelta(days=i)
-        if tmpDT.weekday() in (5, 6):
-            result['weekend'] = result['weekend']+1
-        else:
-            result['weekday'] = result['weekday'] + 1
 
-    if book_at.weekday() < 5 and book_at.hour > 9:
-        result["weekday"] = result["weekday"] - 1
-        result["weekend"] = result["weekend"] + 1
-    elif book_at.weekday() >= 5 and book_at.hour < 14:
-        result["weekday"] = result["weekday"] - 1
-        result["weekend"] = result["weekend"] + 1
-    if result["weekday"]<0 or result["weekday"]<0:
-        result["weekday"]=0
-        result["weekday"]=0
+
+    if book_at.hour < 12:
+        for i in range(0, count ):
+            tmpDT = book_at + datetime.timedelta(days=i)
+            if tmpDT.weekday() in (5, 6):
+                result['weekend'] = result['weekend'] + 1
+            else:
+                result['weekday'] = result['weekday'] + 1
+        # result["weekday"] = result["weekday"] + 1
+        # result["weekend"] = result["weekend"] - 1
+    else:
+        for i in range(1, count + 1):
+            tmpDT = book_at + datetime.timedelta(days=i)
+            if tmpDT.weekday() in (5, 6):
+                result['weekend'] = result['weekend'] + 1
+            else:
+                result['weekday'] = result['weekday'] + 1
+        # result["weekday"] = result["weekday"] - 1
+        # result["weekend"] = result["weekend"] + 1
+
     return result
 def checkOldUser(openid,prefer):
     isOld = False
