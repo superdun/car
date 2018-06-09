@@ -205,6 +205,22 @@ def accident():
     else:
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
 
+@agentweb.route('/accident/<id>')
+@flask_login.login_required
+def accidentDetail(id):
+    try:
+        user = getAdmin(current_user.openid)
+    except:
+        return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
+    if current_user.is_authenticated and user:
+        orderid = request.args.get("orderid")
+        carid = request.args.get("carid")
+        car = Car.query.filter_by(id=carid).first()
+        cartypes = Cartype.query.all()
+        return render_template("agent/accident.html",car=car,orderid=orderid,cartypes = cartypes)
+    else:
+        return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
+
 @agentweb.route('/move')
 @flask_login.login_required
 def move():

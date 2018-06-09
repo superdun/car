@@ -338,7 +338,7 @@ def getPreferential():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
     book_at = request.form.get("book_at")
-    # book_at = "2018-05-27T08:30:45"
+    book_at = "2018-06-10T13:59:47"
     if not book_at:
         book_at = ""
     if (not carTypeId) or (not count):
