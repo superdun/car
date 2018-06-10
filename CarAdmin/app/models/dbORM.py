@@ -69,6 +69,9 @@ class Car(db.Model):
     status = db.Column(db.String(80), default="pending")
     orders = db.relationship('Order', backref='Car', lazy='dynamic')
     accidents = db.relationship('Accident', backref='Car', lazy='dynamic')
+    moves = db.relationship('Move', backref='Car', lazy='dynamic')
+    applies = db.relationship('Apply', backref='Car', lazy='dynamic')
+
     def __repr__(self):
         return self.name
 

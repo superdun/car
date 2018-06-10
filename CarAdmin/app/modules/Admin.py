@@ -111,6 +111,7 @@ class CarView(AdminModel):
     # column_list = ("title", "create_at", "view_count",
     #                "category", "is_full", "status","max_book_count")
     column_exclude_list = ('img')
+    form_excluded_columns = ('accidents', 'moves', 'applies', 'orders')
     column_labels = dict(created_at=u'创建时间', name=u'车牌', buy_at=u'购买时间', status=u'状态'
                          , Gps=u'设备', Cartype=u'车型', histories=u"历史", orders=u'订单', image=u"头像", mendhistories=u'维修历史')
 
