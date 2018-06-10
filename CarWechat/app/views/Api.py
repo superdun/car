@@ -5,6 +5,7 @@ from ..models.dbORM import *
 from sqlalchemy import exc
 from ..modules.CarSDK import CarOlineApi
 import hashlib
+from ..helpers.GetAllRealteOrders import getOrderSumData
 import flask_login
 from ..modules import Wechat as wx
 from wechatpy.exceptions import (
@@ -195,8 +196,13 @@ def getOrderApi():
     if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
         ordertype="continue"
         sourceid = int(request.form.get("orderid"))
-        sourceCount = Order.query.filter_by(id = sourceid).first().count
-        book_at = (datetime.now()+ dt.timedelta(days=sourceCount)).strftime('%Y-%m-%dT%H:%M:%S')
+        sourceOrder = Order.query.filter_by(id = sourceid).first()
+        sourceFromDate = sourceOrder.fromdate
+        if not sourceFromDate:
+            return jsonify({'status': 'error', 'code': 9, 'msg': "尚未发车，不能续租"})
+        continueOrders = Order.query.filter_by(sourceid=sourceid).filter_by(status="ok").all()
+        OrderSumData = getOrderSumData(sourceOrder, continueOrders)
+        book_at = (sourceFromDate+ dt.timedelta(days=OrderSumData["countSum"])).strftime('%Y-%m-%dT%H:%M:%S')
     else:
         ordertype="normal"
         sourceid = None

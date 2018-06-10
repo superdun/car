@@ -95,39 +95,39 @@
                 <div class="weui-wepay-details__state">
                     <h2 class="weui-wepay-details__title">
                         续租订单</h2>
-                    <p class="weui-wepay-details__desc">￥{{ data.totalfee/100 }}</p>
+                    <p class="weui-wepay-details__desc">￥{{ o.totalfee/100 }}</p>
                 </div>
             </div>
             <div class="weui-wepay-details__bd">
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">单号：</div>
-                    <div class="weui-wepay-detail__ft">{{ data.tradeno |cutstring }}</div>
+                    <div class="weui-wepay-detail__ft">{{ o.tradeno |cutstring }}</div>
                 </div>
 
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">服务点：</div>
-                    <div class="weui-wepay-detail__ft">{{ data.Serverstop.name }}</div>
+                    <div class="weui-wepay-detail__ft">{{ o.Serverstop.name }}</div>
                 </div>
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">时间：</div>
-                    <div class="weui-wepay-detail__ft">{{ data.created_at }}</div>
+                    <div class="weui-wepay-detail__ft">{{ o.created_at }}</div>
                 </div>
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">支付状态：</div>
-                    <div class="weui-wepay-detail__ft">{{ orderConfig[data.status][0] }}</div>
+                    <div class="weui-wepay-detail__ft">{{ orderConfig[o.status][0] }}</div>
                 </div>
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">天数：</div>
-                    <div class="weui-wepay-detail__ft">{{ data.count }}</div>
+                    <div class="weui-wepay-detail__ft">{{ o.count }}</div>
                 </div>
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">折扣：</div>
-                    <div class="weui-wepay-detail__ft">-￥{{ data.cutfee/100 }}</div>
+                    <div class="weui-wepay-detail__ft">-￥{{ o.cutfee/100 }}</div>
                 </div>
 
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">总价：</div>
-                    <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ data.totalfee/100 }}</div>
+                    <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ o.totalfee/100 }}</div>
                 </div>
 
             </div>
@@ -388,9 +388,9 @@
                         if (result['status'] == 'ok') {
                             alert('信息录入成功');
                             if (isaccident == "1") {
-                                window.location = "{{url_for('agentweb.accident')}}" + "?orderid=" + "{{ data.id }}" + "&carid=" + "{{ data.Car.id }}"
+                                window.location = "{{url_for('agentweb.accidentNew')}}" + "?orderid=" + "{{ data.id }}" + "&carid=" + "{{ data.Car.id }}"
                             } else {
-                                window.location = "{{url_for('agentweb.order')}}"
+                                window.location = "{{url_for('agentweb.accident')}}"
                             }
                         }
                         if (result['status'] == 'error') {

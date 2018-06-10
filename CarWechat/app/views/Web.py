@@ -242,6 +242,8 @@ def cart(id):
             if isContinue == "true":
                 orderid = int(request.args.get("orderid"))
                 sourceOrder = Order.query.filter_by(id=orderid).first()
+                if not sourceOrder.fromdate:
+                    return returnError("您的订单尚未配送发车，无法续租")
                 return render_template('car/continuecart.html', carData=CarType, wxJSSDKConfig=wxJSSDKConfig,
                                        imgDomain="http://%s" % getQiniuDomain(), sourceOrder=sourceOrder)
                 # try:

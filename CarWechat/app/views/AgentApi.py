@@ -122,7 +122,7 @@ def accidentApi():
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
-    if not carid  or not isureprice :
+    if not carid   :
         return jsonify({"status": "lacked"})
 
     carid = int(carid)
@@ -141,12 +141,25 @@ def accidentApi():
         user = AgentWeb.getAdmin(current_user.openid)
     except:
         return jsonify({"status": "error"})
-
-    accident = Accident(carid=carid, created_at=created_at, theircarcode=theircarcode, isureaompany=isureaompany,
+    if request.args.get("id"):
+        accident = Accident.query.filter_by(id = request.args.get("id")).first()
+        accident.carid = carid
+        accident.created_at =created_at
+        accident.created_at = created_at
+        accident.theircarcode = theircarcode
+        accident.isureaompany = isureaompany
+        accident.isureprice = iisureprice
+        accident.theirprice = itheirprice
+        accident.repaircompany = repaircompany
+        accident.orderid = iorderid
+        accident.userid = user.id
+    else:
+        accident = Accident(carid=carid, created_at=created_at, theircarcode=theircarcode, isureaompany=isureaompany,
                         isureprice=iisureprice,theirprice=itheirprice,repaircompany=repaircompany,orderid=iorderid,userid=user.id)
     db.session.add(accident)
     db.session.commit()
     return jsonify({"status": "ok"})
+
 
 
 @agentapi.route('/move', methods=['POST'])
@@ -164,21 +177,37 @@ def moveApi():
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
-    if not carid or not fromid or not toid or not fromkm or not tokm:
+    if not carid or not fromid or not fromkm :
         return jsonify({"status": "lacked"})
 
     carid = int(carid)
     fromid = int(fromid)
-    toid = int(toid)
+
     fromkm = int(fromkm)
-    tokm = int(tokm)
+
+    try:
+        toid = int(toid)
+        tokm = int(tokm)
+    except:
+        toid = tokm = None
     try:
         import AgentWeb
         user = AgentWeb.getAdmin(current_user.openid)
     except:
         return jsonify({"status": "error"})
+    if request.args.get("id"):
+        move = Move.query.filter_by(id = request.args.get("id")).first()
+        move.carid = carid
+        move.created_at = created_at
+        move.fromid = fromid
+        move.toid = toid
+        move.fromkm = fromkm
+        move.tokm = tokm
+        move.userid = user.id
 
-    move = Move(carid=carid, created_at=created_at, fromid=fromid, toid=toid,
+
+    else:
+        move = Move(carid=carid, created_at=created_at, fromid=fromid, toid=toid,
                     fromkm=fromkm,tokm=tokm,userid=user.id)
     db.session.add(move)
     db.session.commit()
