@@ -199,7 +199,7 @@ def accident():
     if current_user.is_authenticated and user:
         orderCount = current_app.config.get("ORDER_LIMIT")
         data=Accident.query.filter_by(userid=user.id).order_by(
-            Order.id.desc()).limit(orderCount).all()
+            Accident.id.desc()).limit(orderCount).all()
         return render_template("agent/accident.html",data=data,imgDomain="http://%s" % getQiniuDomain())
     else:
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
@@ -247,7 +247,7 @@ def move():
     if current_user.is_authenticated and user:
         orderCount = current_app.config.get("ORDER_LIMIT")
         data=Move.query.filter_by(userid=user.id).order_by(
-            Order.id.desc()).limit(orderCount).all()
+            Move.id.desc()).limit(orderCount).all()
         return render_template("agent/move.html",imgDomain="http://%s" % getQiniuDomain(),data=data)
     else:
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
@@ -294,7 +294,7 @@ def apply():
     if current_user.is_authenticated and user:
         orderCount = current_app.config.get("ORDER_LIMIT")
         data=Apply.query.filter_by(userid=user.id).order_by(
-            Order.id.desc()).limit(orderCount).all()
+            Apply.id.desc()).limit(orderCount).all()
         return render_template("agent/apply.html",imgDomain="http://%s" % getQiniuDomain(),data = data)
     else:
         return render_template("agent/error.html", data={'msg': u'抱歉，您不是管理员'})
