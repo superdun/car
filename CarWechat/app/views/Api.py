@@ -12,6 +12,7 @@ from wechatpy.exceptions import (
     InvalidSignatureException,
     WeChatPayException
 )
+import datetime as dt
 from datetime import datetime
 from wechatpy.utils import timezone
 import time
@@ -192,7 +193,7 @@ def getOrderApi():
     import datetime as dt
     from ..modules.Limit import dateCounvert
     # book_at = "2018-05-27T08:30:45"
-    import datetime as dt
+
     if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
         ordertype="continue"
         sourceid = int(request.form.get("orderid"))
@@ -349,6 +350,15 @@ def getPreferential():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
     book_at = request.form.get("book_at")
+    if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
+        sourceid = int(request.form.get("orderid"))
+        sourceOrder = Order.query.filter_by(id = sourceid).first()
+        sourceFromDate = sourceOrder.fromdate
+        if not sourceFromDate:
+            return jsonify({'status': 'error', 'code': 9, 'msg': "尚未发车，不能续租"})
+        continueOrders = Order.query.filter_by(sourceid=sourceid).filter_by(status="ok").all()
+        OrderSumData = getOrderSumData(sourceOrder, continueOrders)
+        book_at = (sourceFromDate+ dt.timedelta(days=OrderSumData["countSum"])).strftime('%Y-%m-%dT%H:%M:%S')
     # book_at = "2018-06-15T11:59:47"
     if not book_at:
         book_at = ""

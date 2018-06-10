@@ -59,9 +59,10 @@
             </div>
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">保险</div>
-                <div class="weui-wepay-detail__ft" id="insure" price="{{ sourceOrder.Insure.price if sourceOrder.Insure else 0 }}">
-                    <a href="javascript:weui.alert('{{ sourceOrder.Insure.detail if sourceOrder.Insure else "无"}}');">{{ sourceOrder.Insure.name if sourceOrder.Insure else "无"}}
-                        ￥{{ sourceOrder.Insure.price/100 if sourceOrder.Insure else 0}}/天</a>
+                <div class="weui-wepay-detail__ft" id="insure"
+                     price="{{ sourceOrder.Insure.price if sourceOrder.Insure else 0 }}">
+                    <a href="javascript:weui.alert('{{ sourceOrder.Insure.detail if sourceOrder.Insure else "无" }}');">{{ sourceOrder.Insure.name if sourceOrder.Insure else "无" }}
+                        ￥{{ sourceOrder.Insure.price/100 if sourceOrder.Insure else 0 }}/天</a>
                 </div>
             </div>
             <div class="weui-wepay-detail">
@@ -147,7 +148,7 @@
         }
         function setSum(v) {
             {#            var v = (100*($("#count").val() * ($("#price").text() * 1.0 + $('input[name="radio1"]:checked').attr("price") / 100.0)) - Math.abs($("#cutfee").text() * 100))/100;#}
-            var value = v+($("#count").val()*$('#insure').attr("price") )/ 100.0;
+            var value = v + ($("#count").val() * $('#insure').attr("price") ) / 100.0;
             $("#totalfee-top").html('￥' + value);
             $("#sum").html(value)
         }
@@ -156,6 +157,8 @@
             formDataPrefer.append('id', {{ carData.id }});
             formDataPrefer.append('count', $("#count").val());
             formDataPrefer.append('book_at', "");
+            formDataPrefer.append('iscontinue', true);
+            formDataPrefer.append('orderid', "{{ sourceOrder.id }}");
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/preferential',
                 type: 'POST',
@@ -245,7 +248,7 @@
             })
         }
         var serverstop = "{{ sourceOrder.Serverstop.id }}";
-        var loc="";
+        var loc = "";
         var convertor = new BMap.Convertor();
         var myGeo = new BMap.Geocoder();
         $(document).ready(function () {
