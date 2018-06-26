@@ -100,7 +100,7 @@
                                 {% for img in imgs %}
                                     {% if img %}
                                         <li data-id="c{{ loop.index }}" class="weui-uploader__file"
-                                            style="background-image:url({{ img }})"></li>
+                                            style="background-image:url({{ img }}!fanglow)"></li>
                                     {% endif %}
                                 {% endfor %}
                             </ul>
@@ -152,7 +152,7 @@
         function imgClickBind() {
             $(".weui-uploader__file").click(function () {
                 var bg = $(this).css('background-image');
-                bg = bg.replace('url(', '').replace(')', '').replace(/\"/gi, "");
+                bg = bg.replace('url(', '').replace(')', '').replace(/\"/gi, "").split("!fanglow")[0];
                 var val = $(this).attr("data-id");
                 var that = this;
                 var gallery = weui.gallery(bg, {

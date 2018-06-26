@@ -101,7 +101,7 @@
                                     {% for img in imgs %}
                                         {% if img %}
                                             <li data-id="c{{ loop.index }}" class="weui-uploader__file"
-                                                style="background-image:url({{ img }})"></li>
+                                                style="background-image:url({{ img }}!fanglow)"></li>
                                         {% endif %}
                                     {% endfor %}
                                 </ul>
@@ -261,6 +261,20 @@
 {% endblock %}
 {% block script %}
     <script>
+        function imgClickBind() {
+            $(".weui-uploader__file").click(function () {
+                var bg = $(this).css('background-image');
+                bg = bg.replace('url(', '').replace(')', '').replace(/\"/gi, "").split("!fanglow")[0];
+                var val = $(this).attr("data-id");
+                var that = this;
+                var gallery = weui.gallery(bg, {
+                    className: 'custom-classname',
+                    onDelete: function () {
+
+                    }
+                });
+            });
+        }
         weui.uploader('#uploader', {
             url: 'http://localhost:8081',
             auto: false,
@@ -380,7 +394,7 @@
         });
 
         $(document).ready(function () {
-
+            imgClickBind();
             $('#depart').click(function () {
                 {#                if (!$("#weuiAgree").prop("checked")) {#}
                 {#                    return#}

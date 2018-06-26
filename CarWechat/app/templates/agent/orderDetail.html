@@ -129,6 +129,28 @@
                 <div class="weui-wepay-detail__bd">是否出省：</div>
                 <div class="weui-wepay-detail__ft">{% if data.outprovince==1 %}是{% else %}否{% endif %}</div>
             </div>
+            <div class="weui-cells weui-cells_form" id="uploader">
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <div class="weui-uploader">
+                            <div class="weui-uploader__hd">
+                                <p class="weui-uploader__title">存证图片</p>
+                            </div>
+                            <div class="weui-uploader__bd">
+                                <ul class="weui-uploader__files" id="uploaderFiles">
+                                    {% for img in imgs %}
+                                        {% if img %}
+                                            <li data-id="c{{ loop.index }}" class="weui-uploader__file"
+                                                style="background-image:url({{ img }}!fanglow)"></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
         {% for o in continueOrders %}
             <div class="weui-wepay-details__hd">
@@ -168,27 +190,6 @@
                 <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">总价：</div>
                     <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ o.totalfee/100 }}</div>
-                </div>
-                <div class="weui-cells weui-cells_form" id="uploader">
-                    <div class="weui-cell">
-                        <div class="weui-cell__bd">
-                            <div class="weui-uploader">
-                                <div class="weui-uploader__hd">
-                                    <p class="weui-uploader__title">存证图片</p>
-                                </div>
-                                <div class="weui-uploader__bd">
-                                    <ul class="weui-uploader__files" id="uploaderFiles">
-                                        {% for img in imgs %}
-                                            {% if img %}
-                                                <li data-id="c{{ loop.index }}" class="weui-uploader__file"
-                                                    style="background-image:url({{ img }})"></li>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -236,6 +237,20 @@
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
     <script>
+        function imgClickBind() {
+            $(".weui-uploader__file").click(function () {
+                var bg = $(this).css('background-image');
+                bg = bg.replace('url(', '').replace(')', '').replace(/\"/gi, "").split("!fanglow")[0];
+                var val = $(this).attr("data-id");
+                var that = this;
+                var gallery = weui.gallery(bg, {
+                    className: 'custom-classname',
+                    onDelete: function () {
+
+                    }
+                });
+            });
+        }
         function refund() {
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/refundapply/{{ data.id }}',
@@ -257,7 +272,7 @@
         }
         $(document).ready(function () {
             navSelect($('#nav-order'));
-
+            imgClickBind();
             $('#refund').click(function () {
                 alert("暂不能申请退款，请联系客服 4006662456");
                 {#                refund();#}
