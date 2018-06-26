@@ -37,7 +37,7 @@ def upload_file(file, basePath, domain, storeModel):
         pic_dir = basePath + '/' + relativePath()
         path = pic_dir + filename
         if not op.exists(op.dirname(path)):
-            os.makedirs(os.path.dirname(path))
+            os.makedirs(os.path.dirname(path),  0o111)
 
         file.seek(0)
         file.save(path)
@@ -51,7 +51,7 @@ def upload_file(file, basePath, domain, storeModel):
         # return filename
         localUrl = 'http://' + domain + '/' + qiniu_file_name
         title = filename.rsplit('.', 1)[0]
-        return {"title": title, "isImage": 1, "fileName": filename, "localUrl": localUrl, "result": 1}
+        return {"status":"ok","title": title, "isImage": 1, "fileName": filename, "localUrl": localUrl, "result": 1,"relativePath":qiniu_file_name}
 
 
 def upload_file_by_pillow(file,filename, basePath, domain, storeModel):

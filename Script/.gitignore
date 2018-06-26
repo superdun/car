@@ -1,0 +1,6 @@
+.idea
+*.pyc
+instance/*
+keys/*
+static/upload/*
+config.py

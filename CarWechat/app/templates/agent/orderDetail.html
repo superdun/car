@@ -169,7 +169,27 @@
                     <div class="weui-wepay-detail__bd">总价：</div>
                     <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ o.totalfee/100 }}</div>
                 </div>
-
+                <div class="weui-cells weui-cells_form" id="uploader">
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">
+                            <div class="weui-uploader">
+                                <div class="weui-uploader__hd">
+                                    <p class="weui-uploader__title">存证图片</p>
+                                </div>
+                                <div class="weui-uploader__bd">
+                                    <ul class="weui-uploader__files" id="uploaderFiles">
+                                        {% for img in imgs %}
+                                            {% if img %}
+                                                <li data-id="c{{ loop.index }}" class="weui-uploader__file"
+                                                    style="background-image:url({{ img }})"></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         {% endfor %}

@@ -5,7 +5,7 @@ from ..models.dbORM import *
 from ..modules.CarSDK import CarOlineApi
 from ..modules import Wechat as wx
 import flask_login
-
+from ..modules.Cache import cache
 from datetime import datetime
 from wechatpy.utils import timezone
 import time
@@ -73,32 +73,22 @@ def carRecApi(imei):
 
 @api.route('/api/carmonitor')
 def carMonitorApi():
-    carapi = getcarApi()
-    carapi.getToken()
-    data = carapi.monitor()
-    print data
-    if 'err' in data:
-        return jsonify({'status': 'error', 'msg': data['err'], 'data': []})
-    if data['msg'] == 'OK':
-        for i in data['data']:
-            carObj = Gps.query.filter_by(code=i['imei']).first()
-            if carObj and carObj.cars:
-                try:
-                    carId = carObj.cars[0].id
-                    carName = carObj.cars[0].name
-                    carImg = carObj.cars[0].img
-                except:
-                    carId = ""
-                    carName = ""
-                    carImg = ""
-            else:
-                carId = ""
-                carName = ""
-                carImg = ""
-            i['car'] = {'id': carId, 'name': carName, 'img': carImg}
-        return jsonify({'status': 'ok', 'msg': data['msg'], 'data': data['data']})
-    else:
-        return jsonify({'status': 'error', 'msg': data['msg'], 'data': []})
+
+
+    carObjs = Gps.query.all()
+    r = []
+
+    for carObj in carObjs:
+
+        try:
+            cr = cache().get(carObj.code)
+            if cr and cr !={} :
+                r.append(cr)
+        except:
+            print cr
+            print carObj.code
+    return jsonify({'status': 'ok', 'msg': "ok", 'data': r})
+
 
 
 @api.route('/api/carmonitor/<id>')

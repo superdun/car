@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 import os, sys
-from  flask import Blueprint, request, render_template, current_app, url_for, jsonify
+from  flask import Blueprint, request, render_template, current_app, url_for, jsonify, make_response
 from flask_login import login_required, current_user
-
+import json
 from ..models.dbORM import *
 
 from wechatpy.exceptions import (
@@ -10,8 +10,9 @@ from wechatpy.exceptions import (
     WeChatPayException
 )
 from datetime import datetime
-
+from flask_qiniustorage import Qiniu
 from app import db
+from ..helpers.thumb import upload_file
 
 agentapi = Blueprint('agentapi', __name__)
 
@@ -26,6 +27,8 @@ def departApi():
     carid = request.form.get("carid")
     orderid = request.form.get("orderid")
     kmbefore = request.form.get("kmbefore")
+    imgList = json.loads(request.form.get("imgList"))
+
     if not depart_time:
         depart_time = datetime.now()
     else:
@@ -42,6 +45,13 @@ def departApi():
     except:
         return jsonify({"status": "error"})
     order = Order.query.filter_by(id=orderid).first()
+
+    proofimg = carendimg = carbeforeimg  = None
+    imgs = [None, None, None]
+    for i in range(len(imgList.values())):
+        imgs[i] = imgList.values()[i]
+    proofimg , carendimg , carbeforeimg  = imgs
+
     if current_user.is_authenticated and user and order:
         admins = AgentWeb.getDownerAdmin(user)
         if order.Serverstop.userid not in ([x.id for x in admins]):
@@ -53,6 +63,9 @@ def departApi():
         order.currentcarid = carid
         order.kmbefore = kmbefore
         order.orderstatus = "depart"
+        order.proofimg = proofimg
+        order.carendimg = carendimg
+        order.carbeforeimg = carbeforeimg
         db.session.add(order)
         db.session.commit()
         return jsonify({"status": "ok"})
@@ -86,7 +99,7 @@ def backApi():
         return jsonify({"status": "error"})
     order = Order.query.filter_by(id=orderid).first()
     cartype = order.Cartype
-    cartype.count = cartype.count+1
+    cartype.count = cartype.count + 1
     if current_user.is_authenticated and user and order:
         admins = AgentWeb.getDownerAdmin(user)
         if order.Serverstop.userid not in ([x.id for x in admins]):
@@ -117,18 +130,24 @@ def accidentApi():
     theirprice = request.form.get("theirprice")
     repaircompany = request.form.get("repaircompany")
     orderid = request.form.get("orderid")
+    imgList = json.loads(request.form.get("imgList"))
     if not created_at:
         created_at = datetime.now()
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
-    if not carid   :
+    if not carid:
         return jsonify({"status": "lacked"})
 
     carid = int(carid)
     iorderid = None
-    iisureprice=None
-    itheirprice=None
+    iisureprice = None
+    itheirprice = None
+    img1 = img2 = img3 = img4 = img5 = img6 = None
+    imgs = [None, None, None, None, None, None]
+    for i in range(len(imgList.values())):
+        imgs[i] = imgList.values()[i]
+    img1, img2, img3, img4, img5,img6 = imgs
     try:
         if orderid:
             iorderid = int(orderid)
@@ -142,9 +161,9 @@ def accidentApi():
     except:
         return jsonify({"status": "error"})
     if request.args.get("id"):
-        accident = Accident.query.filter_by(id = request.args.get("id")).first()
+        accident = Accident.query.filter_by(id=request.args.get("id")).first()
         accident.carid = carid
-        accident.created_at =created_at
+        accident.created_at = created_at
         accident.created_at = created_at
         accident.theircarcode = theircarcode
         accident.isureaompany = isureaompany
@@ -153,13 +172,20 @@ def accidentApi():
         accident.repaircompany = repaircompany
         accident.orderid = iorderid
         accident.userid = user.id
+        accident.img1 = img1
+        accident.img2 = img2
+        accident.img3 = img3
+        accident.img4 = img4
+        accident.img5 = img5
+        accident.img6 = img6
     else:
         accident = Accident(carid=carid, created_at=created_at, theircarcode=theircarcode, isureaompany=isureaompany,
-                        isureprice=iisureprice,theirprice=itheirprice,repaircompany=repaircompany,orderid=iorderid,userid=user.id)
+                            isureprice=iisureprice, theirprice=itheirprice, repaircompany=repaircompany,
+                            orderid=iorderid, userid=user.id, img1=img1, img2=img2, img3=img3, img4=img4, img5=img5,
+                            img6=img6)
     db.session.add(accident)
     db.session.commit()
     return jsonify({"status": "ok"})
-
 
 
 @agentapi.route('/move', methods=['POST'])
@@ -177,7 +203,7 @@ def moveApi():
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
-    if not carid or not fromid or not fromkm :
+    if not carid or not fromid or not fromkm:
         return jsonify({"status": "lacked"})
 
     carid = int(carid)
@@ -196,7 +222,7 @@ def moveApi():
     except:
         return jsonify({"status": "error"})
     if request.args.get("id"):
-        move = Move.query.filter_by(id = request.args.get("id")).first()
+        move = Move.query.filter_by(id=request.args.get("id")).first()
         move.carid = carid
         move.created_at = created_at
         move.fromid = fromid
@@ -208,10 +234,11 @@ def moveApi():
 
     else:
         move = Move(carid=carid, created_at=created_at, fromid=fromid, toid=toid,
-                    fromkm=fromkm,tokm=tokm,userid=user.id)
+                    fromkm=fromkm, tokm=tokm, userid=user.id)
     db.session.add(move)
     db.session.commit()
     return jsonify({"status": "ok"})
+
 
 @agentapi.route('/apply', methods=['POST'])
 @login_required
@@ -220,13 +247,12 @@ def applyApi():
     created_at = request.form.get("created_at")
     comment = request.form.get("comment")
 
-
     if not created_at:
         created_at = datetime.now()
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
-    if not carid or not comment :
+    if not carid or not comment:
         return jsonify({"status": "lacked"})
 
     carid = int(carid)
@@ -237,10 +263,11 @@ def applyApi():
     except:
         return jsonify({"status": "error"})
 
-    apply = Apply(carid=carid, created_at=created_at, comment=comment,userid=user.id)
+    apply = Apply(carid=carid, created_at=created_at, comment=comment, userid=user.id)
     db.session.add(apply)
     db.session.commit()
     return jsonify({"status": "ok"})
+
 
 @agentapi.route('/carsbycartype', methods=['POST'])
 @login_required
@@ -252,5 +279,18 @@ def carsbycartypeApi():
     cars = Cartype.query.filter_by(id=cartypeid).first().cars
     result = []
     for i in cars:
-        result.append({'value':i.id,'label':i.name})
+        result.append({'value': i.id, 'label': i.name})
+    return jsonify(result)
+
+
+@agentapi.route('/upload', methods=['POST'])
+@login_required
+def upload():
+    if 'fileVal' not in request.files:
+        response = make_response("upload failed")
+        response.status_code = 501
+        return response
+    file = request.files['fileVal']
+    domain = current_app.config.get("QINIU_BUCKET_DOMAIN")
+    result = upload_file(file, "app/static/upload", domain, Qiniu(current_app))
     return jsonify(result)

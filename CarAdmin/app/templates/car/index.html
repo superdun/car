@@ -20,6 +20,12 @@
             height: 90%
         }
 
+        .collection {
+            position: absolute;
+            width: 200px;
+            top: 150px;
+            right: 5px;
+        }
 
     </style>
 {% endblock %}
@@ -29,7 +35,32 @@
     <div id="map-container">
 
     </div>
-
+    <ul class="collection">
+        <li class="collection-item avatar">
+            <i class="material-icons circle yellow">play_arrow</i>
+            <span class="title">出省</span>
+            <p id="outCount">0
+            </p>
+        </li>
+        <li class="collection-item avatar">
+            <i class="material-icons circle red">play_arrow</i>
+            <span class="title">运动</span>
+            <p id="moveCount">0
+            </p>
+        </li>
+        <li class="collection-item avatar">
+            <i class="material-icons circle blue">play_arrow</i>
+            <span class="title">静止</span>
+            <p id="stayCount">0
+            </p>
+        </li>
+        <li class="collection-item avatar">
+            <i class="material-icons circle grey">play_arrow</i>
+            <span class="title">离线</span>
+            <p id="offlineCount">0
+            </p>
+        </li>
+    </ul>
 
 {% endblock %}
 {% block script %}
@@ -55,7 +86,7 @@
             }
 
             function addMarker(point, index, data) {  // 创建图标对象
-                var myIconColor = new BMap.Icon("http://p5w48dhwa.bkt.clouddn.com/carRed.png", new BMap.Size(60, 60), {
+                var myIconRed = new BMap.Icon("http://p5w48dhwa.bkt.clouddn.com/carRed.png", new BMap.Size(60, 60), {
                     // 指定定位位置。
                     // 当标注显示在地图上时，其所指向的地理位置距离图标左上
                     // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
@@ -66,18 +97,32 @@
                     imageOffset: new BMap.Size(0, 0)   // 设置图片偏移
                 });
                 var myIconGrey = new BMap.Icon("http://p5w48dhwa.bkt.clouddn.com/carGrey.png", new BMap.Size(60, 60), {
-                    // 指定定位位置。
-                    // 当标注显示在地图上时，其所指向的地理位置距离图标左上
-                    // 角各偏移10像素和25像素。您可以看到在本例中该位置即是
-                    // 图标中央下端的尖角位置。
-                    // 设置图片偏移。
-                    // 当您需要从一幅较大的图片中截取某部分作为标注图标时，您
-                    // 需要指定大图的偏移位置，此做法与css sprites技术类似。
+                    imageOffset: new BMap.Size(0, 0)   // 设置图片偏移
+                });
+                var myIconCayan = new BMap.Icon("http://p5w48dhwa.bkt.clouddn.com/carCayan.png", new BMap.Size(60, 60), {
+                    imageOffset: new BMap.Size(0, 0)   // 设置图片偏移
+                });
+                var myIconYellow = new BMap.Icon("http://p5w48dhwa.bkt.clouddn.com/carYellow.png", new BMap.Size(60, 60), {
                     imageOffset: new BMap.Size(0, 0)   // 设置图片偏移
                 });
                 // 创建标注对象并添加到地图
                 if (data["car"]["id"] !== "") {
-                    var marker = new BMap.Marker(point, {icon: myIconColor, rotation: data['course']});
+                    if (data['outprovice'] == 1) {
+                        var marker = new BMap.Marker(point, {icon: myIconYellow, rotation: data['course']});
+
+                    }
+                    else if (data['device_info_new'] == 4) {
+                        var marker = new BMap.Marker(point, {icon: myIconCayan, rotation: data['course']});
+
+                    }
+                    else if (data['device_info_new'] != 0) {
+                        var marker = new BMap.Marker(point, {icon: myIconGrey, rotation: data['course']});
+
+                    }
+                    else {
+                        var marker = new BMap.Marker(point, {icon: myIconRed, rotation: data['course']});
+
+                    }
 
                 }
                 else {
@@ -87,10 +132,28 @@
                 marker.addEventListener("click", function () {
 
                     var address = "";
+                    var carStatus = "";
+                    if (data['outprovice'] == 1) {
+                        carStatus = "出省";
+
+                    }
+                    else if (data['device_info_new'] == 4) {
+                        carStatus = "静止";
+
+                    }
+                    else if (data['device_info_new'] != 0) {
+                        carStatus = "离线";
+
+                    }
+                    else {
+                        carStatus = "运动";
+
+                    }
                     if (data['car']["id"] !== "") {
+
                         var opts = {
                             width: 200,     // 信息窗口宽度
-                            height: 200,     // 信息窗口高度
+                            height: 250,     // 信息窗口高度
                             title: data['car']['name'], // 信息窗口标题
                             enableMessage: true,//设置允许信息窗发送短息
                         };
@@ -100,7 +163,7 @@
                             if (result) {
                                 address = result.address;
                             }
-                            var infoWindow = new BMap.InfoWindow("<p>目前位置：" + address + "</p><a href='" + 'car' + '/' + data['car']['id'] + "'>详细信息</a><br>" +
+                            var infoWindow = new BMap.InfoWindow("<p>目前状态：" + carStatus + "</p>" + "<p>目前速度：" + data["speed"] + "</p>" + "<p>目前位置：" + address + "</p><a href='" + 'car' + '/' + data['car']['id'] + "'>详细信息</a><br>" +
                                 "<a href='" + 'carRec' + '/' + data['car']['id'] + "'>轨迹回放</a><br>", opts);
                             map.openInfoWindow(infoWindow, point);
                         });
@@ -118,7 +181,7 @@
                             if (result) {
                                 address = result.address;
                             }
-                            var infoWindow = new BMap.InfoWindow("<p>目前位置：" + address + "</p>此设备暂未绑定车辆,请联系管理员或登陆后台修改", opts);
+                            var infoWindow = new BMap.InfoWindow("<p>目前状态：" + carStatus + "</p>" + "<p>目前速度：" + data["speed"] + "</p>" + "<p>目前位置：" + address + "</p>此设备暂未绑定车辆,请联系管理员或登陆后台修改", opts);
                             map.openInfoWindow(infoWindow, point);
                         });
                     }
@@ -132,6 +195,7 @@
             map.addControl(new BMap.ScaleControl());
             map.addControl(new BMap.OverviewMapControl());
             map.addControl(new BMap.MapTypeControl());
+            map.enableScrollWheelZoom();   //启用滚轮放大缩小，默认禁用
             var data = [];
 
             function getPoint() {
@@ -145,7 +209,27 @@
                     success: function (result) {
                         if (result['status'] == "ok") {
                             data = result['data'];
+                            var outCount = 0;
+                            var moveCount = 0;
+                            var offlineCount = 0;
+                            var stayCount = 0;
                             for (var i = 0; i < data.length; i++) {
+                                if (data[i]['outprovice'] == 1) {
+                                    outCount++;
+
+                                }
+                                else if (data[i]['device_info_new'] == 4) {
+                                    stayCount++;
+                                }
+                                else if (data[i]['device_info_new'] != 0) {
+                                    offlineCount++;
+
+                                }
+                                else {
+                                    moveCount++;
+                                }
+
+
                                 if (data[i]['device_info'] === 0) {
                                     var lng = data[i]['lng'];
                                     var lat = data[i]['lat'];
@@ -153,7 +237,10 @@
                                     addMarker(point, i, data[i]);
                                 }
                             }
-                            map.centerAndZoom(point, 15);
+                            $("#outCount").text(outCount);
+                            $("#stayCount").text(stayCount);
+                            $("#offlineCount").text(offlineCount);
+                            $("#moveCount").text(moveCount);
 
                         }
                         else {
@@ -162,10 +249,11 @@
                     }
 
                 })
-            }
+            };
 
-            getPoint()
-//        setInterval(getPoint,5000)
+            getPoint();
+            map.centerAndZoom("大连", 15);
+            setInterval(getPoint, 5000)
         });
     </script>
 {% endblock %}
