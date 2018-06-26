@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from CarAdmin.app.modules.CarSDK import CarOlineApi
+from CarSDK import CarOlineApi
 from config import *
 
 from werkzeug.contrib.cache import RedisCache

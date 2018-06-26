@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import timedelta
+MAX_CONTENT_LENGTH = 1024*1024*10
 DEBUG = False
 SQLALCHEMY_ECHO = False
 PER_PAGE = 32
