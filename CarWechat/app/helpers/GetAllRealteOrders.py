@@ -13,7 +13,13 @@ def getOrderSumData(sourceOrder,cOrders):
         countSum = countSum+co.count
         priceSum = priceSum+co.totalfee
     if sourceOrder.fromdate:
-        endDate = sourceOrder.fromdate + dt.timedelta(days=countSum)
-        endDateStr = (endDate).strftime('%Y-%m-%d %H:%M:%S')
-        overDate = (endDate-datetime.now()).seconds/60
+
+        if sourceOrder.todate:
+            endDate = sourceOrder.fromdate + dt.timedelta(days=countSum)
+            endDateStr = (endDate).strftime('%Y-%m-%d %H:%M:%S')
+            overDate = (endDate - sourceOrder.todate).seconds / 60
+        else:
+            endDate = sourceOrder.fromdate + dt.timedelta(days=countSum)
+            endDateStr = (endDate).strftime('%Y-%m-%d %H:%M:%S')
+            overDate = (endDate - datetime.now()).seconds / 60
     return {"priceSum":priceSum,"countSum":countSum,"endDate":endDateStr,"overDate":overDate}
