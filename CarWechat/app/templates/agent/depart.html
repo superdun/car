@@ -12,6 +12,49 @@
 {% endblock %}
 {% block content %}
     <div class="weui-wepay-details">
+        {% for o in continueOrders %}
+            <div class="weui-wepay-details__hd">
+                <div class="weui-wepay-details__state">
+                    <h2 class="weui-wepay-details__title">
+                        续租订单</h2>
+                    <p class="weui-wepay-details__desc">￥{{ o.totalfee/100 }}</p>
+                </div>
+            </div>
+            <div class="weui-wepay-details__bd">
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">单号：</div>
+                    <div class="weui-wepay-detail__ft">{{ o.tradeno |cutstring }}</div>
+                </div>
+
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">时间：</div>
+                    <div class="weui-wepay-detail__ft">{{ o.created_at }}</div>
+                </div>
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">支付状态：</div>
+                    <div class="weui-wepay-detail__ft">{{ orderConfig[o.status][0] }}</div>
+                </div>
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">车型：</div>
+                    <div class="weui-wepay-detail__ft">{{ o.Cartype.name }}</div>
+                </div>
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">天数：</div>
+                    <div class="weui-wepay-detail__ft">{{ o.count }}</div>
+                </div>
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">折扣：</div>
+                    <div class="weui-wepay-detail__ft">-￥{{ o.cutfee/100 }}</div>
+                </div>
+
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">总价：</div>
+                    <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ o.totalfee/100 }}</div>
+                </div>
+
+            </div>
+        {% endfor %}
+
         <div class="weui-wepay-details__hd">
             <div class="weui-wepay-details__state">
                 <h2 class="weui-wepay-details__title">
@@ -80,74 +123,39 @@
         {#            </div>#}
         {##}
         {#        {% endif %}#}
-        {% for o in continueOrders %}
-            <div class="weui-wepay-details__hd">
-                <div class="weui-wepay-details__state">
-                    <h2 class="weui-wepay-details__title">
-                        续租订单</h2>
-                    <p class="weui-wepay-details__desc">￥{{ o.totalfee/100 }}</p>
-                </div>
+
+        <div class="weui-wepay-details__hd cohead">
+            <div class="weui-wepay-details__state">
+                <h2 class="weui-wepay-details__title">
+
+                    <i class="weui-wepay-details__icon weui-icon-success"></i>
+                    总计
+
+                </h2>
             </div>
-            <div class="weui-wepay-details__bd">
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">单号：</div>
-                    <div class="weui-wepay-detail__ft">{{ o.tradeno |cutstring }}</div>
-                </div>
-
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">时间：</div>
-                    <div class="weui-wepay-detail__ft">{{ o.created_at }}</div>
-                </div>
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">支付状态：</div>
-                    <div class="weui-wepay-detail__ft">{{ orderConfig[o.status][0] }}</div>
-                </div>
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">车型：</div>
-                    <div class="weui-wepay-detail__ft">{{ o.Cartype.name }}</div>
-                </div>
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">天数：</div>
-                    <div class="weui-wepay-detail__ft">{{ o.count }}</div>
-                </div>
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">折扣：</div>
-                    <div class="weui-wepay-detail__ft">-￥{{ o.cutfee/100 }}</div>
-                </div>
-
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">总价：</div>
-                    <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ o.totalfee/100 }}</div>
-                </div>
-
+        </div>
+        <div class="weui-wepay-details__bd">
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">起始日期</div>
+                <div class="weui-wepay-detail__ft">{{ data.created_at }}</div>
             </div>
-        {% endfor %}
-        {% if  continueOrders %}
-            <div class="weui-wepay-details__hd cohead">
-                <div class="weui-wepay-details__state">
-                    <h2 class="weui-wepay-details__title">
-
-                        <i class="weui-wepay-details__icon weui-icon-success"></i>
-                        总计
-
-                    </h2>
-                </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">截止日期</div>
+                <div class="weui-wepay-detail__ft">{{ OrderSumData.endDate }}</div>
             </div>
-            <div class="weui-wepay-details__bd">
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">起始日期</div>
-                    <div class="weui-wepay-detail__ft">{{ data.created_at }}</div>
-                </div>
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">总价</div>
-                    <div class="weui-wepay-detail__ft">{{ OrderSumData.priceSum/100 }}</div>
-                </div>
-                <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">订单总天数</div>
-                    <div class="weui-wepay-detail__ft">{{ OrderSumData.countSum }}</div>
-                </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">超时/分钟</div>
+                <div class="weui-wepay-detail__ft">{{ OrderSumData.overDate }}分钟</div>
             </div>
-        {% endif %}
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">总价</div>
+                <div class="weui-wepay-detail__ft">{{ OrderSumData.priceSum/100 }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">订单总天数</div>
+                <div class="weui-wepay-detail__ft">{{ OrderSumData.countSum }}</div>
+            </div>
+        </div>
     </div>
 
     <div class="weui-cells__title">发车登记</div>
@@ -230,7 +238,7 @@
                             </ul>
                             <div class="weui-uploader__input-box">
                                 <input id="uploaderInput" class="weui-uploader__input" type="file" accept="image/*"
-                                        multiple=""/>
+                                       multiple=""/>
                             </div>
                         </div>
                     </div>

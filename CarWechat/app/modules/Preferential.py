@@ -35,7 +35,7 @@ def getDayCount(prefer,book_at,count):
     if book_at.hour < 12:
         for i in range(0, count ):
             tmpDT = book_at + datetime.timedelta(days=i)
-            if tmpDT.weekday() in (5, 6):
+            if tmpDT.weekday() in (4, 5, 6):
                 result['weekend'] = result['weekend'] + 1
             else:
                 result['weekday'] = result['weekday'] + 1
@@ -44,7 +44,7 @@ def getDayCount(prefer,book_at,count):
     else:
         for i in range(1, count + 1):
             tmpDT = book_at + datetime.timedelta(days=i)
-            if tmpDT.weekday() in (5, 6):
+            if tmpDT.weekday() in (4, 5, 6):
                 result['weekend'] = result['weekend'] + 1
             else:
                 result['weekday'] = result['weekday'] + 1

@@ -181,7 +181,8 @@ def orderDetail(id):
     car = order.Cartype.cars
     if current_user.is_authenticated and user and order:
         admins = getDownerAdmin(user)
-        continueOrders = Order.query.filter_by(sourceid=id).filter_by(status="ok").all()
+        continueOrders = Order.query.filter_by(sourceid=id).filter_by(status="ok").order_by(
+            Order.id.desc()).all()
         OrderSumData = getOrderSumData(order, continueOrders)
         orderConfig = getOrderConfig()
         if order.Serverstop.userid not in ([x.id for x in admins]):
