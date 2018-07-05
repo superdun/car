@@ -209,6 +209,7 @@ def formatPayAt(patAt):
 
 
 class OrderView(AdminModel):
+    can_export = True
     @property
     def can_refund(self):
         self.id = request.args.get('id')
