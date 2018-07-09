@@ -144,10 +144,10 @@ class UserView(AdminModel):
     form_extra_fields = {
         'password': PasswordField(u'密码')
     }
-    column_labels = dict(name=u'用户名', password=u'密码', Userrole=u'角色',upid = u"上级")
-    column_list = ("id","name", 'Userrole','upid')
-    form_columns = ("name", "password", 'Userrole', 'openid','upid')
-    column_editable_list = ("name", "Userrole", "upid", 'openid')
+    column_labels = dict(name=u'用户名', password=u'密码', Userrole=u'角色',upid = u"上级",phone=u"电话")
+    column_list = ("id","name", 'Userrole','upid','phone')
+    form_columns = ("name", "password", 'Userrole', 'openid','upid','phone')
+    column_editable_list = ("name", "Userrole", "upid", 'openid','phone')
     def on_model_change(self, form, model, is_created):
         password = model.password
         md5 = hashlib.md5()

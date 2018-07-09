@@ -249,6 +249,7 @@ class User(db.Model):
     accidents = db.relationship('Accident', backref='User', lazy='dynamic')
     moves = db.relationship('Move', backref='User', lazy='dynamic')
     applies = db.relationship('Apply', backref='User', lazy='dynamic')
+    phone = db.Column(db.String(80))
     def __repr__(self):
         return self.name
 

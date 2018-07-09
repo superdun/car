@@ -13,6 +13,8 @@ from datetime import datetime
 from flask_qiniustorage import Qiniu
 from app import db
 from ..helpers.thumb import upload_file
+from ..modules.SMS import sendSMS
+
 
 agentapi = Blueprint('agentapi', __name__)
 
@@ -66,8 +68,13 @@ def departApi():
         order.proofimg = proofimg
         order.carendimg = carendimg
         order.carbeforeimg = carbeforeimg
+
         db.session.add(order)
         db.session.commit()
+        num = order.Customer.phone
+        msg = '{"carname": "%s","agentname":"%s","agentnumber":"%s"}' % (order.Car.name,user.name,user.phone)
+        sendResult = sendSMS('depart', num, msg.decode('utf8')).send()
+        print sendResult
         return jsonify({"status": "ok"})
     else:
         return jsonify({"status": "error"})
