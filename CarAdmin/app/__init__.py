@@ -3,11 +3,12 @@ from flask import Flask,render_template,request
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 import flask_login
+from flask_babelex import Babel
 
 db = SQLAlchemy()
 admin = Admin()
 login_manager = flask_login.LoginManager()
-
+babel = Babel()
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -22,6 +23,7 @@ def create_app():
 
     login_manager.init_app(app)
 
+    babel.init_app(app)
     from  models.dbORM import Loginrecord
     from  models.dbORM import User as U
     def getusers():
@@ -78,10 +80,15 @@ def create_app():
         db.session.commit()
         # DO NOT ever store passwords in plaintext and always compare password
         # hashes using constant-time comparison!
+        import hashlib
+        md5 = hashlib.md5()
+        md5.update(request.form['password'])
 
-        user.is_authenticated = (request.form['password'] == users[username]['password'])
+        if md5.hexdigest() == users[username]['password']:
+            return user
+        else:
+            return None
 
-        return user
 
     # 注册蓝本
     from views import Web, Api, Login
