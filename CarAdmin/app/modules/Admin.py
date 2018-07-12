@@ -222,20 +222,19 @@ class OrderView(AdminModel):
             return False
     column_searchable_list = ("Customer.name",)
 
-    column_labels = dict(created_at=u'创建时间', tradetype=u'交易类型', Cartype=u'车辆型号'
-                         , totalfee=u'总价', Customer=u'客户', status=u'订单状态', pay_at=u'付款时间', fromdate=u'起租时间',
+    column_labels = dict(created_at=u'创建时间', tradetype=u'交易类型', Cartype=u'车辆型号',cartype=u"车型",car=u"车牌"
+                         , totalfee=u'总价', Customer=u'客户', customer=u'客户',status=u'订单状态', pay_at=u'付款时间', fromdate=u'起租时间',
                          todate=u'交还时间',
-                         isrefund=u'是否退款', r_pay_at=u'退款时间', r_totalfee=u'退款金额', offlinefee=u'金额/分', cutfee=u"折扣价格",
+                          offlinefee=u'金额/分', cutfee=u"折扣价格",
                          oldfee=u"原始价格", Preferential=u"所用优惠", proofimg=u"存证图片", carbeforeimg=u"交车图片",
-                         carendimg=u"还车图片", Car=u"分配车辆", location=u"订车位置", Serverstop=u"所选服务站", count=u"天数",
-                         Insure=u"保险", insurefee=u"保险价格", carfee=u"车费",tradeno=u"订单号",book_at=u"预约时间")
+                         carendimg=u"还车图片", Car=u"分配车辆", location=u"订车位置", Serverstop=u"所选服务站", serverstop=u"服务站", count=u"天数",
+                         Insure=u"保险", insurefee=u"保险价格", carfee=u"车费",tradeno=u"订单号",book_at=u"预约时间",name=u"名")
 
     edit_template = 'admin/order.html'
     column_list = (
         "id", "tradeno","created_at", "tradetype", "Cartype", "count", "oldfee", "cutfee", "insurefee", "totalfee", "Customer",
         "status", "pay_at", "fromdate",
-        "todate",
-        "isrefund", "r_pay_at", "r_totalfee", "Car", "Serverstop", "location", "Insure","book_at")
+        "todate",  "Car", "Serverstop", "location", "Insure","book_at")
     form_columns = (
         "offlinefee", "fromdate", "todate", "Customer", "Cartype", "Car", "Serverstop", "location", 'proofimg',
         'carbeforeimg', 'carendimg')
