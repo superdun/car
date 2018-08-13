@@ -272,7 +272,8 @@
                 $('#stared').raty({
                     starType: 'img',
                     path: "{{ url_for("static",filename='img/') }}",
-                    readonly:true,
+                    readOnly:true,
+                    starOff:  'star-on.png',
                     number:{{ data.star }}
                 });
             }
