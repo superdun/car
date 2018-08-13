@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="pragma" content="no-cache">
+
+    <meta http-equiv="cache-control" content="no-cache">
+
+    <meta http-equiv="expires" content="">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <!--Import Google Icon Font-->
     <link href="https://cdn.bootcss.com/material-design-icons/3.0.1/iconfont/material-icons.min.css" rel="stylesheet">
@@ -86,7 +91,7 @@
     var bodyHeight = document.body.clientHeight;
     var tabHeight = $(".weui-tabbar").height();
     var navHeight = $("#tabitem").height();
-    $(".weui-tab__panel").height(bodyHeight-tabHeight-navHeight-20);
+    $(".weui-tab__panel").height(bodyHeight - tabHeight - navHeight - 20);
 </script>
 {% block script %}{% endblock %}
 </body>
