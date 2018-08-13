@@ -39,6 +39,14 @@
             </div>
 
         </div>
+                <div class="weui-cell">
+            <div class="weui-cell__hd"><label class="weui-label">推荐人手机号 </label></div>
+
+            <div class="weui-cell__bd">
+                <input id="referee" class="weui-input" type="text" placeholder="输入推荐人手机号"/>
+            </div>
+
+        </div>
         <div class="weui-cell weui-cell_vcode">
             <div class="weui-cell__hd">
                 <label class="weui-label">手机号</label>
@@ -168,6 +176,7 @@
                         formData.append('idCode', $('#idCode').removeClass('weui-cell_warn').val());
                         formData.append('vCode', $('#vCode').removeClass('weui-cell_warn').val());
                         formData.append('phone', $('#phone').removeClass('weui-cell_warn').val());
+                        formData.append('referee', $('#referee').removeClass('weui-cell_warn').val());
                         $('#name').parent().parent().removeClass('weui-cell_warn');
                         $('#driveage').parent().parent().removeClass('weui-cell_warn');
                         $('#idCode').parent().parent().removeClass('weui-cell_warn');

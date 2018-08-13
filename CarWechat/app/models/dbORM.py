@@ -92,6 +92,7 @@ class Customer(db.Model):
     phone = db.Column(db.String(800), unique=True)
     status = db.Column(db.String(800), default="pending")
     olduser =  db.Column(db.Integer, default=0)
+    integral = db.Column(db.Integer, default=0)
     @property
     def is_authenticated(self):
         return True
@@ -202,6 +203,9 @@ class Order(db.Model):
     ordertype = db.Column(db.String(800))
     sourceid = db.Column(db.Integer)
     hascontinue = db.Column(db.Integer, default=0)
+    integralfee = db.Column(db.Integer)
+    integtalused = db.Column(db.Integer)
+    star = db.Column(db.Integer)
     def __repr__(self):
         return self.tradeno
 
@@ -342,3 +346,10 @@ class Userrole(db.Model):
         return self.name
 
 # POST
+class Integral(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ration = db.Column(db.Float, default=1)
+    name = db.Column(db.String(80))
+
+    def __repr__(self):
+        return self.name

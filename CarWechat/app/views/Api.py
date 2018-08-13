@@ -12,21 +12,23 @@ from wechatpy.exceptions import (
     InvalidSignatureException,
     WeChatPayException
 )
+from ..modules.Integral import *
 import datetime as dt
-from datetime import datetime
+from datetime import datetime as dtt
 from wechatpy.utils import timezone
 import time
 import json
 import random
 from ..modules.Preferential import getFees
 from ..modules.Limit import checkLimit
+
 from app import db
 
 api = Blueprint('api', __name__)
 
 
 def getOutTradeNo():
-    now = datetime.fromtimestamp(time.time(), tz=timezone('Asia/Shanghai'))
+    now = dtt.fromtimestamp(time.time(), tz=timezone('Asia/Shanghai'))
     return '{0}{1}{2}'.format(
         current_app.config.get("WECHAT_MCH_ID"),
         now.strftime('%Y%m%d%H%M%S'),
@@ -59,6 +61,7 @@ def profileApi():
         elif len(request.form['name']) == 0:
             filter_list.append("name")
     name = request.form['name']
+    driveage = 0
     if request.form['driveage'].isnumeric():
         driveage = int(request.form['driveage'])
     else:
@@ -66,7 +69,7 @@ def profileApi():
     phone = request.form['phone']
 
     idCode = request.form['idCode']
-
+    referee = request.form['referee']
     # md5 = hashlib.md5()
     # md5.update(request.form['password'])
     # psswd = md5.hexdigest()
@@ -83,6 +86,20 @@ def profileApi():
         return jsonify({'status': 'alert', 'msg': '身份证验证服务器出错，请稍后重试'})
     elif not idCodeVerifyResult['isok']:
         return jsonify({'status': 'alert', 'msg': '身份证姓名不匹配'})
+    recomendIntegral=0
+    recomendedIntegral=0
+    if referee:
+        refereeCustomer = Customer.query.filter_by(phone=referee).first()
+        if refereeCustomer:
+            recomendIntegral = getRecomend()
+            recomendedIntegral = getRecomended()
+            refereeCustomer.integral = refereeCustomer.integral + recomendIntegral
+            db.session.add(refereeCustomer)
+            db.session.commit()
+        else:
+            return jsonify({'status': 'alert', 'msg': '推荐人不存在，请检查'})
+
+    signIntegral = getSign()
     if flask_login.current_user.is_authenticated:
         customer = Customer.query.filter_by(openid=flask_login.current_user.openid).first()
         if customer:
@@ -94,10 +111,10 @@ def profileApi():
             customer.status = 'normal'
         else:
             customer = Customer(name=name, phone=phone, driveage=driveage, idcode=idCode,
-                                status='normal', created_at=datetime.now())
+                                status='normal', created_at=dtt.now(), integral=signIntegral + recomendedIntegral)
     else:
         customer = Customer(name=name, phone=phone, driveage=driveage, idcode=idCode, status='normal',
-                            created_at=datetime.now())
+                            created_at=dtt.now(), integral=signIntegral + recomendedIntegral)
     try:
         db.session.add(customer)
         db.session.commit()
@@ -149,18 +166,23 @@ def getPayResult():
                 order.status = "ok"
 
                 order.Customer.olduser = 1
-                sourceOrderId =order.id
-                if order.ordertype=="continue":
-                    sourceOrder = Order.query.filter_by(id = order.sourceid).first()
+                sourceOrderId = order.id
+                if order.ordertype == "continue":
+                    sourceOrder = Order.query.filter_by(id=order.sourceid).first()
                     sourceOrder.hascontinue = 1
                     db.session.add(sourceOrder)
                     sourceOrderId = sourceOrder.id
                 else:
                     order.orderstatus = "start"
-
+                cIntegral = order.Customer.integral
+                integralImprove = getIntegralImprove(order.totalfee)
+                order.Customer.integral = integralImprove + cIntegral
                 db.session.add(order)
                 db.session.commit()
-                wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单",current_app.config.get('WECHAT_HOST') +url_for("agentweb.wechatCodeOrder",id=sourceOrderId))
+
+                wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单",
+                                       current_app.config.get('WECHAT_HOST') + url_for("agentweb.wechatCodeOrder",
+                                                                                       id=sourceOrderId))
 
     else:
         rr = wxPay.close(r["out_trade_no"])
@@ -177,38 +199,35 @@ def getOrderApi():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
 
-
-
     location = request.form.get("location")
     serverstop = request.form.get("serverstop")
     insureid = request.form.get("insureid")
     book_at = request.form.get("book_at")
 
     insure = Insure.query.filter_by(id=insureid).first()
-
+    hasntegral = request.form.get("hasIntegral")
     if serverstop and serverstop.isnumeric():
         serverstop = int(serverstop)
     else:
         return jsonify({'status': 'error', 'code': 7, 'msg': "请选择最近的服务站"})
-    import datetime as dt
     from ..modules.Limit import dateCounvert
     # book_at = "2018-05-27T08:30:45"
 
-    if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
-        ordertype="continue"
+    if request.form.get("iscontinue") == "true" and request.form.get("orderid").isnumeric():
+        ordertype = "continue"
         sourceid = int(request.form.get("orderid"))
-        sourceOrder = Order.query.filter_by(id = sourceid).first()
+        sourceOrder = Order.query.filter_by(id=sourceid).first()
         sourceFromDate = sourceOrder.fromdate
         if not sourceFromDate:
             return jsonify({'status': 'error', 'code': 9, 'msg': "尚未发车，不能续租"})
         continueOrders = Order.query.filter_by(sourceid=sourceid).filter_by(status="ok").all()
         OrderSumData = getOrderSumData(sourceOrder, continueOrders)
-        book_at = (sourceFromDate+ dt.timedelta(days=OrderSumData["countSum"])).strftime('%Y-%m-%dT%H:%M:%S')
+        book_at = (sourceFromDate + datetime.timedelta(days=OrderSumData["countSum"])).strftime('%Y-%m-%dT%H:%M:%S')
     else:
-        ordertype="normal"
+        ordertype = "normal"
         sourceid = None
     if not book_at:
-        book_at = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+        book_at = dtt.now().strftime('%Y-%m-%dT%H:%M:%S')
     else:
         pass
         # try:
@@ -219,7 +238,7 @@ def getOrderApi():
 
     checkResult = checkLimit(carTypeId, count, book_at)
     if checkResult["limit"]:
-        return  jsonify({'status': 'error', 'code': 6, 'msg': checkResult['msg']})
+        return jsonify({'status': 'error', 'code': 6, 'msg': checkResult['msg']})
     if (not carTypeId) or (not count):
         return jsonify({'status': 'error', 'code': 1, 'msg': "参数错误"})
     car = Cartype.query.filter_by(id=int(carTypeId)).first()
@@ -237,7 +256,7 @@ def getOrderApi():
     oldfee = carfee
     cutfee = 0
     open_id = flask_login.current_user.openid
-    prefer = getFees(carTypeId, count, carfee,open_id,book_at)
+    prefer = getFees(carTypeId, count, carfee, open_id, book_at)
     preferentialid = None
     if prefer['isprefer']:
         carfee = prefer['newfee']
@@ -252,12 +271,21 @@ def getOrderApi():
         ins_id = None
         insurefee = 0
     totalfee = carfee + insurefee
+    integralfee = 0
+    integtalused = 0
+    if hasntegral == 'true':
+        getIntegralResult = getIntegralCut(open_id, totalfee)
+        integralfee = getIntegralResult["cut"]
+        totalfee = totalfee - integralfee
+        integtalused = getIntegralResult["used"]
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
 
-    order = Order(created_at=datetime.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
-                  tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee, preferentialdetail=json.dumps(prefer),
+    order = Order(created_at=dtt.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
+                  tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee,
+                  preferentialdetail=json.dumps(prefer),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
-                  book_at=book_at,ordertype=ordertype,sourceid=sourceid)
+                  book_at=book_at, ordertype=ordertype, sourceid=sourceid, integralfee=integralfee,
+                  integtalused=integtalused)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
@@ -266,9 +294,9 @@ def getOrderApi():
                                      user_id=open_id, out_trade_no=out_trade_no, )
 
     except WeChatPayException, e:
-        e = Error(msg=e.errmsg, type=4)
+        err = Error(msg=e.errmsg, type=4)
         # models.session.add(order)
-        db.session.add(e)
+        db.session.add(err)
         db.session.commit()
         return jsonify({'status': 'failed', 'orderId': order.id, 'msg': u"订单创建失败"})
     if oresult['return_code'] == 'SUCCESS':
@@ -277,7 +305,7 @@ def getOrderApi():
         order.tradeno = out_trade_no
         order.status = 'waiting'
         order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
-        if order.ordertype!="continue":
+        if order.ordertype != "continue":
             car.count = car.count - 1
         db.session.add(order)
         db.session.add(car)
@@ -351,15 +379,15 @@ def getPreferential():
     carTypeId = request.form.get("id")
     count = request.form.get("count")
     book_at = request.form.get("book_at")
-    if request.form.get("iscontinue")=="true" and request.form.get("orderid").isnumeric():
+    if request.form.get("iscontinue") == "true" and request.form.get("orderid").isnumeric():
         sourceid = int(request.form.get("orderid"))
-        sourceOrder = Order.query.filter_by(id = sourceid).first()
+        sourceOrder = Order.query.filter_by(id=sourceid).first()
         sourceFromDate = sourceOrder.fromdate
         if not sourceFromDate:
             return jsonify({'status': 'error', 'code': 9, 'msg': "尚未发车，不能续租"})
         continueOrders = Order.query.filter_by(sourceid=sourceid).filter_by(status="ok").all()
         OrderSumData = getOrderSumData(sourceOrder, continueOrders)
-        book_at = (sourceFromDate+ dt.timedelta(days=OrderSumData["countSum"])).strftime('%Y-%m-%dT%H:%M:%S')
+        book_at = (sourceFromDate + dt.timedelta(days=OrderSumData["countSum"])).strftime('%Y-%m-%dT%H:%M:%S')
     # book_at = "2018-06-15T11:59:47"
     if not book_at:
         book_at = ""
@@ -374,7 +402,7 @@ def getPreferential():
         return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
     openid = flask_login.current_user.openid
     totalfee = int(car.price) * int(count)
-    prefer = getFees(carTypeId, count, totalfee,openid,book_at)
+    prefer = getFees(carTypeId, count, totalfee, openid, book_at)
     return jsonify(prefer)
 
 
@@ -396,3 +424,59 @@ def getrecount():
     if car.count == 0:
         return jsonify({'status': 'failed'})
     return jsonify({'status': 'ok'})
+
+
+# @api.route('/integral/<id>')
+# @flask_login.login_required
+# def getintegral(id):
+#     customer = Customer.query.filter_by(id=id).first()
+#     if customer and customer.openid == flask_login.current_user.openid:
+#         return jsonify({"status": "ok","integral":customer.integral})
+#     else:
+#         return jsonify({"status":"failed"})
+
+@api.route('/integralration/<type>')
+@flask_login.login_required
+def getintegralration(type):
+    if type == 1:
+        integral = Integral.query.filter_by(name=u"积分").first()
+    elif type == 2:
+        integral = Integral.query.filter_by(name=u"返点").first()
+    else:
+        integral = Integral.query.filter_by(name=u"兑现").first()
+    if integral:
+        return jsonify({"status": "ok", "ration": integral.ration})
+    else:
+        return jsonify({"status": "failed"})
+
+
+@api.route('/integral', methods=['POST'])
+@flask_login.login_required
+def getintegral():
+    fee = request.form.get("fee")
+
+    result = getIntegralCut(flask_login.current_user.openid, fee)
+    return jsonify({"status": "ok", "result": result})
+
+@api.route('/star/<id>')
+@flask_login.login_required
+def getStar(id):
+    order = Order.query.filter_by(id=id).first()
+    starCount = int(request.args.get("starCount"))
+    if order and order.Customer.openid == flask_login.current_user.openid and order.ordertype=="normal":
+        if not order.star and starCount<=5 and starCount>0:
+            order.star = starCount
+            commentIntegral = getComment()
+            commentedIntegral = getCommented(starCount)
+            order.Customer.integral = order.Customer.integral+commentIntegral
+            db.session.add(order)
+            db.session.commit()
+            user = User.query.filter_by(id = order.Serverstop.userid).first()
+            if user:
+                customer = Customer.query.filter_by(openid=user.openid).first()
+                if customer:
+                    customer.integral = customer.integral+commentedIntegral
+                    db.session.add(customer)
+                    db.session.commit()
+            return jsonify({"status": "ok","integral":commentIntegral})
+    return jsonify({"status": "error"})

@@ -238,14 +238,17 @@ def cart(id):
             wxJSSDKConfig = getJSSDK(url)
 
             CarType = Cartype.query.filter(Cartype.status != "deleted" and Cartype.id == id).first()
-
+            integralSwitch = Integral.query.filter_by(name=u"开关").first()
+            integralIsOpen = False
+            if  integralSwitch and int(integralSwitch.ration) == 1:
+                integralIsOpen = True
             if isContinue == "true":
                 orderid = int(request.args.get("orderid"))
                 sourceOrder = Order.query.filter_by(id=orderid).first()
                 if not sourceOrder.fromdate:
                     return returnError("您的订单尚未配送发车，无法续租")
                 return render_template('car/continuecart.html', carData=CarType, wxJSSDKConfig=wxJSSDKConfig,
-                                       imgDomain="http://%s" % getQiniuDomain(), sourceOrder=sourceOrder)
+                                       imgDomain="http://%s" % getQiniuDomain(), sourceOrder=sourceOrder,integralIsOpen=integralIsOpen)
                 # try:
                 #
                 #
@@ -268,7 +271,7 @@ def cart(id):
             if not CarType:
                 return returnError("该车型暂时已满员，请选择其他车辆")
             return render_template('car/cart.html', carData=CarType, wxJSSDKConfig=wxJSSDKConfig,
-                                   imgDomain="http://%s" % getQiniuDomain(), serverstop=ServerStop, insure=InSure)
+                                   imgDomain="http://%s" % getQiniuDomain(), serverstop=ServerStop, insure=InSure,integralIsOpen=integralIsOpen)
         else:
             return redirect(url_for("web.wechatSign"))
 

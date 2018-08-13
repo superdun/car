@@ -9,7 +9,9 @@ from wechatpy.exceptions import (
     InvalidSignatureException,
     WeChatPayException
 )
-from datetime import datetime
+from ..modules.Integral import *
+from datetime import datetime as dtt
+from ..helpers.GetAllRealteOrders import getOrderSumData
 from flask_qiniustorage import Qiniu
 from app import db
 from ..helpers.thumb import upload_file
@@ -32,7 +34,7 @@ def departApi():
     imgList = json.loads(request.form.get("imgList"))
 
     if not depart_time:
-        depart_time = datetime.now()
+        depart_time = dtt.now()
     else:
         from ..modules.Limit import dateCounvert
         depart_time = dateCounvert(depart_time)
@@ -90,7 +92,7 @@ def backApi():
     orderid = request.form.get("orderid")
     kmafter = request.form.get("kmafter")
     if not back_time:
-        back_time = datetime.now()
+        back_time = dtt.now()
     else:
         from ..modules.Limit import dateCounvert
         back_time = dateCounvert(back_time)
@@ -105,9 +107,18 @@ def backApi():
     except:
         return jsonify({"status": "error"})
     order = Order.query.filter_by(id=orderid).first()
+    continueOrders = Order.query.filter_by(sourceid=order.id).filter_by(status="ok").all()
+    OrderSumData = getOrderSumData(order, continueOrders)
+    integral = getCarBack(OrderSumData["priceSum"])
+
+
     cartype = order.Cartype
     cartype.count = cartype.count + 1
     if current_user.is_authenticated and user and order:
+        agent = Customer.query.filter_by(openid=current_user.openid).first()
+        if agent:
+            agent.integral = agent.integral+integral
+
         admins = AgentWeb.getDownerAdmin(user)
         if order.Serverstop.userid not in ([x.id for x in admins]):
             return jsonify({"status": "error"})
@@ -119,7 +130,7 @@ def backApi():
         order.orderstatus = "finish"
         db.session.add(order)
         db.session.add(cartype)
-
+        db.session.add(agent)
         db.session.commit()
         return jsonify({"status": "ok"})
     else:
@@ -139,7 +150,7 @@ def accidentApi():
     orderid = request.form.get("orderid")
     imgList = json.loads(request.form.get("imgList"))
     if not created_at:
-        created_at = datetime.now()
+        created_at = dtt.now()
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
@@ -206,7 +217,7 @@ def moveApi():
     tokm = request.form.get("tokm")
 
     if not created_at:
-        created_at = datetime.now()
+        created_at = dtt.now()
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)
@@ -255,7 +266,7 @@ def applyApi():
     comment = request.form.get("comment")
 
     if not created_at:
-        created_at = datetime.now()
+        created_at = dtt.now()
     else:
         from ..modules.Limit import dateCounvert
         created_at = dateCounvert(created_at)

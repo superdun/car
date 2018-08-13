@@ -94,7 +94,6 @@ class AdminModel(ModelView):
         else:
             return False
 
-
 # super admin models
 class AccidentView(AdminModel):
     can_edit = False
@@ -122,7 +121,9 @@ class CarView(AdminModel):
     }
     column_searchable_list = ("name",)
 
-
+class IntegralView(AdminModel):
+    can_edit = False
+    column_editable_list = ("ration",)
 class GpsView(AdminModel):
     column_labels = dict(cars=u"车辆", code=u'设备码')
 

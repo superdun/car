@@ -92,7 +92,14 @@
 
 
         </div>
-
+        {% if integralIsOpen %}
+            <label for="integralAgree" class="weui-agree" style="display: none;" id="integralAgreeLabel">
+                <input id="integralAgree" type="checkbox" class="weui-agree__checkbox">
+                <span class="weui-agree__text" id="integralAgreeText">
+            使用积分抵扣
+    </span>
+            </label>
+        {% endif %}
 
         <label for="weuiAgree" class="weui-agree">
             <input id="weuiAgree" type="checkbox" class="weui-agree__checkbox">
@@ -115,6 +122,13 @@
     <script type="text/javascript" src="{{ url_for('static',filename='js/numberstepper.js') }}"></script>
 
     <script>
+        var integral = 0;
+        var sumFee = 0;
+        var hasIntegral = false;
+        function setInsure(obj) {
+            getPrefer();
+            getIntegral();
+        }
         function cancel(id) {
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelorder/' + id,
@@ -140,17 +154,51 @@
 
         $('body').on('change.numstep', '.js-numstepper', function (event, mode, value, valueOld) {
             getPrefer();
+            getIntegral();
             {#            setSum();#}
             $("#sum").css("color", 'red');
         });
         function setInsure(obj) {
-            setSum();
+            getPrefer();
+            getIntegral();
         }
-        function setSum(v) {
+
+        function setSum(v, hasntegral) {
+
             {#            var v = (100*($("#count").val() * ($("#price").text() * 1.0 + $('input[name="radio1"]:checked').attr("price") / 100.0)) - Math.abs($("#cutfee").text() * 100))/100;#}
             var value = v + ($("#count").val() * $('#insure').attr("price") ) / 100.0;
-            $("#totalfee-top").html('￥' + value);
-            $("#sum").html(value)
+            sumFee = value;
+            if (hasntegral) {
+                var newValue = value - integral;
+            }
+            else {
+                var newValue = value;
+            }
+
+            $("#totalfee-top").html('￥' + newValue);
+            $("#sum").html(newValue)
+        }
+        function getIntegral() {
+            var formDataIntegral = new FormData();
+            formDataIntegral.append("fee", sumFee);
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/integral',
+                type: 'POST',
+                data: formDataIntegral,
+                contentType: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    if (data["status"] == "ok") {
+                        integral = data["result"]["cut"];
+                        $("#integralAgreeText").text("使用 " + data["result"]["used"] + " 积分抵扣 " + integral + "元");
+                        $("#integralAgreeLabel").show()
+                    }
+                    {#                    setSum(sumFee,hasIntegral);#}
+
+                }
+
+            })
         }
         function getPrefer() {
             var formDataPrefer = new FormData();
@@ -195,6 +243,8 @@
             formData.append('location', loc);
             formData.append('serverstop', serverstop);
             formData.append('insureid', "{{ sourceOrder.Insure.id }}" * 1);
+            formData.append('hasIntegral', hasIntegral);
+
             formData.append('book_at', "");
             formData.append('iscontinue', true);
             formData.append('orderid', "{{ sourceOrder.id }}");
@@ -265,6 +315,7 @@
                     onConfirm: function (result) {
                         $('#count').val(result[0]['value']);
                         getPrefer();
+                        getIntegral();
                         {#                        setSum();#}
                         $('#sum').css("color", 'red');
                     }
@@ -274,6 +325,7 @@
 
             $("#count").val(1);
             getPrefer();
+            getIntegral();
 
         });
         translateCallback = function (data) {

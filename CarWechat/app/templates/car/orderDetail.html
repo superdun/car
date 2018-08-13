@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block css %}
     <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery.raty.css') }}">
+
     <style type="text/css">
         .container {
             padding: 20px;
@@ -157,13 +159,40 @@
                 </div>
             </div>
         {% endif %}
+
         {% if data.status=="ok" %}
-                {% if  not data.todate %}
+            {% if  data.todate %}
+
+                {% if  not data.star %}
+                    <div class="weui-wepay-detail">
+                        <div class="weui-wepay-detail__bd">服务评价</div>
+                        <div id="star">
+
+                        </div>
+
+                    </div>
                     <div class="weui-wepay-details__ft">
-                        <a href="/wx/cart/{{ data.Cartype.id }}?isContinue=true&orderid={{ data.id }}"
-                           class="weui-btn weui-btn_primary" id="continue">续租</a>
+                        <a href="javascript:;" class="weui-btn weui-btn_primary" id="starSubmit">提交评价</a>
+                    </div>
+                {% else %}
+                    <div class="weui-wepay-detail">
+                        <div class="weui-wepay-detail__bd">已评价</div>
+                        <div id="stared">
+
+                        </div>
+
                     </div>
                 {% endif %}
+
+            {% endif %}
+        {% endif %}
+        {% if data.status=="ok" %}
+            {% if  not data.todate %}
+                <div class="weui-wepay-details__ft">
+                    <a href="/wx/cart/{{ data.Cartype.id }}?isContinue=true&orderid={{ data.id }}"
+                       class="weui-btn weui-btn_primary" id="continue">续租</a>
+                </div>
+            {% endif %}
 
 
             <div class="weui-wepay-details__ft">
@@ -177,7 +206,9 @@
 {% block script %}
     <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+    <script src="https://cdn.bootcss.com/raty/2.8.0/jquery.raty.js"></script>
     <script>
+        var starCount = 0;
         function refund() {
             $.ajax({
                 url: window.location.protocol + "//" + window.location.host + '/wx/api/refundapply/{{ data.id }}',
@@ -197,13 +228,55 @@
 
             })
         }
+        function starAjax() {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/star/{{ data.id }}?starCount=' + starCount,
+                type: 'get',
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        alert("评价成功，获得" + data["integral"] + "积分")
+                    }
+                    else {
+                        alert("评价失败，请稍后重试")
+                    }
+                    location.reload()
+
+                }
+
+            })
+        }
         $(document).ready(function () {
             navSelect($('#nav-order'));
+            if ($('#star')) {
+                $('#star').raty({
+                    starType: 'img',
+                    path: "{{ url_for("static",filename='img/') }}",
+                    click: function (e) {
+                        starCount = e;
+                    }
+                });
+            }
 
             $('#refund').click(function () {
                 alert("暂不能申请退款，请联系客服 4006662456");
                 {#                refund();#}
             });
+            if ($('#starSubmit')) {
+                $('#starSubmit').click(function () {
+                    starAjax();
+                });
+            }
+            if ($('#stared')) {
+                $('#stared').raty({
+                    starType: 'img',
+                    path: "{{ url_for("static",filename='img/') }}",
+                    readonly:true,
+                    number:{{ data.star }}
+                });
+            }
+
         });
 
     </script>
