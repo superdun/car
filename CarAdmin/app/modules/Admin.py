@@ -288,7 +288,7 @@ class OrderView(AdminModel):
                              insurefee=lambda v, c, m, p: None if not m.insurefee else float(m.insurefee) / 100,
                              totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
                              ordertype=lambda v, c, m, p: u"正常" if  m.ordertype=="normal" else u"续租",
-                             preToDate=lambda v, c, m, p: m.fromdate+datetime.timedelta(days=m.count) if m and m.ordertype=="normal" and m.fromdate else datetime.timedelta(days=m.count+GetMasterOrder(m.sourceid).count)+GetMasterOrder(m.sourceid).fromdate if m else "",
+                             preToDate=lambda v, c, m, p: m.fromdate+datetime.timedelta(days=m.count) if  m is not None and m.ordertype=="normal" and m.fromdate else datetime.timedelta(days=m.count+GetMasterOrder(m.sourceid).count)+GetMasterOrder(m.sourceid).fromdate if m is not None else "",
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")
