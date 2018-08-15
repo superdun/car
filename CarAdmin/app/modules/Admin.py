@@ -235,13 +235,13 @@ def formatPayAt(patAt):
 class OrderView(AdminModel):
     can_export = True
 
-    @expose('/')
-    def index(self):
-        # Get URL for the test view method
-        user_list_url = url_for('user.index_view')
-        return self.render('index.html', user_list_url=user_list_url)
+    # @expose('/')
+    # def index(self):
+    #     # Get URL for the test view method
+    #     user_list_url = url_for('user.index_view')
+    #     return self.render('index.html', user_list_url=user_list_url)
 
-    
+
     def get_query(self):
         return self.session.query(self.model).filter(self.model.status == "ok")
 
