@@ -2,8 +2,10 @@
 from ..models.dbORM import *
 def GetOrders(id):
     return Order.query.filter(Order.id==id or Order.sourceid==id).all()
+def GetMasterOrder(id):
+    return Order.query.filter_by(id=id ).first()
 def getOrderSumData(sourceOrder,cOrders):
-    import datetime as dt
+    import datetime as dtt
     from ..modules.Limit import dateCounvert
     countSum=sourceOrder.count
     priceSum = sourceOrder.totalfee
@@ -14,7 +16,7 @@ def getOrderSumData(sourceOrder,cOrders):
         countSum = countSum+co.count
         priceSum = priceSum+co.totalfee
     if sourceOrder.fromdate:
-        endDate = sourceOrder.fromdate + dt.timedelta(days=countSum)
+        endDate = sourceOrder.fromdate + dtt.timedelta(days=countSum)
         endDateStr = (endDate).strftime('%Y-%m-%d %H:%M:%S')
 
         if sourceOrder.todate:

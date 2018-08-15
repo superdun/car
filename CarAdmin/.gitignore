@@ -3,3 +3,4 @@
 instance/*
 static/upload/*
 ./.qiniu_pythonsdk_hostscache.json
+app/temp/*

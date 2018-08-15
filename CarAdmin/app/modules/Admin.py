@@ -16,11 +16,15 @@ from flask_qiniustorage import Qiniu
 from wtforms import SelectField, PasswordField
 from flask_admin import BaseView, expose
 import hashlib
+import datetime
+from ..helpers.GetAllRealteOrders import GetMasterOrder
 from app import db
 
 
 def getQiniuDomain():
     return current_app.config.get('QINIU_BUCKET_DOMAIN', '')
+
+
 def getUploadUrl():
     return current_app.config.get('UPLOAD_URL')
 
@@ -94,17 +98,26 @@ class AdminModel(ModelView):
         else:
             return False
 
+
 # super admin models
 class AccidentView(AdminModel):
     can_edit = False
-    column_labels = dict(Car=u"车牌",User=u"管理员",repaircompany=u"维修公司",theircarcode=u"对方车牌",isureaompany=u"保险公司",isureprice=u"理赔金额",theirprice=u"对方修车费用",created_at=u'创建时间')
-    column_exclude_list = ('img1','img2','img3','img4','img5','img6')
+    column_labels = dict(Car=u"车牌", User=u"管理员", repaircompany=u"维修公司", theircarcode=u"对方车牌", isureaompany=u"保险公司",
+                         isureprice=u"理赔金额", theirprice=u"对方修车费用", created_at=u'创建时间')
+    column_exclude_list = ('img1', 'img2', 'img3', 'img4', 'img5', 'img6')
+
+
 class MoveView(AdminModel):
     can_edit = False
-    column_labels = dict(created_at=u'创建时间',User=u"管理员",Car=u'车牌',fromServerstop=u'从',toServerstop=u'到',fromkm=u'发车里程',tokm=u'到达里程')
+    column_labels = dict(created_at=u'创建时间', User=u"管理员", Car=u'车牌', fromServerstop=u'从', toServerstop=u'到',
+                         fromkm=u'发车里程', tokm=u'到达里程')
+
+
 class ApplyView(AdminModel):
     can_edit = False
-    column_labels = dict(created_at=u'创建时间',User=u"管理员",Car=u'车牌',comment=u'用途')
+    column_labels = dict(created_at=u'创建时间', User=u"管理员", Car=u'车牌', comment=u'用途')
+
+
 class CarView(AdminModel):
     # Override displayed fields
     # column_list = ("title", "create_at", "view_count",
@@ -121,9 +134,12 @@ class CarView(AdminModel):
     }
     column_searchable_list = ("name",)
 
+
 class IntegralView(AdminModel):
     can_edit = False
     column_editable_list = ("ration",)
+
+
 class GpsView(AdminModel):
     column_labels = dict(cars=u"车辆", code=u'设备码')
 
@@ -131,7 +147,7 @@ class GpsView(AdminModel):
 class CustomerView(AdminModel):
     column_labels = dict(created_at=u'创建时间', name=u'姓名', gender=u'性别', idcode=u'身份证'
                          , comment=u'备注', driveage=u'驾龄', phone=u'电话', status=u'状态', histories=u"历史", orders=u'订单',
-                         image=u"头像",olduser=u"老用户")
+                         image=u"头像", olduser=u"老用户",integral=u"通力币")
     column_exclude_list = ('img', 'password')
     form_extra_fields = {
         'img': ImageUpload(u"头像", base_path=getUploadUrl(), relative_path=thumb.relativePath(),
@@ -139,16 +155,19 @@ class CustomerView(AdminModel):
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
     form_excluded_columns = ('img', 'password', 'openid', '')
-    column_searchable_list = ("name","phone")
+    column_searchable_list = ("name", "phone")
     column_editable_list = ("olduser",)
+
+
 class UserView(AdminModel):
     form_extra_fields = {
         'password': PasswordField(u'密码')
     }
-    column_labels = dict(name=u'用户名', password=u'密码', Userrole=u'角色',upid = u"上级",phone=u"电话")
-    column_list = ("id","name", 'Userrole','upid','phone')
-    form_columns = ("name", "password", 'Userrole', 'openid','upid','phone')
-    column_editable_list = ("name", "Userrole", "upid", 'openid','phone')
+    column_labels = dict(name=u'用户名', password=u'密码', Userrole=u'角色', upid=u"上级", phone=u"电话")
+    column_list = ("id", "name", 'Userrole', 'upid', 'phone')
+    form_columns = ("name", "password", 'Userrole', 'openid', 'upid', 'phone')
+    column_editable_list = ("name", "Userrole", "upid", 'openid', 'phone')
+
     def on_model_change(self, form, model, is_created):
         password = model.password
         md5 = hashlib.md5()
@@ -160,45 +179,49 @@ class PreferentialView(AdminModel):
     column_labels = dict(name=u'优惠名', password=u'密码', status=u'状态', mincount=u"最小购买数", minfee=u"最低消费额",
                          cutfee=u"固定折扣金额", discount=u"折扣率", multicount=u"是否乘数量", maxcutfee=u"最大折扣金额", cartypes=u'车型',
                          orders=u"订单",
-                         created_at=u"创建时间",justnew=u"只针对新用户",prior=u"优先级",weekday=u"只限工作日",weekend=u"只限周末",start_at=u"开始时间",end_at=u"结束时间")
+                         created_at=u"创建时间", justnew=u"只针对新用户", prior=u"优先级", weekday=u"只限工作日", weekend=u"只限周末",
+                         start_at=u"开始时间", end_at=u"结束时间")
     form_extra_fields = {
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
-    form_excluded_columns = ('orders', 'created_at','Cartype')
+    form_excluded_columns = ('orders', 'created_at', 'Cartype')
 
 
 class CartypeView(AdminModel):
     column_exclude_list = ('img')
-    form_excluded_columns = ('orders',"Insure","Preferential")
+    form_excluded_columns = ('orders', "Insure", "Preferential")
     column_labels = dict(preferentials=u"所用优惠", created_at=u'创建时间', name=u'车名', price=u'价格/分', status=u'状态',
-                         cars=u'该类车辆', Carcat=u"种类",count=u"剩余数量",Limit=u'限制类型',insures=u"保险")
+                         cars=u'该类车辆', Carcat=u"种类", count=u"剩余数量", Limit=u'限制类型', insures=u"保险")
     # column_formatters = dict(price=lambda v, c, m, p: None if not m.price else int(m.price) / 100)
     form_extra_fields = {
         'img': ImageUpload('Image', base_path=getUploadUrl(), relative_path=thumb.relativePath(),
                            url_relative_path=getQiniuDomain()),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
-    column_editable_list = ("count","Limit","preferentials")
+    column_editable_list = ("count", "Limit", "preferentials")
 
 
 class InsureView(AdminModel):
-    column_labels = dict(name=u"名称", detail=u'详情', price=u'价格/分',cartypes=u"车型")
-    form_excluded_columns = ('orders','Cartype')
+    column_labels = dict(name=u"名称", detail=u'详情', price=u'价格/分', cartypes=u"车型")
+    form_excluded_columns = ('orders', 'Cartype')
     # column_formatters = dict(price=lambda v, c, m, p: None if not m.price else int(m.price) / 100)
+
 
 class LimitView(AdminModel):
-    column_labels = dict(name=u"描述", start_at=u'起始时间', end_at=u'终止时间',mincount=u'起租天数',maxcount=u'最大天数')
+    column_labels = dict(name=u"描述", start_at=u'起始时间', end_at=u'终止时间', mincount=u'起租天数', maxcount=u'最大天数')
 
     # column_formatters = dict(price=lambda v, c, m, p: None if not m.price else int(m.price) / 100)
+
 
 class CarcatView(AdminModel):
     column_labels = dict(name=u"名称", cars=u'该类车型', Carcat=u"种类")
 
 
 class ServerstopView(AdminModel):
-    column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度",User = u'代理')
+    column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度", User=u'代理')
     form_excluded_columns = ('orders',)
     column_editable_list = ("User",)
+
 
 def formatPayAt(patAt):
     if patAt:
@@ -211,6 +234,17 @@ def formatPayAt(patAt):
 
 class OrderView(AdminModel):
     can_export = True
+
+    @expose('/')
+    def index(self):
+        # Get URL for the test view method
+        user_list_url = url_for('user.index_view')
+        return self.render('index.html', user_list_url=user_list_url)
+
+    
+    def get_query(self):
+        return self.session.query(self.model).filter(self.model.status == "ok")
+
     @property
     def can_refund(self):
         self.id = request.args.get('id')
@@ -221,33 +255,41 @@ class OrderView(AdminModel):
                 return False
         else:
             return False
+
     column_searchable_list = ("Customer.name",)
 
-    column_labels = dict(created_at=u'创建时间', tradetype=u'交易类型', Cartype=u'车辆型号',cartype=u"车型",car=u"车牌"
-                         , totalfee=u'总价', Customer=u'客户', customer=u'客户',status=u'订单状态', pay_at=u'付款时间', fromdate=u'起租时间',
+    column_labels = dict(created_at=u'创建时间', tradetype=u'交易类型', Cartype=u'车辆型号', cartype=u"车型", car=u"车牌"
+                         , totalfee=u'总价', Customer=u'客户', customer=u'客户', status=u'订单状态', pay_at=u'付款时间',
+                         fromdate=u'起租时间',
                          todate=u'交还时间',
-                          offlinefee=u'金额/分', cutfee=u"折扣价格",
+                         offlinefee=u'金额/分', cutfee=u"折扣价格",
                          oldfee=u"原始价格", Preferential=u"所用优惠", proofimg=u"存证图片", carbeforeimg=u"交车图片",
-                         carendimg=u"还车图片", Car=u"分配车辆", location=u"订车位置", Serverstop=u"所选服务站", serverstop=u"服务站", count=u"天数",
-                         Insure=u"保险", insurefee=u"保险价格", carfee=u"车费",tradeno=u"订单号",book_at=u"预约时间",name=u"名")
+                         carendimg=u"还车图片", Car=u"分配车辆", location=u"订车位置", Serverstop=u"服务站", serverstop=u"服务站",
+                         count=u"天数",
+                         Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
+                         integralfee=u"积分抵扣", ordertype=u"订单类型",preToDate=u"预计到期日")
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "tradeno","created_at", "tradetype", "Cartype", "count", "oldfee", "cutfee", "insurefee", "totalfee", "Customer",
-        "status", "pay_at", "fromdate",
-        "todate",  "Car", "Serverstop", "location", "Insure","book_at")
+        "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "insurefee", "integralfee", "totalfee",
+        "Customer",
+        "pay_at", "fromdate",
+        "todate","preToDate", "Car", "Serverstop", "book_at")
     form_columns = (
-        "offlinefee", "fromdate", "todate", "Customer", "Cartype", "Car", "Serverstop", "location", 'proofimg',
+        "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
     column_filters = (
-         "created_at","fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name"
-        )
+        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name","ordertype"
+    )
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
                              offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
                              oldfee=lambda v, c, m, p: None if not m.oldfee else float(m.oldfee) / 100,
                              cutfee=lambda v, c, m, p: None if not m.cutfee else float(m.cutfee) / 100,
                              insurefee=lambda v, c, m, p: None if not m.insurefee else float(m.insurefee) / 100,
-                             totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100)
+                             totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
+                             ordertype=lambda v, c, m, p: u"正常" if  m.ordertype=="normal" else u"续租",
+                             preToDate=lambda v, c, m, p: m.fromdate+datetime.timedelta(days=m.count) if m.ordertype=="normal" else datetime.timedelta(days=m.count+GetMasterOrder(m.sourceid).count)+GetMasterOrder(m.sourceid).fromdate ,
+                             )
 
     column_editable_list = ("fromdate", "todate", "Car")
 
@@ -266,8 +308,6 @@ class OrderView(AdminModel):
             'carendimg': ImageUpload(u'还车图片', base_path=getUploadUrl(), relative_path=thumb.relativePath(),
                                      url_relative_path=getQiniuDomain())
         }
-
-
 
 
 def on_model_change(self, form, model, is_created):
