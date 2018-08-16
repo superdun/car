@@ -281,17 +281,18 @@ class OrderView(AdminModel):
                          todate=u'交还时间',
                          offlinefee=u'金额/分', cutfee=u"折扣价格",
                          oldfee=u"原始价格", Preferential=u"所用优惠", proofimg=u"存证图片", carbeforeimg=u"交车图片",
-                         carendimg=u"还车图片", Car=u"分配车辆", location=u"订车位置", Serverstop=u"服务站", serverstop=u"服务站",
+                         carendimg=u"还车图片", Car=u"分配车辆", location=u"位置", Serverstop=u"服务站", serverstop=u"服务站",
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
-                         integralfee=u"积分抵扣", ordertype=u"订单类型", preToDate=u"预计到期日")
+                         integralfee=u"积分抵扣", ordertype=u"订单类型", preToDate=u"预计回车", kmbefore=u"发车公里", kmafter=u"收车里程",
+                         km=u"行驶里程",Owner=u"代理")
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "insurefee", "integralfee", "totalfee",
+        "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee", "totalfee",
         "Customer",
         "pay_at", "fromdate",
-        "todate", "preToDate", "Car", "Serverstop", "book_at")
+        "todate", "preToDate", "kmbefore", "kmafter", "km", "Car", "Serverstop","Owner", "book_at")
     form_columns = (
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
@@ -309,6 +310,8 @@ class OrderView(AdminModel):
                                  days=m.count) if m.ordertype == "normal" and m.fromdate  else (
                                  datetime.timedelta(days=m.count + GetMasterOrder(m.sourceid).count) + GetMasterOrder(
                                      m.sourceid).fromdate) if GetMasterOrder(m.sourceid)  else "-",
+                             km=lambda v, c, m, p: int(m.kmafter)-int(m.kmbefore) if m.kmbefore and m.kmafter else "-",
+                             Owner=lambda v, c, m, p:m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理"
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")
