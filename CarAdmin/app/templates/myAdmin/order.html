@@ -1,0 +1,66 @@
+{% extends 'admin/model/list.html' %}
+{% import 'admin/model/layout.html' as model_layout with context %}
+
+{% block model_menu_bar %}
+    <ul class="nav nav-tabs actions-nav">
+        <li class="active">
+            <a href="javascript:void(0)">{{ _gettext('List') }}{% if count %} ({{ count }}){% endif %}</a>
+        </li>
+
+        {% if admin_view.can_create %}
+            <li>
+                {%- if admin_view.create_modal -%}
+                    {{ lib.add_modal_button(url=get_url('.create_view', url=return_url, modal=True), title=_gettext('Create New Record'), content=_gettext('Create')) }}
+                {% else %}
+                    <a href="{{ get_url('.create_view', url=return_url) }}"
+                       title="{{ _gettext('Create New Record') }}">{{ _gettext('Create') }}</a>
+                {%- endif -%}
+            </li>
+        {% endif %}
+
+        {% if admin_view.can_export %}
+            {{ model_layout.export_options() }}
+        {% endif %}
+
+        {% block model_menu_bar_before_filters %}{% endblock %}
+
+        {% if filters %}
+            <li class="dropdown">
+                {{ model_layout.filter_options() }}
+            </li>
+        {% endif %}
+
+        {% if actions %}
+            <li class="dropdown">
+                {{ actionlib.dropdown(actions) }}
+            </li>
+        {% endif %}
+
+        {% if search_supported %}
+            <li>
+                {{ model_layout.search_form() }}
+            </li>
+        {% endif %}
+        <li>
+            <a class="dropdown-toggle" data-toggle="dropdown" href="javascript:void(0)">
+                快速筛选<b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+
+                <li>
+                    <a href="{{ url_for('order.yesterday') }}" >昨天</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('order.lastweek') }}" >上周</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('order.lastmonth') }}" >上月</a>
+                </li>
+            </ul>
+        </li>
+
+        {% block model_menu_bar_after_filters %}{% endblock %}
+    </ul>
+
+
+{% endblock %}

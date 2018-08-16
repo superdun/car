@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask import request
+from flask import request, redirect, url_for
 import os
 import os.path as op
 import time
@@ -18,6 +18,8 @@ from flask_admin import BaseView, expose
 import hashlib
 import datetime
 from ..helpers.GetAllRealteOrders import GetMasterOrder
+from ..helpers.ExportExcel import *
+from ..helpers.dateHelper import dateStringMakerForFilter
 from app import db
 
 
@@ -147,7 +149,7 @@ class GpsView(AdminModel):
 class CustomerView(AdminModel):
     column_labels = dict(created_at=u'创建时间', name=u'姓名', gender=u'性别', idcode=u'身份证'
                          , comment=u'备注', driveage=u'驾龄', phone=u'电话', status=u'状态', histories=u"历史", orders=u'订单',
-                         image=u"头像", olduser=u"老用户",integral=u"通力币")
+                         image=u"头像", olduser=u"老用户", integral=u"通力币")
     column_exclude_list = ('img', 'password')
     form_extra_fields = {
         'img': ImageUpload(u"头像", base_path=getUploadUrl(), relative_path=thumb.relativePath(),
@@ -234,13 +236,28 @@ def formatPayAt(patAt):
 
 class OrderView(AdminModel):
     can_export = True
+    list_template = 'myAdmin/order.html'
 
-    # @expose('/')
-    # def index(self):
-    #     # Get URL for the test view method
-    #     user_list_url = url_for('user.index_view')
-    #     return self.render('index.html', user_list_url=user_list_url)
+    @expose('/yesterday')
+    def yesterday(self):
+        # Get URL for the test view method
+        s, e = getLastYesterdayRange()
+        ds = "flt2_4=" + dateStringMakerForFilter(s) + "+to+" + dateStringMakerForFilter(e)
+        return redirect(url_for("order.index_view") + "?" + ds)
 
+    @expose('/lastweek')
+    def lastweek(self):
+        # Get URL for the test view method
+        s, e = getLastWeekRange()
+        ds = "flt2_4=" + dateStringMakerForFilter(s) + "+to+" + dateStringMakerForFilter(e)
+        return redirect(url_for("order.index_view") + "?" + ds)
+
+    @expose('/lastmonth')
+    def lastmonth(self):
+        # Get URL for the test view method
+        s, e = getLastMonthRange()
+        ds = "flt2_4=" + dateStringMakerForFilter(s) + "+to+" + dateStringMakerForFilter(e)
+        return redirect(url_for("order.index_view") + "?" + ds)
 
     def get_query(self):
         return self.session.query(self.model).filter(self.model.status == "ok")
@@ -267,19 +284,19 @@ class OrderView(AdminModel):
                          carendimg=u"还车图片", Car=u"分配车辆", location=u"订车位置", Serverstop=u"服务站", serverstop=u"服务站",
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
-                         integralfee=u"积分抵扣", ordertype=u"订单类型",preToDate=u"预计到期日")
+                         integralfee=u"积分抵扣", ordertype=u"订单类型", preToDate=u"预计到期日")
 
     edit_template = 'admin/order.html'
     column_list = (
         "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "insurefee", "integralfee", "totalfee",
         "Customer",
         "pay_at", "fromdate",
-        "todate","preToDate", "Car", "Serverstop", "book_at")
+        "todate", "preToDate", "Car", "Serverstop", "book_at")
     form_columns = (
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
     column_filters = (
-        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name","ordertype"
+        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype"
     )
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
                              offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
@@ -287,8 +304,11 @@ class OrderView(AdminModel):
                              cutfee=lambda v, c, m, p: None if not m.cutfee else float(m.cutfee) / 100,
                              insurefee=lambda v, c, m, p: None if not m.insurefee else float(m.insurefee) / 100,
                              totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
-                             ordertype=lambda v, c, m, p: u"正常" if  m.ordertype=="normal" else u"续租",
-                             preToDate=lambda v, c, m, p: m.fromdate+datetime.timedelta(days=m.count) if m.ordertype=="normal" and m.fromdate  else (datetime.timedelta(days=m.count+GetMasterOrder(m.sourceid).count)+GetMasterOrder(m.sourceid).fromdate )if GetMasterOrder(m.sourceid)  else "-",
+                             ordertype=lambda v, c, m, p: u"正常" if m.ordertype == "normal" else u"续租",
+                             preToDate=lambda v, c, m, p: m.fromdate + datetime.timedelta(
+                                 days=m.count) if m.ordertype == "normal" and m.fromdate  else (
+                                 datetime.timedelta(days=m.count + GetMasterOrder(m.sourceid).count) + GetMasterOrder(
+                                     m.sourceid).fromdate) if GetMasterOrder(m.sourceid)  else "-",
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")

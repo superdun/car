@@ -303,7 +303,9 @@
             auto: true,
             type: 'file',
             fileVal: 'fileVal',
-            compress: false,
+            compress: {
+                quality: .5
+            },
             onBeforeQueued: function (files) {
                 // `this` 是轮询到的文件, `files` 是所有文件
 

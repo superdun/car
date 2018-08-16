@@ -146,8 +146,8 @@
         var uploadCount = imgs.length;
         $("#uploadCount").text(uploadCount);
         var imgList = {};
-        for(var im=1;im<=imgs.length;im++){
-            imgList[im+""]=imgs[im-1]
+        for (var im = 1; im <= imgs.length; im++) {
+            imgList[im + ""] = imgs[im - 1]
         }
         function imgClickBind() {
             $(".weui-uploader__file").click(function () {
@@ -177,7 +177,9 @@
             auto: true,
             type: 'file',
             fileVal: 'fileVal',
-            compress: false,
+            compress: {
+                quality: .5
+            },
             onBeforeQueued: function (files) {
                 // `this` 是轮询到的文件, `files` 是所有文件
 
