@@ -104,7 +104,7 @@ class KPIView(AdminIndexView):
     def index(self):
         data = Order.query.filter_by(status="ok").all()
         SumData = getOrderSumFromAdminData(data)
-        return self.render('myadmin/KPI.html',summary_data=SumData)
+        return self.render('myAdmin/KPI.html',summary_data=SumData)
 # super admin models
 class AccidentView(AdminModel):
     can_edit = False
