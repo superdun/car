@@ -285,14 +285,14 @@ class OrderView(AdminModel):
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
                          integralfee=u"积分抵扣", ordertype=u"订单类型", preToDate=u"预计回车", kmbefore=u"发车公里", kmafter=u"收车里程",
-                         km=u"行驶里程",Owner=u"代理")
+                         km=u"行驶里程", Owner=u"代理")
 
     edit_template = 'admin/order.html'
     column_list = (
         "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee", "totalfee",
         "Customer",
         "pay_at", "fromdate",
-        "todate", "preToDate", "kmbefore", "kmafter", "km", "Car", "Serverstop","Owner", "book_at")
+        "todate", "preToDate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "Owner", "book_at")
     form_columns = (
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
@@ -310,8 +310,10 @@ class OrderView(AdminModel):
                                  days=m.count) if m.ordertype == "normal" and m.fromdate  else (
                                  datetime.timedelta(days=m.count + GetMasterOrder(m.sourceid).count) + GetMasterOrder(
                                      m.sourceid).fromdate) if GetMasterOrder(m.sourceid)  else "-",
-                             km=lambda v, c, m, p: int(m.kmafter)-int(m.kmbefore) if m.kmbefore and m.kmafter else "-",
-                             Owner=lambda v, c, m, p:m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理"
+                             km=lambda v, c, m, p: int(m.kmafter) - int(
+                                 m.kmbefore) if m.kmbefore and m.kmafter and m.kmbefore.isdigit() and m.kmafter.isdigit()
+                             else "-",
+                             Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理"
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")
