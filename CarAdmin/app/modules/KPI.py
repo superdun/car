@@ -29,8 +29,8 @@ class getKpiClass(object):
     def getFee(self, c, range):
         if range == "w":
             r = getWeekRange(c)
-            w = r[0].weekday()
-            rn = self.weekName[w]
+            w = str(r[0].month)+"/"+str(r[0].day)
+            rn = w
 
         else:
             r = getMonthRange(c)
@@ -115,7 +115,7 @@ def getKPIs(resultModel):
     getKpiObj.setOption("orderCountMonth", '#b6a2de', u"按月订单数", u"订单数")
     getKpiObj.setOption("feeWeek", '#5ab1ef ', u"按周收入", u"元")
     getKpiObj.setOption("feeMonth", '#ffb980', u"按月收入", u"元")
-    getKpiObj.setOption("feeMonth", '#d87a80', u"陆续添加中。。。。", u"")
+    getKpiObj.setOption("userMonth", '#d87a80', u"陆续添加中。。。。", u"")
 
     for i in range(count)[::-1]:
         weekOrderCount = getKpiObj.getOrderCount(i, "w")
