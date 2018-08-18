@@ -327,10 +327,11 @@ class OrderView(AdminModel):
         if template == 'myAdmin/order.html':
             # append a summary_data dictionary into kwargs
             kwargs['summary_data'] = self.get_sum()
-            filterRawList = self.current_filter[0][2].split(" ")
-            if len(filterRawList) == 5:
-                kwargs['current_filter_name'] = self.current_filter[0][1]
-                kwargs['current_filter'] = filterRawList[0]+" - "+filterRawList[3]
+            if len(self.current_filter)>=1:
+                filterRawList = self.current_filter[0][2].split(" ")
+                if len(filterRawList) == 5:
+                    kwargs['current_filter_name'] = self.current_filter[0][1]
+                    kwargs['current_filter'] = filterRawList[0] + " - " + filterRawList[3]
 
         return super(OrderView, self).render(template, **kwargs)
 
