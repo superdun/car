@@ -18,7 +18,7 @@ from flask_admin import BaseView, expose
 import hashlib
 import datetime
 from ..helpers.GetAllRealteOrders import GetMasterOrder
-from ..helpers.ExportExcel import *
+from ..helpers.ExportExcel import getLastMonthRange, getLastWeekRange, getLastYesterdayRange, getOrderSumFromAdminData
 from ..helpers.dateHelper import dateStringMakerForFilter
 from app import db
 
@@ -260,7 +260,79 @@ class OrderView(AdminModel):
         return redirect(url_for("order.index_view") + "?" + ds)
 
     def get_query(self):
-        return self.session.query(self.model).filter(self.model.status == "ok")
+        return super(OrderView, self).get_query().filter(self.model.status == "ok")
+
+    def get_count_query(self):
+        return super(OrderView, self).get_count_query().filter(self.model.status == "ok")
+
+    def get_list(self, page, sort_column, sort_desc, search, filters,
+                 execute=True, page_size=None):
+        joins = {}
+        count_joins = {}
+
+        query = self.get_query()
+        count_query = self.get_count_query() if not self.simple_list_pager else None
+
+        # Ignore eager-loaded relations (prevent unnecessary joins)
+        # TODO: Separate join detection for query and count query?
+        if hasattr(query, '_join_entities'):
+            for entity in query._join_entities:
+                for table in entity.tables:
+                    joins[table] = None
+
+        # Apply search criteria
+        if self._search_supported and search:
+            query, count_query, joins, count_joins = self._apply_search(query,
+                                                                        count_query,
+                                                                        joins,
+                                                                        count_joins,
+                                                                        search)
+
+        # Apply filters
+        if filters and self._filters:
+            query, count_query, joins, count_joins = self._apply_filters(query,
+                                                                         count_query,
+                                                                         joins,
+                                                                         count_joins,
+                                                                         filters)
+
+        # Calculate number of rows if necessary
+        count = count_query.scalar() if count_query else None
+        from sqlalchemy.orm import joinedload
+        # Auto join
+        for j in self._auto_joins:
+            query = query.options(joinedload(j))
+
+        # Sorting
+        query, joins = self._apply_sorting(query, joins, sort_column, sort_desc)
+        self.current_all_query = query
+        self.current_filter = filters
+        # Pagination
+        query = self._apply_pagination(query, page, page_size)
+
+        # Execute if needed
+        if execute:
+            query = query.all()
+
+        return count, query
+
+    def get_sum(self):
+        if self.current_all_query:
+            allData = self.current_all_query.all()
+            return getOrderSumFromAdminData(allData)
+        else:
+            return None
+
+    def render(self, template, **kwargs):
+        if template == 'myAdmin/order.html':
+            # append a summary_data dictionary into kwargs
+            kwargs['summary_data'] = self.get_sum()
+            filterRawList = self.current_filter[0][2].split(" ")
+            if len(filterRawList) == 5:
+                kwargs['current_filter_name'] = self.current_filter[0][1]
+                kwargs['current_filter'] = filterRawList[0]+" - "+filterRawList[3]
+
+        return super(OrderView, self).render(template, **kwargs)
 
     @property
     def can_refund(self):

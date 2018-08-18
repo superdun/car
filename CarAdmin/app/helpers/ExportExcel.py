@@ -1,5 +1,6 @@
 # import xlwt
-# from ..models.dbORM import *
+from ..models.dbORM import *
+from sqlalchemy import func
 import datetime
 
 def getToday():
@@ -28,3 +29,18 @@ def getLastMonthRange():
 #     fromDate = getYesterday()
 #     toDate = getToday
 #     orders = Order.query.filter_by(status="ok").filter(Order.created_at.between(fromDate,toDate)).all()
+def getOrderSumFromAdminData(data):
+    result={"oldfee":0,"cutfee":0,"integralfee":0,"totalfee":0,"count":0,"normal":0,"continue":0}
+    for d in data:
+        result["oldfee"] = result["oldfee"]+d.oldfee
+        result["cutfee"] = result["cutfee"]+d.cutfee
+        result["integralfee"] = result["integralfee"]+d.integralfee
+        result["totalfee"] = result["totalfee"]+d.totalfee
+        result["count"] = result["count"]+1
+        if d.ordertype=="normal":
+            result["normal"]=result["normal"]+1
+        else:
+            result["continue"]=result["continue"]+1
+    return result
+
+

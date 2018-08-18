@@ -1,6 +1,14 @@
 {% extends 'admin/model/list.html' %}
 {% import 'admin/model/layout.html' as model_layout with context %}
+{% block head_css %}
+    {{ super() }}
+    <style type="text/css">
 
+        .sumData {
+
+        }
+    </style>
+{% endblock %}
 {% block model_menu_bar %}
     <ul class="nav nav-tabs actions-nav">
         <li class="active">
@@ -48,13 +56,13 @@
             <ul class="dropdown-menu">
 
                 <li>
-                    <a href="{{ url_for('order.yesterday') }}" >昨天</a>
+                    <a href="{{ url_for('order.yesterday') }}">昨天</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('order.lastweek') }}" >上周</a>
+                    <a href="{{ url_for('order.lastweek') }}">上周</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('order.lastmonth') }}" >上月</a>
+                    <a href="{{ url_for('order.lastmonth') }}">上月</a>
                 </li>
             </ul>
         </li>
@@ -63,4 +71,28 @@
     </ul>
 
 
+{% endblock %}
+{% block model_list_table %}
+    {% if summary_data %}
+        <div class="panel panel-primary">
+            <div class="panel-heading">汇总 <span> {{ current_filter_name }}：{{ current_filter }}</span></div>
+            <div class="panel-body">
+
+                <table class="table table-bordered">
+                    <tr>
+                        <td class="sumData"> 合计订单: {{ summary_data.count }}</td>
+                        <td class="sumData"> 普通订单: {{ summary_data.normal }}</td>
+                        <td class="sumData"> 续租订单: {{ summary_data.continue }}</td>
+                        <td class="sumData"> 原价总计: {{ summary_data.oldfee }}</td>
+                        <td class="sumData"> 折扣总计: {{ summary_data.cutfee }}</td>
+                        <td class="sumData"> 积分抵扣总计: {{ summary_data.integralfee }}</td>
+                        <td class="sumData"> 实付总价: {{ summary_data.totalfee }}</td>
+
+                    </tr>
+                </table>
+
+            </div>
+        </div>
+    {% endif %}
+    {{ super() }}
 {% endblock %}
