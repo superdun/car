@@ -32,10 +32,10 @@ def getLastMonthRange():
 def getOrderSumFromAdminData(data):
     result={"oldfee":0,"cutfee":0,"integralfee":0,"totalfee":0,"count":0,"normal":0,"continue":0}
     for d in data:
-        result["oldfee"] = (result["oldfee"]+int(d.oldfee) )/100
-        result["cutfee"] = (result["cutfee"]+int(d.cutfee) )/100
-        result["integralfee"] = (result["integralfee"]+int(d.integralfee ) )/100
-        result["totalfee"] = (result["totalfee"]+int(d.totalfee ) )/100
+        result["oldfee"] = (result["oldfee"]+int(d.oldfee) )/100 if d.oldfee else result["oldfee"]
+        result["cutfee"] = (result["cutfee"]+int(d.cutfee) )/100  if d.cutfee else result["cutfee"]
+        result["integralfee"] = (result["integralfee"]+int(d.integralfee ) )/100 if d.integralfee else result["integralfee"]
+        result["totalfee"] = (result["totalfee"]+int(d.totalfee ) )/100 if d.totalfee else result["totalfee"]
         result["count"] = result["count"]+1
         if d.ordertype=="normal":
             result["normal"]=result["normal"]+1
