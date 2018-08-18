@@ -11,13 +11,21 @@ from wechatpy.utils import timezone
 import time
 import json
 import random
+from ..modules.Wechat import getPayApiKey
+from ..modules.KPI import getKPIs
+from wechatpy.exceptions import (
+    InvalidSignatureException,
+    WeChatPayException
+)
+from app import db
 
 api = Blueprint('api', __name__)
+
+
 def getcarApi():
     account = current_app.config.get('CAR_ACCOUNT', '')
     password = current_app.config.get('CAR_PASSWORD', '')
     return CarOlineApi(account=account, password=password)
-
 
 
 def getOutTradeNo():
@@ -44,6 +52,7 @@ def getRefundResult(s, key):
 
 
 @api.route('/api/carrec/<imei>')
+@flask_login.login_required
 def carRecApi(imei):
     started_at = request.args.get("started_at")
     ended_at = request.args.get("ended_at")
@@ -72,9 +81,8 @@ def carRecApi(imei):
 
 
 @api.route('/api/carmonitor')
+@flask_login.login_required
 def carMonitorApi():
-
-
     carObjs = Gps.query.all()
     r = []
 
@@ -82,7 +90,7 @@ def carMonitorApi():
 
         try:
             cr = cache().get(carObj.code)
-            if cr and cr !={} :
+            if cr and cr != {}:
                 r.append(cr)
         except:
             print cr
@@ -90,8 +98,8 @@ def carMonitorApi():
     return jsonify({'status': 'ok', 'msg': "ok", 'data': r})
 
 
-
 @api.route('/api/carmonitor/<id>')
+@flask_login.login_required
 def oneCarMonitorApi(id):
     carapi = getcarApi()
     carapi.getToken()
@@ -135,6 +143,7 @@ def getRefundResult():
 
 
 @api.route('/api/refreshrefundresult')
+@flask_login.login_required
 def refreshRefundResult():
     wxPay = wx.getPay()
     if wxPay.sandbox:
@@ -149,20 +158,22 @@ def refreshRefundResult():
         r = wxPay.refund.query(refund_id=refund_id, out_refund_no=out_refund_no, transaction_id=transaction_id,
                                out_trade_no=out_trade_no)
         for k in range(int(r['refund_count'])):
-            if r["refund_status_%d"%k]=="SUCCESS":
-                i.status="refunded"
-                i.r_pay_at=r["refund_success_time_%d"%k]
+            if r["refund_status_%d" % k] == "SUCCESS":
+                i.status = "refunded"
+                i.r_pay_at = r["refund_success_time_%d" % k]
                 i.r_totalfee = r["refund_fee_%d" % k]
                 i.r_detail = json.dumps(r)
                 db.session.add(i)
 
                 db.session.commit()
-    return jsonify({"status":"ok"})
+    return jsonify({"status": "ok"})
+
 
 @api.route('/api/refund/<id>')
+@flask_login.login_required
 def refundApplyApi(id):
     if flask_login.current_user.is_authenticated:
-        if request.args.get("isconfirm")=="True":
+        if request.args.get("isconfirm") == "True":
             isconfirm = True
         else:
             isconfirm = False
@@ -213,3 +224,30 @@ def refundApplyApi(id):
                 return jsonify({"status": 'failed'})
 
         return jsonify({"status": 'ok'})
+
+
+@api.route('/api/kpidata')
+@flask_login.login_required
+def GetKPIs():
+    options = {
+        b'ackgroundColor': '#eee',
+        'color': ['#3398DB'],
+        'title': {
+            'text': ""
+        },
+        'tooltip': {},
+        'legend': {
+            'data': []
+        },
+        'xAxis': {
+            'data': []
+        },
+        'yAxis': {},
+        'series': [{
+            'name': "",
+            'type': 'bar',
+            'data': []
+        }]
+    }
+
+    return jsonify(getKPIs(options))

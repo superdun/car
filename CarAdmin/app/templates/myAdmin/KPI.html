@@ -1,0 +1,109 @@
+{% extends 'admin/master.html' %}
+{% block head_meta %}
+    {{ super() }}
+    <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/echarts.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+{% endblock %}
+{% block head_css %}
+    {{ super() }}
+    <style type="text/css">
+        .chartContainer {
+            min-height: 400px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="row">
+
+        <div class="col-md-10  col-md-offset-1  ">
+            {% if summary_data %}
+                <div class="panel panel-primary">
+                    <div class="panel-heading">汇总</div>
+                    <div class="panel-body">
+
+                        <table class="table table-bordered">
+                            <tr>
+                                <td class="sumData"> 合计订单: {{ summary_data.count }}</td>
+                                <td class="sumData"> 普通订单: {{ summary_data.normal }}</td>
+                                <td class="sumData"> 续租订单: {{ summary_data.continue }}</td>
+                                <td class="sumData"> 原价总计: ￥{{ summary_data.oldfee }}</td>
+                                <td class="sumData"> 折扣总计: ￥{{ summary_data.cutfee }}</td>
+                                <td class="sumData"> 积分抵扣总计: ￥{{ summary_data.integralfee }}</td>
+                                <td class="sumData"> 实付总价: ￥{{ summary_data.totalfee }}</td>
+
+                            </tr>
+                        </table>
+
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="orderCountMonth" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="orderCountWeek" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="feeMonth" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="feeWeek" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="userMonth" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="userWeek" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="agentMonth" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="agentWeek" class="chartContainer"></div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+
+        // 基于准备好的dom，初始化echarts实例
+        var orderCountMonth = echarts.init(document.getElementById('orderCountMonth'));
+        var orderCountWeek = echarts.init(document.getElementById('orderCountWeek'));
+        var feeMonth = echarts.init(document.getElementById('feeMonth'));
+        var feeWeek = echarts.init(document.getElementById('feeWeek'));
+        var userMonth = echarts.init(document.getElementById('userMonth'));
+        var userWeek = echarts.init(document.getElementById('userWeek'));
+        var agentMonth = echarts.init(document.getElementById('agentMonth'));
+        var agentWeek = echarts.init(document.getElementById('agentWeek'));
+        // 指定图表的配置项和数据
+
+
+        // 使用刚指定的配置项和数据显示图表。
+
+        function getData() {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/api/kpidata',
+                type: 'get',
+                contentType: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    orderCountMonth.setOption(data["orderCountMonth"]);
+                    orderCountWeek.setOption(data["orderCountWeek"]);
+                    feeMonth.setOption(data["feeMonth"]);
+                    feeWeek.setOption(data["feeWeek"]);
+                    userMonth.setOption(data["userMonth"]);
+                    userWeek.setOption(data["userWeek"]);
+                    agentMonth.setOption(data["agentMonth"]);
+                    agentWeek.setOption(data["agentWeek"]);
+
+                }
+
+            })
+        }
+        getData()
+    </script>
+{% endblock %}

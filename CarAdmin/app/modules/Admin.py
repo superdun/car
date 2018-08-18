@@ -3,9 +3,8 @@ from flask import request, redirect, url_for
 import os
 import os.path as op
 import time
-from flask_admin import Admin
+from flask_admin import Admin,form, expose,AdminIndexView
 import flask_login
-from flask_admin import form
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.view import func
 from jinja2 import Markup
@@ -14,11 +13,11 @@ from ..models.dbORM import *
 from ..helpers import thumb
 from flask_qiniustorage import Qiniu
 from wtforms import SelectField, PasswordField
-from flask_admin import BaseView, expose
 import hashlib
 import datetime
 from ..helpers.GetAllRealteOrders import GetMasterOrder
-from ..helpers.ExportExcel import getLastMonthRange, getLastWeekRange, getLastYesterdayRange, getOrderSumFromAdminData
+from ..helpers.ExportExcel import getLastMonthRange, getLastWeekRange, getLastYesterdayRange
+from ..modules.KPI import getOrderSumFromAdminData
 from ..helpers.dateHelper import dateStringMakerForFilter
 from app import db
 
@@ -40,7 +39,7 @@ def img_url_format(value):
 
 
 def dashboard():
-    admin = Admin(current_app, name=u'通力后台管理')
+    admin = Admin(current_app, name=u'通力后台管理',index_view=KPIView())
     admin.add_view(UserView(User, db.session, name=u"员工管理"))
     admin.add_view(UserView1(User, db.session, name=u"个人资料", endpoint="profile"))
     admin.add_view(CarView(Car, db.session, name=u"车辆管理"))
@@ -58,7 +57,6 @@ def dashboard():
     admin.add_view(AccidentView(Accident, db.session, name=u"事故"))
     admin.add_view(MoveView(Move, db.session, name=u"调车"))
     admin.add_view(ApplyView(Apply, db.session, name=u"用车"))
-
 
 class UploadWidget(form.ImageUploadInput):
     def get_url(self, field):
@@ -100,7 +98,13 @@ class AdminModel(ModelView):
         else:
             return False
 
-
+#KPI
+class KPIView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        data = Order.query.filter_by(status="ok").all()
+        SumData = getOrderSumFromAdminData(data)
+        return self.render('myadmin/KPI.html',summary_data=SumData)
 # super admin models
 class AccidentView(AdminModel):
     can_edit = False
