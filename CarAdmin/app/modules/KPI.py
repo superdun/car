@@ -20,7 +20,7 @@ class getKpiClass(object):
         else:
             r = getMonthRange(c)
             w = r[0].month
-            rn = self.monthName[w]
+            rn = self.monthName[w-1]
 
         return [rn, Order.query.filter(
             Order.status == "ok").filter(Order.created_at >= r[0]).filter(
@@ -35,7 +35,7 @@ class getKpiClass(object):
         else:
             r = getMonthRange(c)
             w = r[0].month
-            rn = self.monthName[w]
+            rn = self.monthName[w-1]
         rawResult = Order.query.with_entities(func.sum(Order.totalfee).label('sum')).filter(
             Order.status == "ok").filter(Order.created_at >= r[0]).filter(
             Order.created_at <= r[1]).first().sum
@@ -55,7 +55,7 @@ class getKpiClass(object):
         else:
             r = getMonthRange(c)
             w = r[0].month
-            rn = self.monthName[w]
+            rn = self.monthName[w-1]
         return [rn, int(
             Order.query.with_entities(func.sum(Order.totalfee).label('sum')).filter(Order.status == "ok").filter(
                 Order.created_at >= r[0]).filter(
