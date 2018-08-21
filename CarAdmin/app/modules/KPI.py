@@ -84,7 +84,7 @@ class getKpiClass(object):
 
             else:
                 result["name"] = u'位置服务站'
-            result["value"] = int(i[1])
+            result["value"] = int(i[1])/ 100
             nameResults.append(result["name"])
             results.append(result)
         return [rn, results, nameResults]
