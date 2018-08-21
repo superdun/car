@@ -249,5 +249,22 @@ def GetKPIs():
             'data': []
         }]
     }
-
-    return jsonify(getKPIs(options))
+    optionsPie = {
+        'title': {
+            'text': "",
+            'left': 'center'
+        },
+        'tooltip': {'trigger': 'item'},
+        'legend': {
+            'bottom': 10,
+            'left': 'center',
+            'data': []
+        },
+        'series': [{
+            'name': "",
+            'type': 'pie',
+            'selectedMode': 'single',
+            'data': []
+        }]
+    }
+    return jsonify(getKPIs(options, optionsPie))
