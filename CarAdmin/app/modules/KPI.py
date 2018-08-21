@@ -105,7 +105,7 @@ class getKpiClass(object):
     def setPieOptionData(self, target, data):
         self.KpiResult[target]["title"]["text"] = data[0] + " " + self.KpiResult[target]["title"]["text"]
         self.KpiResult[target]["series"][0]["data"] = data[1]
-        self.KpiResult[target]["legend"]["data"] = data[2]
+        # self.KpiResult[target]["legend"]["data"] = data[2]
 
 
 def getOrderSumFromAdminData(data):

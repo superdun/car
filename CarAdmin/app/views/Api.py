@@ -255,11 +255,11 @@ def GetKPIs():
             'left': 'center'
         },
         'tooltip': {'trigger': 'item'},
-        'legend': {
-            'bottom': 10,
-            'left': 'center',
-            'data': []
-        },
+        # 'legend': {
+        #     'bottom': 10,
+        #     'left': 'center',
+        #     'data': []
+        # },
         'series': [{
             'name': "",
             'type': 'pie',
