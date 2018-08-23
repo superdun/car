@@ -163,7 +163,11 @@ class CustomerView(AdminModel):
     form_excluded_columns = ('img', 'password', 'openid', '')
     column_searchable_list = ("name", "phone")
     column_editable_list = ("olduser",)
+    def get_query(self):
+        return super(CustomerView, self).get_query().filter(self.model.name!=None)
 
+    def get_count_query(self):
+        return super(CustomerView, self).get_count_query().filter(self.model.name!=None)
 
 class UserView(AdminModel):
     form_extra_fields = {
@@ -204,8 +208,8 @@ class CartypeView(AdminModel):
                            url_relative_path=getQiniuDomain()),
         'status': SelectField(u'状态', choices=(("deleted", u"已删除"), ("pending", u"暂停"), ("normal", u"正常"))),
     }
-    column_editable_list = ("count", "Limit", "preferentials")
-
+    column_editable_list = ("Limit", "preferentials")
+    column_formatters = dict(count=lambda v, c, m, p: m.remind_count)
 
 class InsureView(AdminModel):
     column_labels = dict(name=u"名称", detail=u'详情', price=u'价格/分', cartypes=u"车型")

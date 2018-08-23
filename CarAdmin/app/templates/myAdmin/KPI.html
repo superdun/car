@@ -43,6 +43,9 @@
     </div>
     <div class="row">
         <div class="col-md-6 col-lg-4 col-sm-12">
+            <div id="carStatus" class="chartContainer"></div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-sm-12">
             <div id="orderCountMonth" class="chartContainer"></div>
         </div>
         <div class="col-md-6 col-lg-4 col-sm-12">
@@ -72,6 +75,7 @@
     <script type="text/javascript">
 
         // 基于准备好的dom，初始化echarts实例
+         var carStatus = echarts.init(document.getElementById('carStatus'));
         var orderCountMonth = echarts.init(document.getElementById('orderCountMonth'));
         var orderCountWeek = echarts.init(document.getElementById('orderCountWeek'));
         var feeMonth = echarts.init(document.getElementById('feeMonth'));
@@ -93,12 +97,13 @@
                 processData: false,
                 async: false,
                 success: function (data) {
+                    carStatus.setOption(data["carStatus"]);
                     orderCountMonth.setOption(data["orderCountMonth"]);
                     orderCountWeek.setOption(data["orderCountWeek"]);
                     feeMonth.setOption(data["feeMonth"]);
                     feeWeek.setOption(data["feeWeek"]);
                     agentMonth.setOption(data["agentMonth"], 'macarons');
-                    agentWeek.setOption(data["agentWeek"],'macarons');
+                    agentWeek.setOption(data["agentWeek"], 'macarons');
                     userMonth.setOption(data["userMonth"]);
                     userWeek.setOption(data["userWeek"]);
 

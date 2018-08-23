@@ -11,7 +11,7 @@ from wechatpy.exceptions import (
     InvalidSignatureException,
 )
 from ..modules import Wechat as wx
-
+from sqlalchemy import func
 import time
 import flask_login
 from datetime import datetime

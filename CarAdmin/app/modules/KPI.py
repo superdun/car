@@ -49,17 +49,17 @@ class getKpiClass(object):
     def getUserCount(self, c, range):
         if range == "w":
             r = getWeekRange(c)
-            w = r[0].weekday()
-            rn = self.weekName[w]
+            w = str(r[0].month) + "/" + str(r[0].day)
+            rn = w
 
         else:
             r = getMonthRange(c)
             w = r[0].month
             rn = self.monthName[w - 1]
         return [rn, int(
-            Order.query.with_entities(func.sum(Order.totalfee).label('sum')).filter(Order.status == "ok").filter(
-                Order.created_at >= r[0]).filter(
-                Order.created_at <= r[1]).first().sum)]
+            User.query.filter(User.name != None).filter(
+                User.created_at >= r[0]).filter(
+                User.created_at <= r[1]).count())]
 
     def getAgentFee(self, range):
         if range == "w":
@@ -88,13 +88,26 @@ class getKpiClass(object):
             nameResults.append(result["name"])
             results.append(result)
         return [rn, results, nameResults]
-
+    def getCarStatus(self):
+        rawData = Cartype.query.all()
+        nameList=[]
+        lable=[u"剩余数量",u"出租数量"]
+        remindCountList=[]
+        rentCountList=[]
+        for i in rawData:
+            nameList.append(i.name[:4])
+            remindCountList.append(i.remind_count)
+            rentCountList.append(i.rent_count)
+        return [nameList,lable,[remindCountList,rentCountList]]
     def setOption(self, target, color, title, name):
         self.KpiResult[target]["color"] = [color]
         self.KpiResult[target]["title"]["text"] = title
         self.KpiResult[target]["legend"]["data"] = [name]
         self.KpiResult[target]["series"][0]["name"] = name
-
+    def setMultiOption(self, target, title, names):
+        self.KpiResult[target]["title"]["text"] = title
+        self.KpiResult[target]["legend"]["data"] = names
+        self.KpiResult[target].pop('color', None)
     def setPieOption(self, target, title):
         self.KpiResult[target]["title"]["text"] = title
 
@@ -102,6 +115,24 @@ class getKpiClass(object):
         self.KpiResult[target]["series"][0]["data"].append(data[1])
         self.KpiResult[target]["xAxis"]["data"].append(data[0])
 
+    def setMultiOptionData(self, target, data):
+        nameList,lable, d = data
+        self.KpiResult[target]["xAxis"]["data"] = nameList
+        series=[]
+        for i in range(len(lable)):
+            series.append({
+            'name': lable[i],
+            'type': 'bar',
+            'stack': '总量',
+            'label': {
+                'normal': {
+                    'show': True,
+                    'position': 'insideRight'
+                }
+            },
+            'data': d[i]
+            })
+        self.KpiResult[target]["series"] = series
     def setPieOptionData(self, target, data):
         self.KpiResult[target]["title"]["text"] = data[0] + " " + self.KpiResult[target]["title"]["text"]
         self.KpiResult[target]["series"][0]["data"] = data[1]
@@ -130,7 +161,7 @@ def getKPIs(resultModel, optionsPieModel):
     KpiResult = {"orderCountMonth": copy.deepcopy(resultModel), "orderCountWeek": copy.deepcopy(resultModel),
                  "feeMonth": copy.deepcopy(resultModel), "feeWeek": copy.deepcopy(resultModel),
                  "userMonth": copy.copy(resultModel), "userWeek": copy.deepcopy(resultModel),
-                 "agentMonth": copy.deepcopy(optionsPieModel), "agentWeek": copy.deepcopy(optionsPieModel)}
+                 "agentMonth": copy.deepcopy(optionsPieModel), "agentWeek": copy.deepcopy(optionsPieModel),"carStatus": copy.deepcopy(resultModel)}
 
     getKpiObj = getKpiClass(KpiResult)
     getKpiObj.setOption("orderCountWeek", '#2ec7c9', u"按周订单数", u"订单数")
@@ -139,18 +170,30 @@ def getKPIs(resultModel, optionsPieModel):
     getKpiObj.setOption("feeMonth", '#ffb980', u"按月收入", u"元")
     getKpiObj.setPieOption("agentMonth", u"服务站收入情况")
     getKpiObj.setPieOption("agentWeek", u"服务站收入情况")
+    getKpiObj.setOption("userWeek", '#2ec7d9', u"按周新用户", u"用户数")
+    getKpiObj.setOption("userMonth", '#b6a2d2', u"按月新用户", u"用户数")
+    getKpiObj.setMultiOption("carStatus", u"车辆使用情况",[u"剩余数量",u"出租数量"])
+
     for i in range(count)[::-1]:
         weekOrderCount = getKpiObj.getOrderCount(i, "w")
         monthOrderCount = getKpiObj.getOrderCount(i, "m")
         weekOrderFee = getKpiObj.getFee(i, "w")
         monthOrderFee = getKpiObj.getFee(i, "m")
+        userWeekCount = getKpiObj.getUserCount(i, "m")
+        userMonthCount = getKpiObj.getUserCount(i, "w")
 
         getKpiObj.setOptionData("orderCountWeek", weekOrderCount)
         getKpiObj.setOptionData("orderCountMonth", monthOrderCount)
         getKpiObj.setOptionData("feeWeek", weekOrderFee)
         getKpiObj.setOptionData("feeMonth", monthOrderFee)
+        getKpiObj.setOptionData("userWeek", userWeekCount)
+        getKpiObj.setOptionData("userMonth", userMonthCount)
+
     monthAgentFee = getKpiObj.getAgentFee("m")
     getKpiObj.setPieOptionData("agentMonth", monthAgentFee)
     weekAgentFee = getKpiObj.getAgentFee("w")
     getKpiObj.setPieOptionData("agentWeek", weekAgentFee)
+
+    carStatus = getKpiObj.getCarStatus()
+    getKpiObj.setMultiOptionData("carStatus", carStatus)
     return getKpiObj.KpiResult

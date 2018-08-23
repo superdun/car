@@ -178,7 +178,7 @@ def orderDetail(id):
         return render_template(url_for("agentweb.error"), data={'msg': u'请登陆'})
     order = Order.query.filter_by(id=id).first()
 
-    car = order.Cartype.cars
+    car = Car.query.filter_by(typeid = order.carid).filter_by(status = "normal").all()
     if current_user.is_authenticated and user and order:
         admins = getDownerAdmin(user)
         continueOrders = Order.query.filter_by(sourceid=id).filter_by(status="ok").order_by(
@@ -248,7 +248,7 @@ def accidentDetail(id):
         cartypes = Cartype.query.all()
         data = Accident.query.filter_by(id=id).first()
         orderid = data.orderid
-        car = data.Car
+        car =  Car.query.filter_by(typeid = order.carid).filter_by(status = "normal").all()
         data.created_at = data.created_at.strftime('%Y-%m-%dT%H:%M:%S')
         imgs = [data.img1, data.img2, data.img3, data.img4, data.img5, data.img6]
         imgList = {}

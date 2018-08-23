@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
 from flask import current_app
 from datetime import datetime
-
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import select,func
 from app import db
 
 
@@ -32,6 +33,17 @@ class Cartype(db.Model):
     count = db.Column(db.Integer)
     limitid = db.Column(db.Integer, db.ForeignKey('limit.id'))
     insures = db.relationship("Insure", secondary="insurecartype", backref='Cartype', lazy='dynamic')
+
+    @hybrid_property
+    def remind_count(self):
+        # return len(self.cars)   # @note: use when non-dynamic relationship
+        return Car.query.filter(Car.typeid==self.id).filter(Car.status=="normal").count()  # @note: use when dynamic relationship
+
+    @hybrid_property
+    def rent_count(self):
+        # return len(self.cars)   # @note: use when non-dynamic relationship
+        return Car.query.filter(Car.typeid==self.id).filter(Car.status=="pending").count()  # @note: use when dynamic relationship
+
     def __repr__(self):
         return u"%s,单价%s元" % (self.name, float(self.price) / 100)
 

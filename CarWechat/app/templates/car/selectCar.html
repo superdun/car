@@ -30,7 +30,7 @@
                                     <div class="card">
                                         <div class="card-image">
                                             <img src="{{ imgDomain }}{{ d.img }}!fang">
-                                            {% if d.count==0 %}
+                                            {% if d.remind_count==0 %}
                                                 <a disabled href="{{ url_for('web.cart',id=d.id) }}"
                                                    class="btn-floating halfway-fab waves-effect waves-light blue lighten-1 addtocart"><i
                                                         class="material-icons"

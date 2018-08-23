@@ -305,8 +305,8 @@ def getOrderApi():
         order.tradeno = out_trade_no
         order.status = 'waiting'
         order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
-        if order.ordertype != "continue":
-            car.count = car.count - 1
+        # if order.ordertype != "continue":
+            # car.count = car.count - 1
         db.session.add(order)
         db.session.add(car)
         db.session.commit()
@@ -334,7 +334,8 @@ def cancelOrderApi(id):
     if rr['result_code'] == "SUCCESS":
         order.status = "canceled"
         order.detail = json.dumps(rr)
-        order.Cartype.count = order.Cartype.count + 1
+        order.Car.status="normal"
+        # order.Cartype.count = order.Cartype.count + 1
         db.session.add(order)
         db.session.commit()
         return jsonify({"status": 'ok'})

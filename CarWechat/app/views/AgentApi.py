@@ -70,7 +70,7 @@ def departApi():
         order.proofimg = proofimg
         order.carendimg = carendimg
         order.carbeforeimg = carbeforeimg
-
+        order.Car.status = "pending"
         db.session.add(order)
         db.session.commit()
         num = order.Customer.phone
@@ -113,7 +113,8 @@ def backApi():
 
 
     cartype = order.Cartype
-    cartype.count = cartype.count + 1
+    order.Car.status="normal"
+    # cartype.count = cartype.count + 1
     if current_user.is_authenticated and user and order:
         agent = Customer.query.filter_by(openid=current_user.openid).first()
         if agent:
@@ -294,7 +295,7 @@ def carsbycartypeApi():
     if not cartypeid:
         return jsonify([])
 
-    cars = Cartype.query.filter_by(id=cartypeid).first().cars
+    cars =Car.query.filter_by(typeid = cartypeid).filter_by(status = "normal").all()
     result = []
     for i in cars:
         result.append({'value': i.id, 'label': i.name})
