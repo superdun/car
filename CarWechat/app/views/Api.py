@@ -248,7 +248,7 @@ def getOrderApi():
         return jsonify({'status': 'error', 'code': 3, 'msg': "数量错误"})
     if not flask_login.current_user.is_authenticated:
         return jsonify({'status': 'error', 'code': 4, 'msg': "登陆错误"})
-    if car.count == 0:
+    if car.remind_count == 0:
         return jsonify({'status': 'error', 'code': 5, 'msg': "此车已经订完，请选择其他车辆"})
     carName = car.name
     body = u"%s*%s天" % (carName, count)
