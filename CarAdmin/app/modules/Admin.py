@@ -19,6 +19,7 @@ from ..helpers.GetAllRealteOrders import GetMasterOrder
 from ..helpers.ExportExcel import getLastMonthRange, getLastWeekRange, getLastYesterdayRange
 from ..modules.KPI import getOrderSumFromAdminData
 from ..helpers.dateHelper import dateStringMakerForFilter
+import json
 from app import db
 
 
@@ -394,7 +395,8 @@ class OrderView(AdminModel):
                              km=lambda v, c, m, p: int(m.kmafter) - int(
                                  m.kmbefore) if m.kmbefore and m.kmafter and m.kmbefore.isdigit() and m.kmafter.isdigit()
                              else "-",
-                             Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理"
+                             Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
+                             Preferential = lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if json.loads(m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-"
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")
