@@ -361,7 +361,7 @@ class OrderView(AdminModel):
                          fromdate=u'起租时间',
                          todate=u'交还时间',
                          offlinefee=u'金额/分', cutfee=u"折扣价格",
-                         oldfee=u"原始价格", Preferential=u"所用优惠", proofimg=u"存证图片", carbeforeimg=u"交车图片",
+                         oldfee=u"原始价格", Preferential=u"活动名", proofimg=u"存证图片", carbeforeimg=u"交车图片",
                          carendimg=u"还车图片", Car=u"分配车辆", location=u"位置", Serverstop=u"服务站", serverstop=u"服务站",
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
@@ -370,7 +370,7 @@ class OrderView(AdminModel):
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee", "totalfee",
+        "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee", "totalfee","Preferential",
         "Customer",
         "pay_at", "fromdate",
         "todate", "preToDate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "Owner", "book_at")
