@@ -244,8 +244,8 @@ def formatPayAt(patAt):
 
 class OrderView(AdminModel):
     can_export = True
+    export_types = ['xlsx']
     list_template = 'myAdmin/order.html'
-
     @expose('/yesterday')
     def yesterday(self):
         # Get URL for the test view method
