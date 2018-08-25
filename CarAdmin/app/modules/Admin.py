@@ -6,6 +6,7 @@ import time
 from flask_admin import Admin, form, expose, AdminIndexView
 import flask_login
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla.filters import IntEqualFilter
 from flask_admin.contrib.sqla.view import func
 from jinja2 import Markup
 from flask import current_app
@@ -276,6 +277,10 @@ def getOverDateStatus(m):
             return True
     return False
 
+class BEF(IntEqualFilter):
+    def apply(self, query, value, alias=None):
+        return query.filter(Order.OverDateStatus == value)
+
 
 class OrderView(AdminModel):
     can_export = True
@@ -419,22 +424,22 @@ class OrderView(AdminModel):
                          carendimg=u"还车图片", Car=u"分配车辆", location=u"位置", Serverstop=u"服务站", serverstop=u"服务站",
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
-                         integralfee=u"积分抵扣", ordertype=u"订单类型", preToDate=u"预计回车", kmbefore=u"发车公里", kmafter=u"收车里程",
-                         km=u"行驶里程", Owner=u"代理", OverDateStatus=u"超期状态")
+                         integralfee=u"积分抵扣", ordertype=u"订单类型",  kmbefore=u"发车公里", kmafter=u"收车里程",
+                         km=u"行驶里程", Owner=u"代理", isoverdate=u"超期状态",pretodate=u"预计回车")
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "ordertype", "OverDateStatus", "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee",
+        "id", "ordertype", 'isoverdate', "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee",
         "totalfee", "Preferential",
         "Customer",
         "pay_at", "fromdate",
-        "todate", "preToDate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "Owner", "book_at")
+        "todate", "pretodate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "Owner", "book_at")
     form_columns = (
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
     column_filters = (
-        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype","OverDateStatus"
-    )
+        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype",'isoverdate',"pretodate",)
+
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
                              offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
                              oldfee=lambda v, c, m, p: None if not m.oldfee else float(m.oldfee) / 100,
@@ -449,7 +454,7 @@ class OrderView(AdminModel):
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
                              Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if json.loads(
                                  m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
-                             OverDateStatus=lambda v, c, m, p: u"超期" if getOverDateStatus(m) else u"正常",
+                             isoverdate=lambda v, c, m, p: u"超期" if m.isoverdate==1 else u"正常",
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")

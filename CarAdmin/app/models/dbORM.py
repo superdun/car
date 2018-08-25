@@ -3,7 +3,7 @@ from flask import current_app
 from datetime import datetime
 import datetime as dt
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import select,func
+from sqlalchemy import select,func,Boolean
 from app import db
 
 
@@ -222,40 +222,8 @@ class Order(db.Model):
     integralfee = db.Column(db.Integer)
     integtalused = db.Column(db.Integer)
     star = db.Column(db.Integer)
-
-    @hybrid_property
-    def preToDate(self):
-        m = Order.query.filter_by(id=self.id).first()
-        if m.ordertype == "normal" and m.fromdate:
-            if m.hascontinue:
-                orders = Order.query.filter(Order.sourceid == self.id).all()
-                countSum=0
-                for co in orders:
-                    countSum = countSum + co.count
-                preToDate = m.fromdate + dt.timedelta(days=countSum)
-            else:
-                preToDate = m.fromdate + dt.timedelta(
-                    days=m.count)
-
-        elif Order.query.filter_by(id=m.sourceid).first() and Order.query.filter_by(id=m.sourceid).first().fromdate:
-            preToDate = dt.timedelta(days=m.count + Order.query.filter_by(id=m.sourceid).first().count) + Order.query.filter_by(id=m.sourceid).first().fromdate
-        else:
-            return None
-        return preToDate
-
-    @hybrid_property
-    def OverDateStatus(self):
-        try:
-            preToDate = self.preToDate
-            m = Order.query.filter_by(id=self.id).first()
-            if preToDate:
-                if m.todate and m.todate > preToDate:
-                    return self.id == self.id
-                elif preToDate < dt.datetime.now():
-                    return self.id == self.id
-            return self.id != self.id
-        except:
-            return self.id != self.id
+    isoverdate = db.Column(db.Integer)
+    pretodate = db.Column(db.DateTime)
 
     def __repr__(self):
         return self.tradeno
