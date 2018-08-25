@@ -43,14 +43,14 @@ def OverDateStatus(m,ptd):
 
 def update():
     session = dbORM.DBSession()
-    orders = session.query(dbORM.Order).filter(dbORM.Order.status=="ok").limit(1000).all()
+    orders = session.query(dbORM.Order).filter(dbORM.Order.status=="ok").order_by(dbORM.Order.id.desc()).limit(1000).all()
     for i in orders:
         ptd =  preToDate(i)
         ods = OverDateStatus(i,ptd)
         i.isoverdate = ods
         i.pretodate = ptd
         session.add(i)
-    session.commit()
+        session.commit()
     print "update ok"
 if __name__ == '__main__':
     update()
