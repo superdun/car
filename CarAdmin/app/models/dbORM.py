@@ -245,14 +245,17 @@ class Order(db.Model):
 
     @hybrid_property
     def OverDateStatus(self):
-        preToDate = self.preToDate
-        m = Order.query.filter_by(id=self.id).first()
-        if preToDate:
-            if m.todate and m.todate > preToDate:
-                return self.id==self.id
-            elif preToDate < datetime.now():
-                return self.id==self.id
-        return self.id!=self.id
+        try:
+            preToDate = self.preToDate
+            m = Order.query.filter_by(id=self.id).first()
+            if preToDate:
+                if m.todate and m.todate > preToDate:
+                    return self.id == self.id
+                elif preToDate < dt.datetime.now():
+                    return self.id == self.id
+            return self.id != self.id
+        except:
+            return self.id != self.id
 
     def __repr__(self):
         return self.tradeno
