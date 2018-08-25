@@ -56,17 +56,22 @@
             <ul class="dropdown-menu">
 
                 <li>
-                    <a href="{{ url_for('order.yesterday') }}">昨天</a>
+                    <a href="{{ url_for('order.yesterday') }}?{{ request.url.split("?")[-1] if "?" in request.url }}">昨天</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('order.lastweek') }}">上周</a>
+                    <a href="{{ url_for('order.lastweek') }}?{{ request.url.split("?")[-1] if "?" in request.url }}">上周</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('order.lastmonth') }}">上月</a>
+                    <a href="{{ url_for('order.lastmonth') }}?{{ request.url.split("?")[-1] if "?" in request.url }}">上月</a>
                 </li>
+
+
             </ul>
         </li>
+        <li>
+            <a href="{{ url_for('order.overdate') }}?{{ request.url.split("?")[-1] if "?" in request.url }}">超期</a>
 
+        </li>
         {% block model_menu_bar_after_filters %}{% endblock %}
     </ul>
 
@@ -80,13 +85,10 @@
 
                 <table class="table table-bordered">
                     <tr>
-                        <td class="sumData"> 合计订单: {{ summary_data.count }}</td>
-                        <td class="sumData"> 普通订单: {{ summary_data.normal }}</td>
-                        <td class="sumData"> 续租订单: {{ summary_data.continue }}</td>
                         <td class="sumData"> 原价总计: ￥{{ summary_data.oldfee }}</td>
                         <td class="sumData"> 折扣总计: ￥{{ summary_data.cutfee }}</td>
                         <td class="sumData"> 积分抵扣总计: ￥{{ summary_data.integralfee }}</td>
-                        <td class="sumData"> 实付总价: ￥{{ summary_data.totalfee }}</td>
+                        <td class="sumData"> 实际支付: ￥{{ summary_data.totalfee }}</td>
 
                     </tr>
                 </table>

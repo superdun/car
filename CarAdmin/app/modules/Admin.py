@@ -3,7 +3,7 @@ from flask import request, redirect, url_for
 import os
 import os.path as op
 import time
-from flask_admin import Admin,form, expose,AdminIndexView
+from flask_admin import Admin, form, expose, AdminIndexView
 import flask_login
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.view import func
@@ -15,7 +15,7 @@ from flask_qiniustorage import Qiniu
 from wtforms import SelectField, PasswordField
 import hashlib
 import datetime
-from ..helpers.GetAllRealteOrders import GetMasterOrder
+from ..helpers.GetAllRealteOrders import GetMasterOrder, GetContinueOrders, getOrderSumData
 from ..helpers.ExportExcel import getLastMonthRange, getLastWeekRange, getLastYesterdayRange
 from ..modules.KPI import getOrderSumFromAdminData
 from ..helpers.dateHelper import dateStringMakerForFilter
@@ -40,7 +40,7 @@ def img_url_format(value):
 
 
 def dashboard():
-    admin = Admin(current_app, name=u'通力后台管理',index_view=KPIView())
+    admin = Admin(current_app, name=u'通力后台管理', index_view=KPIView())
     admin.add_view(UserView(User, db.session, name=u"员工管理"))
     admin.add_view(UserView1(User, db.session, name=u"个人资料", endpoint="profile"))
     admin.add_view(CarView(Car, db.session, name=u"车辆管理"))
@@ -58,6 +58,7 @@ def dashboard():
     admin.add_view(AccidentView(Accident, db.session, name=u"事故"))
     admin.add_view(MoveView(Move, db.session, name=u"调车"))
     admin.add_view(ApplyView(Apply, db.session, name=u"用车"))
+
 
 class UploadWidget(form.ImageUploadInput):
     def get_url(self, field):
@@ -99,13 +100,16 @@ class AdminModel(ModelView):
         else:
             return False
 
-#KPI
+
+# KPI
 class KPIView(AdminIndexView):
     @expose('/')
     def index(self):
         data = Order.query.filter_by(status="ok").all()
         SumData = getOrderSumFromAdminData(data)
-        return self.render('myAdmin/KPI.html',summary_data=SumData)
+        return self.render('myAdmin/KPI.html', summary_data=SumData)
+
+
 # super admin models
 class AccidentView(AdminModel):
     can_edit = False
@@ -164,11 +168,13 @@ class CustomerView(AdminModel):
     form_excluded_columns = ('img', 'password', 'openid', '')
     column_searchable_list = ("name", "phone")
     column_editable_list = ("olduser",)
+
     def get_query(self):
-        return super(CustomerView, self).get_query().filter(self.model.name!=None)
+        return super(CustomerView, self).get_query().filter(self.model.name != None)
 
     def get_count_query(self):
-        return super(CustomerView, self).get_count_query().filter(self.model.name!=None)
+        return super(CustomerView, self).get_count_query().filter(self.model.name != None)
+
 
 class UserView(AdminModel):
     form_extra_fields = {
@@ -212,6 +218,7 @@ class CartypeView(AdminModel):
     column_editable_list = ("Limit", "preferentials")
     column_formatters = dict(count=lambda v, c, m, p: m.remind_count)
 
+
 class InsureView(AdminModel):
     column_labels = dict(name=u"名称", detail=u'详情', price=u'价格/分', cartypes=u"车型")
     form_excluded_columns = ('orders', 'Cartype')
@@ -243,15 +250,54 @@ def formatPayAt(patAt):
         return ""
 
 
+def getPreToDate(m):
+    if m.ordertype == "normal" and m.fromdate:
+        if m.hascontinue:
+            orders = GetContinueOrders(m.id)
+            return getOrderSumData(m, orders)["rawEndDate"]
+        else:
+            preToDate = m.fromdate + datetime.timedelta(
+                days=m.count)
+
+    elif GetMasterOrder(m.sourceid) and GetMasterOrder(m.sourceid).fromdate:
+        preToDate = datetime.timedelta(days=m.count + GetMasterOrder(m.sourceid).count) + GetMasterOrder(
+            m.sourceid).fromdate
+    else:
+        return None
+    return preToDate
+
+
+def getOverDateStatus(m):
+    preToDate = getPreToDate(m)
+    if preToDate:
+        if m.todate and m.todate > preToDate:
+            return True
+        elif preToDate < datetime.datetime.now():
+            return True
+    return False
+
+
 class OrderView(AdminModel):
     can_export = True
     export_types = ['xlsx']
     list_template = 'myAdmin/order.html'
+
+    @expose('/overdate')
+    def overdate(self):
+        # Get URL for the test view method
+        ds = "flt1_56=1"
+        if "?" in request.url:
+            args = request.url.split("?")[-1] if "?" in request.url else ""
+            return redirect(url_for("order.index_view") + "?" + args + "&" + ds)
+        return redirect(url_for("order.index_view") + "?" + ds)
     @expose('/yesterday')
     def yesterday(self):
         # Get URL for the test view method
         s, e = getLastYesterdayRange()
         ds = "flt2_4=" + dateStringMakerForFilter(s) + "+to+" + dateStringMakerForFilter(e)
+        if "?" in request.url:
+            args = request.url.split("?")[-1] if "?" in request.url else ""
+            return redirect(url_for("order.index_view") + "?" + args + "&" + ds)
         return redirect(url_for("order.index_view") + "?" + ds)
 
     @expose('/lastweek')
@@ -259,6 +305,9 @@ class OrderView(AdminModel):
         # Get URL for the test view method
         s, e = getLastWeekRange()
         ds = "flt2_4=" + dateStringMakerForFilter(s) + "+to+" + dateStringMakerForFilter(e)
+        if "?" in request.url:
+            args = request.url.split("?")[-1] if "?" in request.url else ""
+            return redirect(url_for("order.index_view") + "?" + args + "&" + ds)
         return redirect(url_for("order.index_view") + "?" + ds)
 
     @expose('/lastmonth')
@@ -266,7 +315,11 @@ class OrderView(AdminModel):
         # Get URL for the test view method
         s, e = getLastMonthRange()
         ds = "flt2_4=" + dateStringMakerForFilter(s) + "+to+" + dateStringMakerForFilter(e)
+        if "?" in request.url:
+            args = request.url.split("?")[-1] if "?" in request.url else ""
+            return redirect(url_for("order.index_view") + "?" + args + "&" + ds)
         return redirect(url_for("order.index_view") + "?" + ds)
+
 
     def get_query(self):
         return super(OrderView, self).get_query().filter(self.model.status == "ok")
@@ -336,7 +389,7 @@ class OrderView(AdminModel):
         if template == 'myAdmin/order.html':
             # append a summary_data dictionary into kwargs
             kwargs['summary_data'] = self.get_sum()
-            if len(self.current_filter)>=1:
+            if len(self.current_filter) >= 1:
                 filterRawList = self.current_filter[0][2].split(" ")
                 if len(filterRawList) == 5:
                     kwargs['current_filter_name'] = self.current_filter[0][1]
@@ -367,11 +420,12 @@ class OrderView(AdminModel):
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
                          integralfee=u"积分抵扣", ordertype=u"订单类型", preToDate=u"预计回车", kmbefore=u"发车公里", kmafter=u"收车里程",
-                         km=u"行驶里程", Owner=u"代理")
+                         km=u"行驶里程", Owner=u"代理", OverDateStatus=u"超期状态")
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "ordertype", "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee", "totalfee","Preferential",
+        "id", "ordertype", "OverDateStatus", "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee",
+        "totalfee", "Preferential",
         "Customer",
         "pay_at", "fromdate",
         "todate", "preToDate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "Owner", "book_at")
@@ -379,7 +433,7 @@ class OrderView(AdminModel):
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
     column_filters = (
-        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype"
+        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype","OverDateStatus"
     )
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
                              offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
@@ -388,15 +442,14 @@ class OrderView(AdminModel):
                              insurefee=lambda v, c, m, p: None if not m.insurefee else float(m.insurefee) / 100,
                              totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
                              ordertype=lambda v, c, m, p: u"正常" if m.ordertype == "normal" else u"续租",
-                             preToDate=lambda v, c, m, p: m.fromdate + datetime.timedelta(
-                                 days=m.count) if m.ordertype == "normal" and m.fromdate  else (
-                                 datetime.timedelta(days=m.count + GetMasterOrder(m.sourceid).count) + GetMasterOrder(
-                                     m.sourceid).fromdate) if GetMasterOrder(m.sourceid)  else "-",
+                             # preToDate=lambda v, c, m, p: getPreToDate(m),
                              km=lambda v, c, m, p: int(m.kmafter) - int(
                                  m.kmbefore) if m.kmbefore and m.kmafter and m.kmbefore.isdigit() and m.kmafter.isdigit()
                              else "-",
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
-                             Preferential = lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if json.loads(m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-"
+                             Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if json.loads(
+                                 m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
+                             OverDateStatus=lambda v, c, m, p: u"超期" if getOverDateStatus(m) else u"正常",
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")
@@ -416,6 +469,7 @@ class OrderView(AdminModel):
             'carendimg': ImageUpload(u'还车图片', base_path=getUploadUrl(), relative_path=thumb.relativePath(),
                                      url_relative_path=getQiniuDomain())
         }
+
 
 
 def on_model_change(self, form, model, is_created):
