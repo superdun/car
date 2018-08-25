@@ -86,8 +86,8 @@ def profileApi():
         return jsonify({'status': 'alert', 'msg': '身份证验证服务器出错，请稍后重试'})
     elif not idCodeVerifyResult['isok']:
         return jsonify({'status': 'alert', 'msg': '身份证姓名不匹配'})
-    recomendIntegral=0
-    recomendedIntegral=0
+    recomendIntegral = 0
+    recomendedIntegral = 0
     if referee:
         refereeCustomer = Customer.query.filter_by(phone=referee).first()
         if refereeCustomer:
@@ -279,13 +279,16 @@ def getOrderApi():
         totalfee = totalfee - integralfee
         integtalused = getIntegralResult["used"]
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
-
+    try:
+        serverstopLocation = Serverstop.query.filter_by(id=serverstop).first().Location.name
+    except:
+        serverstopLocation = None
     order = Order(created_at=dtt.now(), customeropenid=open_id, carid=int(carTypeId), totalfee=totalfee,
                   tradetype='JSAPI', count=int(count), oldfee=oldfee, cutfee=cutfee,
                   preferentialdetail=json.dumps(prefer),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
                   book_at=book_at, ordertype=ordertype, sourceid=sourceid, integralfee=integralfee,
-                  integtalused=integtalused)
+                  serverstoplocation=serverstopLocation)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
@@ -306,7 +309,7 @@ def getOrderApi():
         order.status = 'waiting'
         order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
         # if order.ordertype != "continue":
-            # car.count = car.count - 1
+        # car.count = car.count - 1
         db.session.add(order)
         db.session.add(car)
         db.session.commit()
@@ -334,7 +337,7 @@ def cancelOrderApi(id):
     if rr['result_code'] == "SUCCESS":
         order.status = "canceled"
         order.detail = json.dumps(rr)
-        order.Car.status="normal"
+        order.Car.status = "normal"
         # order.Cartype.count = order.Cartype.count + 1
         db.session.add(order)
         db.session.commit()
@@ -459,25 +462,26 @@ def getintegral():
     result = getIntegralCut(flask_login.current_user.openid, fee)
     return jsonify({"status": "ok", "result": result})
 
+
 @api.route('/star/<id>')
 @flask_login.login_required
 def getStar(id):
     order = Order.query.filter_by(id=id).first()
     starCount = int(request.args.get("starCount"))
-    if order and order.Customer.openid == flask_login.current_user.openid and order.ordertype=="normal":
-        if not order.star and starCount<=5 and starCount>0:
+    if order and order.Customer.openid == flask_login.current_user.openid and order.ordertype == "normal":
+        if not order.star and starCount <= 5 and starCount > 0:
             order.star = starCount
             commentIntegral = getComment()
             commentedIntegral = getCommented(starCount)
-            order.Customer.integral = order.Customer.integral+commentIntegral
+            order.Customer.integral = order.Customer.integral + commentIntegral
             db.session.add(order)
             db.session.commit()
-            user = User.query.filter_by(id = order.Serverstop.userid).first()
+            user = User.query.filter_by(id=order.Serverstop.userid).first()
             if user:
                 customer = Customer.query.filter_by(openid=user.openid).first()
                 if customer:
-                    customer.integral = customer.integral+commentedIntegral
+                    customer.integral = customer.integral + commentedIntegral
                     db.session.add(customer)
                     db.session.commit()
-            return jsonify({"status": "ok","integral":commentIntegral})
+            return jsonify({"status": "ok", "integral": commentIntegral})
     return jsonify({"status": "error"})

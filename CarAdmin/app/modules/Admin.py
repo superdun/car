@@ -53,6 +53,7 @@ def dashboard():
     admin.add_view(OrderView1(Order, db.session, name=u"我的订单", endpoint="myorders"))
     admin.add_view(CarcatView(Carcat, db.session, name=u"车类管理"))
     admin.add_view(ServerstopView(Serverstop, db.session, name=u"服务站管理"))
+    admin.add_view(LocationView(Location, db.session, name=u"地区"))
     # admin.add_view(OrderAdminView(name=u'订单管理', endpoint='refund'))
     admin.add_view(InsureView(Insure, db.session, name=u"保险管理"))
     admin.add_view(LimitView(Limit, db.session, name=u"限制管理"))
@@ -239,7 +240,11 @@ class CarcatView(AdminModel):
 class ServerstopView(AdminModel):
     column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度", User=u'代理')
     form_excluded_columns = ('orders',)
-    column_editable_list = ("User",)
+    column_editable_list = ("User", "Location")
+
+
+class LocationView(AdminModel):
+    column_labels = dict(name=u"名称")
 
 
 def formatPayAt(patAt):
@@ -277,6 +282,7 @@ def getOverDateStatus(m):
             return True
     return False
 
+
 class BEF(IntEqualFilter):
     def apply(self, query, value, alias=None):
         return query.filter(Order.OverDateStatus == value)
@@ -295,6 +301,7 @@ class OrderView(AdminModel):
             args = request.url.split("?")[-1] if "?" in request.url else ""
             return redirect(url_for("order.index_view") + "?" + args + "&" + ds)
         return redirect(url_for("order.index_view") + "?" + ds)
+
     @expose('/yesterday')
     def yesterday(self):
         # Get URL for the test view method
@@ -324,7 +331,6 @@ class OrderView(AdminModel):
             args = request.url.split("?")[-1] if "?" in request.url else ""
             return redirect(url_for("order.index_view") + "?" + args + "&" + ds)
         return redirect(url_for("order.index_view") + "?" + ds)
-
 
     def get_query(self):
         return super(OrderView, self).get_query().filter(self.model.status == "ok")
@@ -424,8 +430,8 @@ class OrderView(AdminModel):
                          carendimg=u"还车图片", Car=u"分配车辆", location=u"位置", Serverstop=u"服务站", serverstop=u"服务站",
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
-                         integralfee=u"积分抵扣", ordertype=u"订单类型",  kmbefore=u"发车公里", kmafter=u"收车里程",
-                         km=u"行驶里程", Owner=u"代理", isoverdate=u"超期状态",pretodate=u"预计回车")
+                         integralfee=u"积分抵扣", ordertype=u"订单类型", kmbefore=u"发车公里", kmafter=u"收车里程",
+                         km=u"行驶里程", Owner=u"代理", isoverdate=u"超期状态", pretodate=u"预计回车", serverstoplocation=u"地区")
 
     edit_template = 'admin/order.html'
     column_list = (
@@ -433,12 +439,14 @@ class OrderView(AdminModel):
         "totalfee", "Preferential",
         "Customer",
         "pay_at", "fromdate",
-        "todate", "pretodate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "Owner", "book_at")
+        "todate", "pretodate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "serverstoplocation", "Owner",
+        "book_at")
     form_columns = (
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
     column_filters = (
-        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype",'isoverdate',"pretodate",)
+        "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype",
+        'isoverdate', "pretodate","serverstoplocation")
 
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
                              offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
@@ -454,7 +462,7 @@ class OrderView(AdminModel):
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
                              Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if json.loads(
                                  m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
-                             isoverdate=lambda v, c, m, p: u"超期" if m.isoverdate==1 else u"正常",
+                             isoverdate=lambda v, c, m, p: u"超期" if m.isoverdate == 1 else u"正常",
                              )
 
     column_editable_list = ("fromdate", "todate", "Car")
@@ -474,7 +482,6 @@ class OrderView(AdminModel):
             'carendimg': ImageUpload(u'还车图片', base_path=getUploadUrl(), relative_path=thumb.relativePath(),
                                      url_relative_path=getQiniuDomain())
         }
-
 
 
 def on_model_change(self, form, model, is_created):

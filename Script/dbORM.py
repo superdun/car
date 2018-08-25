@@ -54,9 +54,29 @@ class Order(Base):
     star = Column(Integer)
     isoverdate = Column(Integer)
     pretodate = Column(DateTime)
+    serverstopid = Column(Integer, ForeignKey('serverstop.id'))
+    serverstoplocation =  Column(String(800))
 
     def __repr__(self):
         return self.tradeno
+
+class Serverstop(Base):
+    __tablename__ = "serverstop"
+    id = Column(Integer, primary_key=True)
+    name =Column(String(80))
+    phone = Column(String(80))
+    owner = Column(String(80))
+    orders = relationship('Order', backref='Serverstop', lazy='dynamic')
+    locationid = Column(Integer, ForeignKey('location.id'))
+    def __repr__(self):
+        return self.name
+class Location(Base):
+    __tablename__ = "location"
+    id = Column(Integer, primary_key=True)
+    name =Column(String(80))
+    serrverstops = relationship('Serverstop', backref='Location', lazy='dynamic')
+    def __repr__(self):
+        return self.name
 class Gps(Base):
     __tablename__="gps"
     id = Column(Integer, primary_key=True)

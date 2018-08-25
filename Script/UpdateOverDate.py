@@ -48,10 +48,11 @@ def update():
     for i in orders:
         ptd =  preToDate(i)
         ods = OverDateStatus(i,ptd)
-        i.isoverdate = ods
-        i.pretodate = ptd
-        session.add(i)
-        session.commit()
+        if i.isoverdate!=ods or i.pretodate!=ptd:
+            i.isoverdate = ods
+            i.pretodate = ptd
+            session.add(i)
+            session.commit()
     print "update ok"
 if __name__ == '__main__':
     update()

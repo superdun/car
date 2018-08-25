@@ -165,6 +165,13 @@ class Serverstop(db.Model):
     userid = db.Column(db.Integer, db.ForeignKey('user.id'))
     mfroms = db.relationship('Move', backref='fromServerstop', lazy='dynamic',foreign_keys="Move.fromid")
     mtos = db.relationship('Move', backref='toServerstop', lazy='dynamic',foreign_keys="Move.toid")
+    locationid = db.Column(db.Integer, db.ForeignKey('location.id'))
+    def __repr__(self):
+        return self.name
+class Location(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name =db.Column(db.String(80))
+    serrverstops = db.relationship('Serverstop', backref='Location', lazy='dynamic')
     def __repr__(self):
         return self.name
 class Hy(object):
@@ -224,6 +231,7 @@ class Order(db.Model):
     star = db.Column(db.Integer)
     isoverdate = db.Column(db.Integer)
     pretodate = db.Column(db.DateTime)
+    serverstoplocation =  db.Column(db.String(800))
 
     def __repr__(self):
         return self.tradeno
