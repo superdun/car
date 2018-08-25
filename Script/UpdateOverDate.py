@@ -43,7 +43,8 @@ def OverDateStatus(m,ptd):
 
 def update():
     session = dbORM.DBSession()
-    orders = session.query(dbORM.Order).filter(dbORM.Order.status=="ok").order_by(dbORM.Order.id.desc()).limit(1000).all()
+    lastMonth = dt.datetime.now()-dt.timedelta(weeks=4)
+    orders = session.query(dbORM.Order).filter(dbORM.Order.status=="ok").filter(dbORM.Order.created_at>lastMonth).order_by(dbORM.Order.id.desc()).limit(1000).all()
     for i in orders:
         ptd =  preToDate(i)
         ods = OverDateStatus(i,ptd)
