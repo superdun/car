@@ -348,7 +348,7 @@ class Move(db.Model):
     userid = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return self.id
+        return str(self.id)
 
 class Apply(db.Model):
     id = db.Column(db.Integer, primary_key=True)

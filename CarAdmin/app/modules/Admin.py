@@ -238,8 +238,8 @@ class CarcatView(AdminModel):
 
 
 class ServerstopView(AdminModel):
-    column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度", User=u'代理')
-    form_excluded_columns = ('orders',)
+    column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度", User=u'代理',Location=u"区域")
+    form_excluded_columns = ('orders',"moves","mfroms","mtos")
     column_editable_list = ("User", "Location")
 
 
@@ -282,10 +282,6 @@ def getOverDateStatus(m):
             return True
     return False
 
-
-class BEF(IntEqualFilter):
-    def apply(self, query, value, alias=None):
-        return query.filter(Order.OverDateStatus == value)
 
 
 class OrderView(AdminModel):
