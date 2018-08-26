@@ -250,7 +250,7 @@ class LocationView(AdminModel):
 def formatPayAt(patAt):
     if patAt:
         return u"%s年%s月%s日，%s：%s：%s" % (
-            patAt[:4], patAt[4:6], patAt[6:8], patAt[4:6], patAt[8:10], patAt[10:12])
+            patAt[:4], patAt[4:6], patAt[6:8], patAt[8:10], patAt[10:12], patAt[12:14])
 
     else:
         return ""
