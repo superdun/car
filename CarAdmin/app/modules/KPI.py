@@ -57,9 +57,9 @@ class getKpiClass(object):
             w = r[0].month
             rn = self.monthName[w - 1]
         return [rn, int(
-            User.query.filter(User.name != None).filter(
-                User.created_at >= r[0]).filter(
-                User.created_at <= r[1]).count())]
+            Customer.query.filter(Customer.name != None).filter(
+                Customer.created_at >= r[0]).filter(
+                Customer.created_at <= r[1]).count())]
 
     def getAgentFee(self, range):
         if range == "w":
