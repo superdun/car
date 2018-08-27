@@ -288,7 +288,7 @@ def getOrderApi():
                   preferentialdetail=json.dumps(prefer),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
                   book_at=book_at, ordertype=ordertype, sourceid=sourceid, integralfee=integralfee,
-                  serverstoplocation=serverstopLocation)
+                  serverstoplocation=serverstopLocation,notystatus=0)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()

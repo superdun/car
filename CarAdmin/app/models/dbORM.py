@@ -232,7 +232,7 @@ class Order(db.Model):
     isoverdate = db.Column(db.Integer)
     pretodate = db.Column(db.DateTime)
     serverstoplocation =  db.Column(db.String(800))
-
+    notystatus = db.Column(db.Integer)
     def __repr__(self):
         return self.tradeno
 

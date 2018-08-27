@@ -232,7 +232,7 @@ class Order(db.Model):
     isoverdate = db.Column(db.Integer)
     pretodate = db.Column(db.DateTime)
     serverstoplocation =  db.Column(db.String(800))
-
+    notystatus = db.Column(db.Integer)
     def __repr__(self):
         return self.tradeno
 
@@ -348,7 +348,7 @@ class Move(db.Model):
     userid = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return self.id
+        return str(self.id)
 
 class Apply(db.Model):
     id = db.Column(db.Integer, primary_key=True)

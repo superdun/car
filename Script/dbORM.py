@@ -55,7 +55,10 @@ class Order(Base):
     isoverdate = Column(Integer)
     pretodate = Column(DateTime)
     serverstopid = Column(Integer, ForeignKey('serverstop.id'))
+    customeropenid = Column(Integer, ForeignKey('customer.openid'))
+    currentcarid = Column(Integer, ForeignKey('car.id'))
     serverstoplocation =  Column(String(800))
+    notystatus = Column(Integer)
 
     def __repr__(self):
         return self.tradeno
@@ -67,7 +70,9 @@ class Serverstop(Base):
     phone = Column(String(80))
     owner = Column(String(80))
     orders = relationship('Order', backref='Serverstop', lazy='dynamic')
+    userid = Column(Integer, ForeignKey('user.id'))
     locationid = Column(Integer, ForeignKey('location.id'))
+
     def __repr__(self):
         return self.name
 class Location(Base):
@@ -85,6 +90,35 @@ class Gps(Base):
 
     def __repr__(self):
         return self.code
+class Customer(Base):
+    __tablename__ = "customer"
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, default=datetime.now())
+    name = Column(String(80))
+    idcode = Column(String(80), unique=True)
+    gender = Column(String(80))
+    comment = Column(String(800))
+    img = Column(String(800))
+    openid = Column(String(800), unique=True)
+    password = Column(String(800))
+    driveage = Column(Integer)
+    phone = Column(String(800), unique=True)
+    status = Column(String(800), default="pending")
+    olduser =  Column(Integer, default=0)
+    integral = Column(Integer, default=0)
+    orders = relationship('Order', backref='Customer', lazy='dynamic')
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, default=datetime.now())
+    name = Column(String(80))
+    password = Column(String(80))
+    auth = Column(Integer)
+    openid = Column(String(80))
+    phone = Column(String(80))
+    serverstop = relationship('Serverstop', backref='User', lazy='dynamic')
+    def __repr__(self):
+        return self.name
 
 
 class Car(Base):
@@ -95,8 +129,8 @@ class Car(Base):
     name = Column(String(80))
     buy_at = Column(DateTime, default=datetime.now())
     img = Column(String(200))
+    orders = relationship('Order', backref='Car', lazy='dynamic')
     gpsid = Column(Integer, ForeignKey('gps.id'))
-
 
     def __repr__(self):
         return self.name

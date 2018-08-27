@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
 import dbORM
 import datetime as dt
-
-
+from config import *
+import SMS
 def preToDate(m):
     session = dbORM.DBSession()
     if m.ordertype == "normal" and m.fromdate:
@@ -40,6 +40,23 @@ def OverDateStatus(m,ptd):
         return 0
     except:
         return 0
+def noty(session,order):
+    pass
+    # if not order.todate and  order.notystatus==0:
+    #     cnum = order.Customer.phone
+    #     openid = order.Serverstop.User.openid
+    #     user = session.query(dbORM.Customer).filter(dbORM.Customer.openid == openid).first()
+    #     unum=""
+    #     if user:
+    #         unum = user.phone
+    #     msg = '{"carname": "%s"}' % (order.Car.name)
+    #     if cnum:
+    #         sendResultC = SMS.sendSMS('back', cnum, msg.decode('utf8')).send()
+    #     if unum:
+    #         sendResultU = SMS.sendSMS('back', cnum, msg.decode('utf8')).send()
+
+
+
 
 
 def update():
@@ -49,8 +66,11 @@ def update():
     for i in orders:
         ptd =  preToDate(i)
         ods = OverDateStatus(i,ptd)
+        if ods == 1:
+            noty(session, i)
         if i.isoverdate!=ods or i.pretodate!=ptd:
             i.isoverdate = ods
+
             i.pretodate = ptd
             session.add(i)
             session.commit()
