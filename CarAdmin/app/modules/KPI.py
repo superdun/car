@@ -179,8 +179,8 @@ def getKPIs(resultModel, optionsPieModel):
         monthOrderCount = getKpiObj.getOrderCount(i, "m")
         weekOrderFee = getKpiObj.getFee(i, "w")
         monthOrderFee = getKpiObj.getFee(i, "m")
-        userWeekCount = getKpiObj.getUserCount(i, "m")
-        userMonthCount = getKpiObj.getUserCount(i, "w")
+        userWeekCount = getKpiObj.getUserCount(i, "w")
+        userMonthCount = getKpiObj.getUserCount(i, "m")
 
         getKpiObj.setOptionData("orderCountWeek", weekOrderCount)
         getKpiObj.setOptionData("orderCountMonth", monthOrderCount)

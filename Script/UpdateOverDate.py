@@ -31,9 +31,10 @@ def OverDateStatus(m,ptd):
     try:
         preToDate = ptd
         if preToDate:
-            if m.todate and m.todate > preToDate:
+            if m.todate :
+                if m.todate > preToDate:
+                    return 1
 
-                return 1
             elif preToDate < dt.datetime.now():
                 return 1
         return 0
