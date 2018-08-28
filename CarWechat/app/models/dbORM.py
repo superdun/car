@@ -233,6 +233,12 @@ class Order(db.Model):
     pretodate = db.Column(db.DateTime)
     serverstoplocation =  db.Column(db.String(800))
     notystatus = db.Column(db.Integer)
+
+    @hybrid_property
+    def perprice(self):
+        # return len(self.cars)   # @note: use when non-dynamic relationship
+        return self.Cartype.price/100  # @note: use when dynamic relationship
+
     def __repr__(self):
         return self.tradeno
 

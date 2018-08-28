@@ -238,8 +238,8 @@ class CarcatView(AdminModel):
 
 
 class ServerstopView(AdminModel):
-    column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度", User=u'代理',Location=u"区域")
-    form_excluded_columns = ('orders',"moves","mfroms","mtos")
+    column_labels = dict(name=u"名称", owner=u'管理员', phone=u"电话", lat=u"纬度", lng=u"经度", User=u'代理', Location=u"区域")
+    form_excluded_columns = ('orders', "moves", "mfroms", "mtos")
     column_editable_list = ("User", "Location")
 
 
@@ -255,32 +255,21 @@ def formatPayAt(patAt):
     else:
         return ""
 
-
-def getPreToDate(m):
-    if m.ordertype == "normal" and m.fromdate:
-        if m.hascontinue:
-            orders = GetContinueOrders(m.id)
-            return getOrderSumData(m, orders)["rawEndDate"]
-        else:
-            preToDate = m.fromdate + datetime.timedelta(
-                days=m.count)
-
-    elif GetMasterOrder(m.sourceid) and GetMasterOrder(m.sourceid).fromdate:
-        preToDate = datetime.timedelta(days=m.count + GetMasterOrder(m.sourceid).count) + GetMasterOrder(
-            m.sourceid).fromdate
-    else:
+def getMasterData(id):
+    order = Order.query.filter_by(id=id).first()
+    if not order:
         return None
-    return preToDate
+    if order.ordertype != "continue":
+        return [order.fromdate, order.todate, order.kmbefore, order.kmafter]
+
+    if not order.sourceid:
+        return None
+    masterOrder = GetMasterOrder(order.sourceid)
+    if not masterOrder:
+        return None
+    return [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter]
 
 
-def getOverDateStatus(m):
-    preToDate = getPreToDate(m)
-    if preToDate:
-        if m.todate and m.todate > preToDate:
-            return True
-        elif preToDate < datetime.datetime.now():
-            return True
-    return False
 
 
 
@@ -427,23 +416,33 @@ class OrderView(AdminModel):
                          count=u"天数",
                          Insure=u"保险", insurefee=u"保险价格", carfee=u"车费", tradeno=u"订单号", book_at=u"预约时间", name=u"名",
                          integralfee=u"积分抵扣", ordertype=u"订单类型", kmbefore=u"发车公里", kmafter=u"收车里程",
-                         km=u"行驶里程", Owner=u"代理", isoverdate=u"超期状态", pretodate=u"预计回车", serverstoplocation=u"地区")
+                         km=u"行驶里程", Owner=u"代理", isoverdate=u"超期状态", pretodate=u"预计回车", serverstoplocation=u"地区",perprice=u"单价")
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "ordertype", 'isoverdate', "created_at", "Cartype", "count", "oldfee", "cutfee", "integralfee",
-        "totalfee", "Preferential",
-        "Customer",
-        "pay_at", "fromdate",
-        "todate", "pretodate", "kmbefore", "kmafter", "km", "Car", "Serverstop", "serverstoplocation", "Owner",
+        "id", "ordertype", 'isoverdate', "created_at", "Serverstop", "Owner", "Car", "Cartype", "Preferential",
+        "perprice", "count", "totalfee", "integralfee","Customer","pay_at", "fromdate","todate", "pretodate", "kmbefore", "kmafter", "km", "serverstoplocation",
         "book_at")
     form_columns = (
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
         'carbeforeimg', 'carendimg')
     column_filters = (
         "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype",
-        'isoverdate', "pretodate","serverstoplocation")
+        'isoverdate', "pretodate", "serverstoplocation")
 
+    @property
+    def MasterData(self):
+        order = Order.query.filter_by(id=self.model.id).first()
+        if not order:
+            return None
+        if order.ordertype != "continue":
+            return None
+        if not order.sourceid:
+            return None
+        masterOrder = GetMasterOrder(order.sourceid)
+        if not masterOrder:
+            return None
+        return [masterOrder.fromdate, masterOrder.todate, masterOrder.kmbefore, masterOrder.kmafter]
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
                              offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
                              oldfee=lambda v, c, m, p: None if not m.oldfee else float(m.oldfee) / 100,
@@ -452,16 +451,22 @@ class OrderView(AdminModel):
                              totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
                              ordertype=lambda v, c, m, p: u"正常" if m.ordertype == "normal" else u"续租",
                              # preToDate=lambda v, c, m, p: getPreToDate(m),
+                             fromdate = lambda v, c, m, p: getMasterData(m.id)[0] if getMasterData(m.id) else None,
+                             todate=lambda v, c, m, p: getMasterData(m.id)[1] if getMasterData(m.id) else None,
+                             kmbefore=lambda v, c, m, p: getMasterData(m.id)[2] if getMasterData(m.id) else None,
+                             kmafter=lambda v, c, m, p: getMasterData(m.id)[3] if getMasterData(m.id) else None,
+
                              km=lambda v, c, m, p: int(m.kmafter) - int(
                                  m.kmbefore) if m.kmbefore and m.kmafter and m.kmbefore.isdigit() and m.kmafter.isdigit()
                              else "-",
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
-                             Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if json.loads(
+                             Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if m.preferentialdetail and  json.loads(
                                  m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
+
                              isoverdate=lambda v, c, m, p: u"超期" if m.isoverdate == 1 else u"正常",
                              )
 
-    column_editable_list = ("fromdate", "todate", "Car")
+    # column_editable_list = ("fromdate", "todate", "Car")
 
     @property
     def form_extra_fields(self):
