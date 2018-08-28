@@ -257,6 +257,7 @@ def formatPayAt(patAt):
 MasterData=None
 def getMasterData(id):
     global MasterData
+    MasterData=None
     km=None
     order = Order.query.filter_by(id=id).first()
     if not order:
