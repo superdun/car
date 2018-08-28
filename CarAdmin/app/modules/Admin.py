@@ -263,9 +263,10 @@ def getMasterData(id):
     if not order:
         return None
     if order.ordertype != "continue":
+        carname = order.Car.name
         if order.kmbefore and order.kmafter:
             km = float(order.kmafter)-float(order.kmbefore)
-        MasterData = [order.fromdate, order.todate, order.kmbefore, order.kmafter,km]
+        MasterData = [order.fromdate, order.todate, order.kmbefore, order.kmafter,km,carname]
         return MasterData
     if not order.sourceid:
         return None
@@ -274,7 +275,8 @@ def getMasterData(id):
         return None
     if masterOrder.kmbefore and  masterOrder.kmafter:
         km = float(masterOrder.kmafter) - float(masterOrder.kmbefore)
-    MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km]
+    carname = masterOrder.Car.name
+    MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km,carname]
     return MasterData
 
 
@@ -452,6 +454,7 @@ class OrderView(AdminModel):
                              kmafter=lambda v, c, m, p: MasterData[3] if MasterData else None,
 
                              km=lambda v, c, m, p: MasterData[4] if MasterData else None,
+                             Car=lambda v, c, m, p: MasterData[5] if MasterData else m.Car.name,
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
                              Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if m.preferentialdetail and  json.loads(
                                  m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
