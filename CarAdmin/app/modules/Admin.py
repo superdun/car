@@ -259,11 +259,14 @@ def getMasterData(id):
     global MasterData
     MasterData=None
     km=None
+    carname=None
     order = Order.query.filter_by(id=id).first()
     if not order:
         return None
     if order.ordertype != "continue":
-        carname = order.Car.name
+        if order.Car:
+            carname = order.Car.name
+
         if order.kmbefore and order.kmafter:
             km = float(order.kmafter)-float(order.kmbefore)
         MasterData = [order.fromdate, order.todate, order.kmbefore, order.kmafter,km,carname]
@@ -275,7 +278,8 @@ def getMasterData(id):
         return None
     if masterOrder.kmbefore and  masterOrder.kmafter:
         km = float(masterOrder.kmafter) - float(masterOrder.kmbefore)
-    carname = masterOrder.Car.name
+    if masterOrder.Car:
+        carname = masterOrder.Car.name
     MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km,carname]
     return MasterData
 
