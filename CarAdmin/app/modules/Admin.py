@@ -268,7 +268,11 @@ def getMasterData(id):
             carname = order.Car.name
 
         if order.kmbefore and order.kmafter:
-            km = float(order.kmafter)-float(order.kmbefore)
+            try:
+                km = float(order.kmafter) - float(order.kmbefore)
+            except:
+                pass
+
         MasterData = [order.fromdate, order.todate, order.kmbefore, order.kmafter,km,carname]
         return MasterData
     if not order.sourceid:
@@ -277,7 +281,10 @@ def getMasterData(id):
     if not masterOrder:
         return None
     if masterOrder.kmbefore and  masterOrder.kmafter:
-        km = float(masterOrder.kmafter) - float(masterOrder.kmbefore)
+        try:
+            km = float(masterOrder.kmafter) - float(masterOrder.kmbefore)
+        except:
+            pass
     if masterOrder.Car:
         carname = masterOrder.Car.name
     MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km,carname]
