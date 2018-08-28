@@ -274,7 +274,7 @@ def getMasterData(id):
     if masterOrder.kmbefore and  masterOrder.kmafter:
         km = float(masterOrder.kmafter) - float(masterOrder.kmbefore)
     MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km]
-
+    return MasterData
 
 
 
