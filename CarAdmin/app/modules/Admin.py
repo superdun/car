@@ -263,7 +263,7 @@ def getMasterData(id):
         return None
     if order.ordertype != "continue":
         if order.kmbefore and order.kmafter:
-            km = int(order.kmafter)-int(order.kmbefore)
+            km = float(order.kmafter)-float(order.kmbefore)
         MasterData = [order.fromdate, order.todate, order.kmbefore, order.kmafter,km]
         return MasterData
     if not order.sourceid:
@@ -272,7 +272,7 @@ def getMasterData(id):
     if not masterOrder:
         return None
     if masterOrder.kmbefore and  masterOrder.kmafter:
-        km = int(masterOrder.kmafter) - int(masterOrder.kmbefore)
+        km = float(masterOrder.kmafter) - float(masterOrder.kmbefore)
     MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km]
 
 
@@ -426,8 +426,8 @@ class OrderView(AdminModel):
 
     edit_template = 'admin/order.html'
     column_list = (
-        "id", "ordertype", 'isoverdate', "created_at", "Serverstop", "Owner", "Car", "Cartype", "Preferential",
-        "perprice", "count", "totalfee", "integralfee","Customer","pay_at", "fromdate","todate", "pretodate", "kmbefore", "kmafter", "km", "serverstoplocation",
+        "id", "ordertype", 'isoverdate', "created_at", "Serverstop", "serverstoplocation", "Owner", "Car", "Cartype", "Preferential",
+        "perprice", "count", "totalfee", "integralfee","Customer","pay_at", "fromdate","todate", "pretodate", "kmbefore", "kmafter", "km",
         "book_at")
     form_columns = (
         "fromdate", "todate", "Customer", "Cartype", "Car", 'proofimg',
