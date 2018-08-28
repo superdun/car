@@ -254,10 +254,8 @@ def formatPayAt(patAt):
 
     else:
         return ""
-MasterData=None
-def getMasterData(id):
-    global MasterData
-    MasterData=None
+
+def getMasterData(id,index):
     km=None
     carname=None
     order = Order.query.filter_by(id=id).first()
@@ -274,7 +272,7 @@ def getMasterData(id):
                 pass
 
         MasterData = [order.fromdate, order.todate, order.kmbefore, order.kmafter,km,carname]
-        return MasterData
+        return MasterData[index]
     if not order.sourceid:
         return None
     masterOrder = GetMasterOrder(order.sourceid)
@@ -288,7 +286,8 @@ def getMasterData(id):
     if masterOrder.Car:
         carname = masterOrder.Car.name
     MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km,carname]
-    return MasterData
+
+    return MasterData[index]
 
 
 
@@ -459,13 +458,13 @@ class OrderView(AdminModel):
                              totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
                              ordertype=lambda v, c, m, p: u"正常" if m.ordertype == "normal" else u"续租",
                              # preToDate=lambda v, c, m, p: getPreToDate(m),
-                             fromdate = lambda v, c, m, p: MasterData[0] if getMasterData(m.id) and MasterData[0]else m.fromdate,
-                             todate=lambda v, c, m, p: MasterData[1] if MasterData and MasterData[1] else m.todate,
-                             kmbefore=lambda v, c, m, p: MasterData[2] if MasterData and MasterData[2]else m.kmbefore,
-                             kmafter=lambda v, c, m, p: MasterData[3] if MasterData and MasterData[3] else m.kmafter,
+                             fromdate = lambda v, c, m, p: m.fromdate if m.fromdate   else getMasterData(m.id,0),
+                             todate=lambda v, c, m, p: m.todate if  m.todate  else getMasterData(m.id,1),
+                             kmbefore=lambda v, c, m, p: m.kmbefore if  m.kmbefore else getMasterData(m.id,2),
+                             kmafter=lambda v, c, m, p: m.kmafter if m.kmafter  else getMasterData(m.id,3),
 
-                             km=lambda v, c, m, p: MasterData[4]  if MasterData  and MasterData[4] else None,
-                             Car=lambda v, c, m, p: MasterData[5] if MasterData and MasterData[5] else m.Car,
+                             km=lambda v, c, m, p: getMasterData(m.id,4)  if getMasterData(m.id,4)   else None,
+                             Car=lambda v, c, m, p: m.Car if  m.Car  else getMasterData(m.id,5),
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
                              Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if m.preferentialdetail and  json.loads(
                                  m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
