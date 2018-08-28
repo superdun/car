@@ -452,12 +452,12 @@ class OrderView(AdminModel):
                              totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
                              ordertype=lambda v, c, m, p: u"正常" if m.ordertype == "normal" else u"续租",
                              # preToDate=lambda v, c, m, p: getPreToDate(m),
-                             fromdate = lambda v, c, m, p: MasterData[0] if getMasterData(m.id)  and MasterData[0]else m.fromdate,
+                             fromdate = lambda v, c, m, p: MasterData[0] if getMasterData(m.id) and MasterData[0]else m.fromdate,
                              todate=lambda v, c, m, p: MasterData[1] if MasterData and MasterData[1] else m.todate,
-                             kmbefore=lambda v, c, m, p: MasterData[2] if MasterData  and MasterData[2]else m.kmbefore,
+                             kmbefore=lambda v, c, m, p: MasterData[2] if MasterData and MasterData[2]else m.kmbefore,
                              kmafter=lambda v, c, m, p: MasterData[3] if MasterData and MasterData[3] else m.kmafter,
 
-                             km=lambda v, c, m, p: MasterData[4]  if MasterData  and MasterData[5] else None,
+                             km=lambda v, c, m, p: MasterData[4]  if MasterData  and MasterData[4] else None,
                              Car=lambda v, c, m, p: MasterData[5] if MasterData and MasterData[5] else m.Car,
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
                              Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if m.preferentialdetail and  json.loads(
