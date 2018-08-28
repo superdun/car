@@ -454,7 +454,7 @@ class OrderView(AdminModel):
                              kmafter=lambda v, c, m, p: MasterData[3] if MasterData else None,
 
                              km=lambda v, c, m, p: MasterData[4] if MasterData else None,
-                             Car=lambda v, c, m, p: MasterData[5] if MasterData else m.Car.name,
+                             Car=lambda v, c, m, p: MasterData[5] if MasterData else m.Car,
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
                              Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if m.preferentialdetail and  json.loads(
                                  m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
