@@ -254,20 +254,26 @@ def formatPayAt(patAt):
 
     else:
         return ""
-
+MasterData=None
 def getMasterData(id):
+    global MasterData
+    km=None
     order = Order.query.filter_by(id=id).first()
     if not order:
         return None
     if order.ordertype != "continue":
-        return [order.fromdate, order.todate, order.kmbefore, order.kmafter]
-
+        if order.kmbefore and order.kmafter:
+            km = int(order.kmafter)-int(order.kmbefore)
+        MasterData = [order.fromdate, order.todate, order.kmbefore, order.kmafter,km]
+        return MasterData
     if not order.sourceid:
         return None
     masterOrder = GetMasterOrder(order.sourceid)
     if not masterOrder:
         return None
-    return [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter]
+    if masterOrder.kmbefore and  masterOrder.kmafter:
+        km = int(masterOrder.kmafter) - int(masterOrder.kmbefore)
+    MasterData = [masterOrder.fromdate,masterOrder.todate,masterOrder.kmbefore,masterOrder.kmafter,km]
 
 
 
@@ -430,19 +436,7 @@ class OrderView(AdminModel):
         "created_at", "fromdate", "todate", "Customer.name", "Cartype.name", "Car.name", "Serverstop.name", "ordertype",
         'isoverdate', "pretodate", "serverstoplocation")
 
-    @property
-    def MasterData(self):
-        order = Order.query.filter_by(id=self.model.id).first()
-        if not order:
-            return None
-        if order.ordertype != "continue":
-            return None
-        if not order.sourceid:
-            return None
-        masterOrder = GetMasterOrder(order.sourceid)
-        if not masterOrder:
-            return None
-        return [masterOrder.fromdate, masterOrder.todate, masterOrder.kmbefore, masterOrder.kmafter]
+
     column_formatters = dict(pay_at=lambda v, c, m, p: formatPayAt(m.pay_at),
                              offlinefee=lambda v, c, m, p: None if not m.offlinefee else float(m.offlinefee) / 100,
                              oldfee=lambda v, c, m, p: None if not m.oldfee else float(m.oldfee) / 100,
@@ -451,14 +445,12 @@ class OrderView(AdminModel):
                              totalfee=lambda v, c, m, p: None if not m.totalfee else float(m.totalfee) / 100,
                              ordertype=lambda v, c, m, p: u"正常" if m.ordertype == "normal" else u"续租",
                              # preToDate=lambda v, c, m, p: getPreToDate(m),
-                             fromdate = lambda v, c, m, p: getMasterData(m.id)[0] if getMasterData(m.id) else None,
-                             todate=lambda v, c, m, p: getMasterData(m.id)[1] if getMasterData(m.id) else None,
-                             kmbefore=lambda v, c, m, p: getMasterData(m.id)[2] if getMasterData(m.id) else None,
-                             kmafter=lambda v, c, m, p: getMasterData(m.id)[3] if getMasterData(m.id) else None,
+                             fromdate = lambda v, c, m, p: MasterData[0] if getMasterData(m.id) else None,
+                             todate=lambda v, c, m, p: MasterData[1] if MasterData else None,
+                             kmbefore=lambda v, c, m, p: MasterData[2] if MasterData else None,
+                             kmafter=lambda v, c, m, p: MasterData[3] if MasterData else None,
 
-                             km=lambda v, c, m, p: int(m.kmafter) - int(
-                                 m.kmbefore) if m.kmbefore and m.kmafter and m.kmbefore.isdigit() and m.kmafter.isdigit()
-                             else "-",
+                             km=lambda v, c, m, p: MasterData[4] if MasterData else None,
                              Owner=lambda v, c, m, p: m.Serverstop.User.name if m.Serverstop.User.name else u"服务站未分配代理",
                              Preferential=lambda v, c, m, p: json.loads(m.preferentialdetail)["name"] if m.preferentialdetail and  json.loads(
                                  m.preferentialdetail) and json.loads(m.preferentialdetail).has_key('name') else u"-",
