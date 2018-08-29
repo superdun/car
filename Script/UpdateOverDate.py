@@ -80,6 +80,7 @@ def update():
     orders = session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(
         dbORM.Order.created_at > lastMonth).order_by(dbORM.Order.id.desc()).limit(1000).all()
     for i in orders:
+        print i.id
         ptd = preToDate(i)
         ods = OverDateStatus(i, ptd)
         if ods == 1:
