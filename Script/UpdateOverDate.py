@@ -7,7 +7,7 @@ def preToDate(m):
     session = dbORM.DBSession()
     if m.ordertype == "normal" and m.fromdate:
         if m.hascontinue:
-            orders = session.query(dbORM.Order).filter(dbORM.Order.sourceid == m.id).all()
+            orders = session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(dbORM.Order.sourceid == m.id).all()
             countSum = m.count
             for co in orders:
                 countSum = countSum + co.count
@@ -18,7 +18,7 @@ def preToDate(m):
 
     elif session.query(dbORM.Order).filter_by(id=m.sourceid).first() and session.query(dbORM.Order).filter(dbORM.Order.id==m.sourceid).first().fromdate:
         preToDate = dt.timedelta(
-            days=m.count + session.query(dbORM.Order).filter(dbORM.Order.id==m.sourceid).first().count) + session.query(dbORM.Order).filter(
+            days=m.count + session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(dbORM.Order.id==m.sourceid).first().count) + session.query(dbORM.Order).filter(
                 dbORM.Order.id==m.sourceid).first().fromdate
     else:
         return None
@@ -39,7 +39,7 @@ def OverDateStatus(m,ptd):
                 elif preToDate < dt.datetime.now():
                     return 1
             elif m.ordertype=="continue" and m.sourceid:
-                masterOrder = session.query(dbORM.Order).filter(dbORM.Order.id == m.sourceid).first()
+                masterOrder = session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(dbORM.Order.id == m.sourceid).first()
                 if masterOrder:
                     if masterOrder.todate:
                         if masterOrder.todate > preToDate:
