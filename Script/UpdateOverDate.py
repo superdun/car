@@ -8,7 +8,7 @@ def preToDate(m):
     if m.ordertype == "normal" and m.fromdate:
         if m.hascontinue:
             orders = session.query(dbORM.Order).filter(dbORM.Order.sourceid == m.id).all()
-            countSum = 0
+            countSum = m.count
             for co in orders:
                 countSum = countSum + co.count
             preToDate = m.fromdate + dt.timedelta(days=countSum)
@@ -31,12 +31,22 @@ def OverDateStatus(m,ptd):
     try:
         preToDate = ptd
         if preToDate:
-            if m.todate :
-                if m.todate > preToDate:
-                    return 1
+            if m.ordertype == "normal":
+                if m.todate:
+                    if m.todate > preToDate:
+                        return 1
 
-            elif preToDate < dt.datetime.now():
-                return 1
+                elif preToDate < dt.datetime.now():
+                    return 1
+            elif m.ordertype=="continue" and m.sourceid:
+                masterOrder = session.query(dbORM.Order).filter(dbORM.Order.id == m.sourceid).first()
+                if masterOrder:
+                    if masterOrder.todate:
+                        if masterOrder.todate > preToDate:
+                            return 1
+
+                    elif preToDate < dt.datetime.now():
+                        return 1
         return 0
     except:
         return 0
