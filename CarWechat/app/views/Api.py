@@ -399,8 +399,8 @@ def getOrderApi():
     integtalused = 0
     if hasntegral == 'true':
         getIntegralResult = getIntegralCut(open_id, totalfee)
-        integralfee = getIntegralResult["cut"]
-        totalfee = totalfee - integralfee
+        integralfee = getIntegralResult["cut"]*100
+        totalfee = int(totalfee - integralfee)
         integtalused = getIntegralResult["used"]
     notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getPayResult')
     try:

@@ -6,7 +6,7 @@ from math import floor,ceil
 from app import db
 
 def getIntegralCut(openid,fee):
-    fee = float(fee)-0.1
+    fee = float(fee)/100-0.1
     integralSwitch = Integral.query.filter_by(name=u"开关").first()
     integral = Integral.query.filter_by(name=u"兑现").first()
     integralThreshold = Integral.query.filter_by(name=u"满").first()

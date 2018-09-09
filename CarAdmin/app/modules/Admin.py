@@ -160,7 +160,7 @@ class GpsView(AdminModel):
 class CustomerView(AdminModel):
     column_labels = dict(created_at=u'创建时间', name=u'姓名', gender=u'性别', idcode=u'身份证'
                          , comment=u'备注', driveage=u'驾龄', phone=u'电话', status=u'状态', histories=u"历史", orders=u'订单',
-                         image=u"头像", olduser=u"老用户", integral=u"通力币")
+                         image=u"头像", olduser=u"老用户", integral=u"通力币",refereephone=u"推荐人电话")
     column_exclude_list = ('img', 'password')
     form_extra_fields = {
         'img': ImageUpload(u"头像", base_path=getUploadUrl(), relative_path=thumb.relativePath(),
