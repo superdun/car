@@ -607,7 +607,7 @@ def getintegralration(type):
 @api.route('/integral', methods=['POST'])
 @flask_login.login_required
 def getintegral():
-    fee = request.form.get("fee")
+    fee = float(request.form.get("fee"))*100
 
     result = getIntegralCut(flask_login.current_user.openid, fee)
     return jsonify({"status": "ok", "result": result})
