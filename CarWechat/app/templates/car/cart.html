@@ -206,7 +206,7 @@
             var value = v  + ($("#count").val() * $('input[name="radio1"]:checked').attr("price") ) / 100.0;
             sumFee = value;
             if(hasntegral){
-                var newValue = value-integral;
+                var newValue = (value*100-integral*100)/100;
             }
             else {
                 var newValue = value;

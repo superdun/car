@@ -60,6 +60,8 @@ def dashboard():
     admin.add_view(AccidentView(Accident, db.session, name=u"事故"))
     admin.add_view(MoveView(Move, db.session, name=u"调车"))
     admin.add_view(ApplyView(Apply, db.session, name=u"用车"))
+    admin.add_view(IntegralView(Integral, db.session, name=u"积分"))
+
 
 
 class UploadWidget(form.ImageUploadInput):
@@ -148,9 +150,7 @@ class CarView(AdminModel):
     column_searchable_list = ("name",)
 
 
-class IntegralView(AdminModel):
-    can_edit = False
-    column_editable_list = ("ration",)
+
 
 
 class GpsView(AdminModel):
@@ -246,6 +246,9 @@ class ServerstopView(AdminModel):
 class LocationView(AdminModel):
     column_labels = dict(name=u"名称")
 
+class IntegralView(AdminModel):
+    column_labels = dict(name=u"名称",ration=u"值")
+    column_editable_list = ("ration",)
 
 def formatPayAt(patAt):
     if patAt:

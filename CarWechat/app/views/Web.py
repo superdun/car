@@ -119,8 +119,29 @@ def wechatAuthorize():
 
     if customer.status == "pending":
         return redirect(url_for("web.wechatSign"))
+    if customer.status == "nopay":
+        return redirect(url_for("web.wechatSignPay",open_id=customer.openid))
     return redirect(url_for("web.selectCar"))
 
+@web.route('/signpay/<open_id>')
+def wechatSignPay(open_id):
+    if open_id:
+        customer = Customer.query.filter_by(openid = open_id).first()
+    else:
+        return returnError("未找到相关用户，请联系管理员")
+    if not customer:
+        return returnError("未找到相关用户，请联系管理员")
+    if customer.status=="normal":
+        return  redirect(url_for("web.selectCar"))
+    if customer.status=="nopay":
+        price=0
+        integral = Integral.query.filter_by(name=u"注册费用").first()
+        if integral:
+            price=integral.ration
+        url = request.url
+        wxJSSDKConfig = getJSSDK(url)
+        return render_template('car/signpay.html', openid=open_id,price=price,data = customer,wxJSSDKConfig=wxJSSDKConfig)
+    return returnError("未找到相关用户，请联系管理员")
 
 @web.route('/sign')
 def wechatSign():
@@ -136,6 +157,8 @@ def selectCar():
             return render_template('car/selectCar.html', data=CarType, cat=CarCat,
                                    imgDomain="http://%s" % getQiniuDomain(),
                                    )
+        elif current_user.status == "nopay":
+            return redirect(url_for("web.wechatSignPay",open_id=current_user.openid))
         else:
             return redirect(url_for("web.wechatSign"))
 
@@ -153,6 +176,8 @@ def order():
             return render_template("car/order.html", data=orders, imgDomain="http://%s" % getQiniuDomain(),
                                    orderConfig=orderConfig)
             # return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
+        elif current_user.status == "nopay":
+            return redirect(url_for("web.wechatSignPay",open_id=current_user.openid))
         else:
             return redirect(url_for("web.wechatSign"))
 
@@ -186,6 +211,8 @@ def orderDetail(id):
             else:
                 return render_template('car/orderDetail.html', data=order, imgDomain="http://%s" % getQiniuDomain(),
                                        orderConfig=orderConfig,continueOrders=continueOrders,OrderSumData=OrderSumData)
+        elif current_user.status == "nopay":
+            return redirect(url_for("web.wechatSignPay",open_id=current_user.openid))
         else:
             return redirect(url_for("web.wechatSign"))
 
@@ -204,6 +231,8 @@ def profile():
             else:
                 return redirect(url_for("web.wechatSign"))
                 # return render_template('car/order.html', data=CarType, imgDomain="http://%s" % QINIU_DOMAIN)
+        elif current_user.status == "nopay":
+            return redirect(url_for("web.wechatSignPay",open_id=current_user.openid))
         else:
             return redirect(url_for("web.wechatSign"))
 
@@ -220,6 +249,8 @@ def map():
 
             return render_template('car/map.html', wxJSSDKConfig=wxJSSDKConfig,
                                    imgDomain="http://%s" % getQiniuDomain())
+        elif current_user.status == "nopay":
+            return redirect(url_for("web.wechatSignPay",open_id=current_user.openid))
         else:
             return redirect(url_for("web.wechatSign"))
 
@@ -272,6 +303,8 @@ def cart(id):
                 return returnError("该车型暂时已满员，请选择其他车辆")
             return render_template('car/cart.html', carData=CarType, wxJSSDKConfig=wxJSSDKConfig,
                                    imgDomain="http://%s" % getQiniuDomain(), serverstop=ServerStop, insure=InSure,integralIsOpen=integralIsOpen)
+        elif current_user.status == "nopay":
+            return redirect(url_for("web.wechatSignPay",open_id=current_user.openid))
         else:
             return redirect(url_for("web.wechatSign"))
 

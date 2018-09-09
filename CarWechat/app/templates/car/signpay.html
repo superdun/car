@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block css %}
+    <style type="text/css">
+        .container {
+            padding: 20px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="weui-wepay-details">
+        <div class="weui-wepay-details__hd">
+            <div class="weui-wepay-details__state">
+                <h2 class="weui-wepay-details__title">注册支付</h2>
+                <p class="weui-wepay-details__desc" id="totalfee-top">{{ price }}</p>
+            </div>
+        </div>
+        <div class="weui-wepay-details__bd">
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">用户：</div>
+                <div class="weui-wepay-detail__ft">{{ data.name }}</div>
+            </div>
+            <div class="weui-wepay-details__ft">
+                <a href="javascript:;" class="weui-btn weui-btn_primary" id="pay">支付</a>
+            </div>
+            <div class="weui-wepay-details__ft">
+                <a href="javascript:;" class="weui-btn weui-btn_default" id="refresh">我已支付</a>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block script %}
+    <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
+
+    <script>
+        function cancel(id) {
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/cancelotherorder/' + id,
+                type: 'get',
+                contentType: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        alert("已取消")
+                    }
+                    else {
+                        alert("取消失败，请重试")
+                    }
+                    location.reload()
+
+                }
+
+            })
+        }
+        function getOrder() {
+            var formData = new FormData();
+            formData.append('open_id', "{{ openid }}");
+
+            $.ajax({
+                url: window.location.protocol + "//" + window.location.host + '/wx/api/makesignorder',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    if (data['status'] === 'ok') {
+                        result = data['result'];
+                        wx.chooseWXPay({
+                            timestamp: result['timeStamp'], // 支付签名时间戳，注意微信jssdk中的所有使用timestamp字段均为小写。但最新版的支付后台生成签名使用的timeStamp字段名需大写其中的S字符
+                            nonceStr: result['nonceStr'], // 支付签名随机串，不长于 32 位
+                            package: result['package'], // 统一支付接口返回的prepay_id参数值，提交格式如：prepay_id=\*\*\*）
+                            signType: result['signType'], // 签名方式，默认为'SHA1'，使用新版支付需传入'MD5'
+                            paySign: result['paySign'], // 支付签名
+                            success: function (res) {
+                                if (res.errMsg == "chooseWXPay:ok") {
+                                    alert('支付成功！');// 支付成功后的回调函数
+
+                                } else {
+
+                                    alert(res.errMsg);
+                                    cancel(data["orderId"])
+                                }
+                                setTimeout(1000);
+                                location.reload()
+
+
+                            },
+                            cancel: function (res) {
+                                //支付取消
+                                alert("支付取消");
+                                cancel(data["orderId"])
+                            }
+                        });
+                        {#                        setTimeout(1000);#}
+                        {#                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/order/' + data["orderId"]#}
+
+                    }
+                    else {
+                        if (data['status'] === 'noneed') {
+                                setTimeout(1000);
+                                location.reload()
+                        }
+                        else {
+                            alert(data['msg']);
+                            setTimeout(3000);
+                        }
+
+                        {#                        window.location.href = window.location.protocol + "//" + window.location.host + '/wx/selectcar'#}
+                    }
+                }
+
+            })
+        }
+        $(document).ready(function () {
+            $("#refresh").click(function () {
+                location.reload()
+            });
+            wx.config({
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: '{{ wxJSSDKConfig['appId'] }}', // 必填，公众号的唯一标识
+                timestamp: '{{ wxJSSDKConfig['timestamp'] }}', // 必填，生成签名的时间戳
+                nonceStr: '{{ wxJSSDKConfig['nonceStr'] }}', // 必填，生成签名的随机串
+                signature: '{{ wxJSSDKConfig['signature'] }}',// 必填，签名
+            });
+            wx.ready(function () {
+                // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+                //alert("ok!")
+                $("#pay").click(function () {
+                    getOrder();
+                })
+            });
+            wx.error(function (res) {
+                // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+            });
+        })
+
+    </script>
+
+{% endblock %}

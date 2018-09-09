@@ -86,35 +86,32 @@ def profileApi():
         return jsonify({'status': 'alert', 'msg': '身份证验证服务器出错，请稍后重试'})
     elif not idCodeVerifyResult['isok']:
         return jsonify({'status': 'alert', 'msg': '身份证姓名不匹配'})
-    recomendIntegral = 0
-    recomendedIntegral = 0
+
+    signIntegral = 0
     if referee:
         refereeCustomer = Customer.query.filter_by(phone=referee).first()
         if refereeCustomer:
-            recomendIntegral = getRecomend()
-            recomendedIntegral = getRecomended()
-            refereeCustomer.integral = refereeCustomer.integral + recomendIntegral
-            db.session.add(refereeCustomer)
-            db.session.commit()
+            pass
         else:
             return jsonify({'status': 'alert', 'msg': '推荐人不存在，请检查'})
 
-    signIntegral = getSign()
     if flask_login.current_user.is_authenticated:
         customer = Customer.query.filter_by(openid=flask_login.current_user.openid).first()
         if customer:
             customer.name = name
             customer.phone = phone
             # customer.password = psswd
+            customer.refereephone = referee
             customer.driveage = driveage
             customer.idcode = idCode
-            customer.status = 'normal'
+            customer.status = 'nopay'
         else:
             customer = Customer(name=name, phone=phone, driveage=driveage, idcode=idCode,
-                                status='normal', created_at=dtt.now(), integral=signIntegral + recomendedIntegral)
+                                status='nopay', created_at=dtt.now(), refereephone=referee)
     else:
-        customer = Customer(name=name, phone=phone, driveage=driveage, idcode=idCode, status='normal',
-                            created_at=dtt.now(), integral=signIntegral + recomendedIntegral)
+        return jsonify({'status': 'alert', 'msg': "请使用微信自带浏览器注册或十分钟后重试"})
+        # customer = Customer(name=name, phone=phone, driveage=driveage, idcode=idCode, status='nopay',
+        #                     created_at=dtt.now(), refereephone = referee)
     try:
         db.session.add(customer)
         db.session.commit()
@@ -128,7 +125,8 @@ def profileApi():
                 cu = Customer.query.filter(Customer.phone == phone or Customer.idcode == idCode).first()
                 cu.openid = flask_login.current_user.openid
                 cu.img = flask_login.current_user.img
-                cu.status = 'normal'
+                cu.status = 'nopay'
+                cu.refereephone = referee
                 db.session.add(cu)
                 db.session.commit()
             else:
@@ -136,7 +134,7 @@ def profileApi():
         else:
             return jsonify({'status': 'alert', 'msg': "当前手机号码/身份证号已存在"})
     Cache.cache().delete(phone)
-    return jsonify({'status': 'ok', 'msg': ""})
+    return jsonify({'status': 'ok', 'msg': "", "openid": flask_login.current_user.openid})
 
 
 @api.route('/getpayresult', methods=["POST"])
@@ -175,11 +173,26 @@ def getPayResult():
                 else:
                     order.orderstatus = "start"
                 cIntegral = order.Customer.integral
-                integralImprove = getIntegralImprove(order.totalfee)
-                order.Customer.integral = integralImprove + cIntegral
+                integralImprove = getIntegralImprove(order.totalfee, u"积分")
+
+                refereeCustomer = Customer.query.filter_by(phone=order.Customer.refereephone).first()
+                integralRefereeImprove=0
+                if refereeCustomer:
+                    integralRefereeImprove = getIntegralImprove(order.totalfee, u"返点")
+                    refereeCustomer.integral = refereeCustomer.integral + integralRefereeImprove
+                    db.session.add(refereeCustomer)
+                    db.session.commit()
+                integtalused = 0
+                if order.integtalused:
+                    integtalused = order.integtalused
+                order.Customer.integral = integralImprove + cIntegral - integtalused
                 db.session.add(order)
                 db.session.commit()
-
+                if integtalused:
+                    saveIntegeralRecord(refereeCustomer.id,integtalused, u"抵现", order.id)
+                if refereeCustomer:
+                    saveIntegeralRecord(refereeCustomer.id,integralRefereeImprove, u"返点", order.id)
+                saveIntegeralRecord(order.Customer.id,integralImprove, u"积分", order.id)
                 wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单",
                                        current_app.config.get('WECHAT_HOST') + url_for("agentweb.wechatCodeOrder",
                                                                                        id=sourceOrderId))
@@ -191,6 +204,117 @@ def getPayResult():
         db.session.add(order)
         db.session.commit()
     return "ok"
+
+
+def signIntegralFunc(customer,referee=None):
+    signIntegral = 0
+    if referee:
+        refereeCustomer = Customer.query.filter_by(phone=referee).first()
+        if refereeCustomer:
+            recomendIntegral = getIntegral(u"推荐")
+            signIntegral = getIntegral(u"注册")
+
+            refereeCustomer.integral = refereeCustomer.integral + recomendIntegral
+            db.session.add(refereeCustomer)
+            db.session.commit()
+            saveIntegeralRecord(refereeCustomer.id, recomendIntegral, u"作为" + customer.name + u"的推荐人")
+    customer.integral = signIntegral
+    db.session.add(customer)
+    db.session.commit()
+    saveIntegeralRecord(customer.id, signIntegral, u"注册")
+
+@api.route('/getsignpayresult', methods=["POST"])
+def getSignPayResult():
+    wxPay = wx.getPay()
+    if wxPay.sandbox:
+        sandKey = wxPay._fetch_sanbox_api_key()
+        wxPay.sandbox_api_key = sandKey
+    try:
+        r = wxPay.parse_payment_result(request.data)
+    except InvalidSignatureException, e:
+        e = Error(msg=e.errmsg, type=3)
+        db.session.add(e)
+        db.session.commit()
+        return
+    order = Otherorder.query.filter_by(tradeno=r["out_trade_no"]).first()
+    referee = order.Customer.refereephone
+
+    if r["return_code"] == "SUCCESS":
+
+        if not order:
+            e = Error(msg=json.dumps(r), type=1)
+            db.session.add(e)
+            db.session.commit()
+        else:
+            if not order.wxtradeno:
+                order.wxtradeno = r["transaction_id"]
+                order.pay_at = r["time_end"]
+                order.status = "ok"
+
+                order.Customer.status = "normal"
+                signIntegralFunc(order.Customer,referee)
+                db.session.add(order)
+                db.session.commit()
+
+    else:
+        rr = wxPay.close(r["out_trade_no"])
+        order.status = "failed"
+        order.detail = r["err_code_des"]
+        db.session.add(order)
+        db.session.commit()
+    return "ok"
+
+
+
+@api.route('/makesignorder', methods=['POST'])
+@flask_login.login_required
+def getSignOrderApi():
+    ordertype = "sign"
+    open_id = request.form.get("open_id")
+    customer = Customer.query.filter_by(openid=open_id).filter_by(status="nopay").first()
+    if not customer:
+        return jsonify({'status': 'error', 'msg': u"未知错误，请联系代理"})
+    integral = Integral.query.filter_by(name=u"注册费用").first()
+    if not integral or integral.ration<0.01:
+        customer.status = "normal"
+        signIntegralFunc(customer, customer.refereephone)
+        return jsonify({'status': 'noneed', 'msg': u"无需付费"})
+    totalfee = int(integral.ration) * 100
+
+    notify_url = current_app.config.get('WECHAT_HOST') + url_for('api.getSignPayResult')
+    body = u"%s*%s" % (customer.name, str(totalfee))
+    order = Otherorder(created_at=dtt.now(), customeropenid=open_id, totalfee=totalfee,
+                       tradetype='JSAPI', ordertype=ordertype)
+
+    wxPay = wx.getPay()
+    out_trade_no = getOutTradeNo()
+    try:
+        oresult = wxPay.order.create(trade_type='JSAPI', body=body, total_fee=totalfee, notify_url=notify_url,
+                                     user_id=open_id, out_trade_no=out_trade_no, )
+
+    except WeChatPayException, e:
+        err = Error(msg=e.errmsg, type=4)
+        # models.session.add(order)
+        db.session.add(err)
+        db.session.commit()
+        return jsonify({'status': 'failed', 'orderId': order.id, 'msg': u"订单创建失败"})
+    if oresult['return_code'] == 'SUCCESS':
+        prepay_id = oresult['prepay_id']
+        order.prepayid = prepay_id
+        order.tradeno = out_trade_no
+        order.status = 'waiting'
+        order.detail = json.dumps(wxPay.jsapi.get_jsapi_params(prepay_id))
+        # if order.ordertype != "continue":
+        # car.count = car.count - 1
+        db.session.add(order)
+        db.session.commit()
+        return jsonify({'status': 'ok', 'orderId': order.id, 'result': wxPay.jsapi.get_jsapi_params(prepay_id)})
+    else:
+        order.status = 'failed'
+        order.tradeno = out_trade_no
+        db.session.add(order)
+        db.session.commit()
+        return jsonify({'status': 'failed', 'orderId': order.id, 'result': oresult["err_code_des"]})
 
 
 @api.route('/makeorder', methods=['POST'])
@@ -288,7 +412,7 @@ def getOrderApi():
                   preferentialdetail=json.dumps(prefer),
                   location=location, serverstopid=serverstop, carfee=carfee, insurefee=insurefee, insureid=ins_id,
                   book_at=book_at, ordertype=ordertype, sourceid=sourceid, integralfee=integralfee,
-                  serverstoplocation=serverstopLocation,notystatus=0)
+                  serverstoplocation=serverstopLocation, notystatus=0, integtalused=integtalused)
 
     wxPay = wx.getPay()
     out_trade_no = getOutTradeNo()
@@ -344,6 +468,8 @@ def cancelOrderApi(id):
         return jsonify({"status": 'ok'})
     else:
         return jsonify({"status": 'failed'})
+
+
         # try:
         #     wxPay = wx.getPay()
         #     if wxPay.sandbox:
@@ -362,6 +488,30 @@ def cancelOrderApi(id):
         # except:
         #     return jsonify({"status": 'failed'})
         # return jsonify({"status": 'ok'})
+
+
+@api.route('/cancelotherorder/<id>')
+@flask_login.login_required
+def cancelOtherOrderApi(id):
+    wxPay = wx.getPay()
+    if wxPay.sandbox:
+        sandKey = wxPay._fetch_sanbox_api_key()
+        wxPay.sandbox_api_key = sandKey
+    order = Otherorder.query.filter_by(id=id).first()
+    if not order:
+        return jsonify({"status": 'ok'})
+    tradeNo = order.tradeno
+    rr = wxPay.order.close(tradeNo)
+    if rr['result_code'] == "SUCCESS":
+        order.status = "canceled"
+        order.detail = json.dumps(rr)
+        order.Car.status = "normal"
+        # order.Cartype.count = order.Cartype.count + 1
+        db.session.add(order)
+        db.session.commit()
+        return jsonify({"status": 'ok'})
+    else:
+        return jsonify({"status": 'failed'})
 
 
 @api.route('/refundapply/<id>')

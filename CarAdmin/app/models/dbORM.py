@@ -3,8 +3,7 @@ from flask import current_app
 from datetime import datetime
 import datetime as dt
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import select, func, Boolean
-import json
+from sqlalchemy import select,func,Boolean
 from app import db
 
 
@@ -12,20 +11,15 @@ class Cartypeprefer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cartypeid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
     preferentialid = db.Column(db.Integer, db.ForeignKey('preferential.id'))
-
     def __repr__(self):
         return self.id
-
 
 class Insurecartype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     cartypeid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
     insureid = db.Column(db.Integer, db.ForeignKey('insure.id'))
-
     def __repr__(self):
         return self.id
-
-
 class Cartype(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -35,7 +29,7 @@ class Cartype(db.Model):
     img = db.Column(db.String(200))
     status = db.Column(db.String(800), default="pending")
     orders = db.relationship('Order', backref='Cartype', lazy='dynamic')
-    preferentials = db.relationship("Preferential", secondary="cartypeprefer", backref='Cartype', lazy='dynamic')
+    preferentials = db.relationship("Preferential" , secondary="cartypeprefer", backref='Cartype', lazy='dynamic')
     carcatid = db.Column(db.Integer, db.ForeignKey('carcat.id'))
     count = db.Column(db.Integer)
     limitid = db.Column(db.Integer, db.ForeignKey('limit.id'))
@@ -44,18 +38,15 @@ class Cartype(db.Model):
     @hybrid_property
     def remind_count(self):
         # return len(self.cars)   # @note: use when non-dynamic relationship
-        return Car.query.filter(Car.typeid == self.id).filter(
-            Car.status == "normal").count()  # @note: use when dynamic relationship
+        return Car.query.filter(Car.typeid==self.id).filter(Car.status=="normal").count()  # @note: use when dynamic relationship
 
     @hybrid_property
     def rent_count(self):
         # return len(self.cars)   # @note: use when non-dynamic relationship
-        return Car.query.filter(Car.typeid == self.id).filter(
-            Car.status == "pending").count()  # @note: use when dynamic relationship
+        return Car.query.filter(Car.typeid==self.id).filter(Car.status=="pending").count()  # @note: use when dynamic relationship
 
     def __repr__(self):
         return u"%s,单价%s元" % (self.name, float(self.price) / 100)
-
 
 class Limit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -68,7 +59,6 @@ class Limit(db.Model):
 
     def __repr__(self):
         return self.name
-
 
 class Gps(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -109,14 +99,16 @@ class Customer(db.Model):
     img = db.Column(db.String(800))
     histories = db.relationship('History', backref='Customer', lazy='dynamic')
     orders = db.relationship('Order', backref='Customer', lazy='dynamic')
+    otyherorders = db.relationship('Otherorder', backref='Customer', lazy='dynamic')
+    integralrecords = db.relationship('Integralrecord', backref='Customer', lazy='dynamic')
     openid = db.Column(db.String(800), unique=True)
     password = db.Column(db.String(800))
     driveage = db.Column(db.Integer)
     phone = db.Column(db.String(800), unique=True)
     status = db.Column(db.String(800), default="pending")
-    olduser = db.Column(db.Integer, default=0)
+    olduser =  db.Column(db.Integer, default=0)
     integral = db.Column(db.Integer, default=0)
-
+    refereephone = db.Column(db.String(80))
     @property
     def is_authenticated(self):
         return True
@@ -163,43 +155,43 @@ class Mendhistory(db.Model):
     price = db.Column(db.String(80))
     status = db.Column(db.String(80))
     location = db.Column(db.String(80))
-
     def __repr__(self):
         return "%s %s" % (self.created_at, self.type)
 
-
+class Integralrecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    customerid = db.Column(db.Integer, db.ForeignKey('customer.id'))
+    orderid = db.Column(db.Integer, db.ForeignKey('order.id'))
+    otherorderid = db.Column(db.Integer, db.ForeignKey('otherorder.id'))
+    detail = db.Column(db.String(800))
+    integral = db.Column(db.Integer)
+    def __repr__(self):
+        return "%s %s" % (self.created_at, self.detail)
 class Serverstop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name =db.Column(db.String(80))
     phone = db.Column(db.String(80))
     owner = db.Column(db.String(80))
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
     orders = db.relationship('Order', backref='Serverstop', lazy='dynamic')
     userid = db.Column(db.Integer, db.ForeignKey('user.id'))
-    mfroms = db.relationship('Move', backref='fromServerstop', lazy='dynamic', foreign_keys="Move.fromid")
-    mtos = db.relationship('Move', backref='toServerstop', lazy='dynamic', foreign_keys="Move.toid")
+    mfroms = db.relationship('Move', backref='fromServerstop', lazy='dynamic',foreign_keys="Move.fromid")
+    mtos = db.relationship('Move', backref='toServerstop', lazy='dynamic',foreign_keys="Move.toid")
     locationid = db.Column(db.Integer, db.ForeignKey('location.id'))
-
     def __repr__(self):
         return self.name
-
-
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name =db.Column(db.String(80))
     serrverstops = db.relationship('Serverstop', backref='Location', lazy='dynamic')
-
     def __repr__(self):
         return self.name
-
-
 class Hy(object):
-    def __init__(self, a, b):
+    def __init__(self,a,b):
         self.value = a
         self.type = b
-
-
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -253,20 +245,49 @@ class Order(db.Model):
     star = db.Column(db.Integer)
     isoverdate = db.Column(db.Integer)
     pretodate = db.Column(db.DateTime)
-    serverstoplocation = db.Column(db.String(800))
+    serverstoplocation =  db.Column(db.String(800))
     notystatus = db.Column(db.Integer)
+    integralrecords = db.relationship('Integralrecord', backref='Order', lazy='dynamic')
 
     @hybrid_property
     def perprice(self):
         # return len(self.cars)   # @note: use when non-dynamic relationship
-        return self.Cartype.price / 100  # @note: use when dynamic relationship
-    @hybrid_property
-    def prefname(self):
-        return  json.loads(self.preferentialdetail)["name"] if json.loads(
-            self.preferentialdetail) and json.loads(self.preferentialdetail).has_key('name') else u"-",
+        return self.Cartype.price/100  # @note: use when dynamic relationship
 
     def __repr__(self):
         return self.tradeno
+class Otherorder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
+    totalfee = db.Column(db.Integer)
+    customeropenid = db.Column(db.Integer, db.ForeignKey('customer.openid'))
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    tradetype = db.Column(db.String(80))
+    detail = db.Column(db.String(800))
+    tradeno = db.Column(db.String(80))
+    count = db.Column(db.Integer)
+    status = db.Column(db.String(80), default='pending')
+    prepayid = db.Column(db.String(80))
+    wxtradeno = db.Column(db.String(80))
+    pay_at = db.Column(db.String(80))
+    isrefund = db.Column(db.Integer)
+    r_pay_at = db.Column(db.String(80))
+    r_tradeno = db.Column(db.String(80))
+    r_wxtradeno = db.Column(db.String(80))
+    r_detail = db.Column(db.String(800))
+    r_totalfee = db.Column(db.Integer)
+    fromdate = db.Column(db.DateTime)
+    todate = db.Column(db.DateTime)
+    offlinefee = db.Column(db.Integer)
+    preferentialdetail = db.Column(db.String(800))
+    cutfee = db.Column(db.Integer)
+    oldfee = db.Column(db.Integer)
+    location = db.Column(db.String(800))
+    ordertype = db.Column(db.String(800))
+    integralfee = db.Column(db.Integer)
+    integtalused = db.Column(db.Integer)
+    integralrecords = db.relationship('Integralrecord', backref='Otherorder', lazy='dynamic')
 
 
 class Error(db.Model):
@@ -277,16 +298,12 @@ class Error(db.Model):
 
     def __repr__(self):
         return self.id
-
-
 class Carcat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(8000))
     cartypes = db.relationship('Cartype', backref='Carcat', lazy='dynamic')
-
     def __repr__(self):
         return self.name
-
 
 class Loginrecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -317,7 +334,6 @@ class User(db.Model):
     moves = db.relationship('Move', backref='User', lazy='dynamic')
     applies = db.relationship('Apply', backref='User', lazy='dynamic')
     phone = db.Column(db.String(80))
-
     def __repr__(self):
         return self.name
 
@@ -342,11 +358,8 @@ class Preferential(db.Model):
     start_at = db.Column(db.DateTime)
     end_at = db.Column(db.DateTime)
     newpricecut = db.Column(db.Integer)
-
     def __repr__(self):
         return self.name
-
-
 class Insure(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
@@ -354,10 +367,8 @@ class Insure(db.Model):
     price = db.Column(db.Integer)
     orders = db.relationship('Order', backref='Insure', lazy='dynamic')
     cartypes = db.relationship("Cartype", secondary="insurecartype", backref='Insure', lazy='dynamic')
-
     def __repr__(self):
         return self.name
-
 
 class Accident(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -376,10 +387,8 @@ class Accident(db.Model):
     theirprice = db.Column(db.Float)
     orderid = db.Column(db.Integer, db.ForeignKey('order.id'))
     userid = db.Column(db.Integer, db.ForeignKey('user.id'))
-
     def __repr__(self):
         return self.id
-
 
 class Move(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -394,7 +403,6 @@ class Move(db.Model):
     def __repr__(self):
         return str(self.id)
 
-
 class Apply(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -406,6 +414,8 @@ class Apply(db.Model):
         return self.id
 
 
+
+
 class Userrole(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
@@ -414,7 +424,6 @@ class Userrole(db.Model):
 
     def __repr__(self):
         return self.name
-
 
 # POST
 class Integral(db.Model):

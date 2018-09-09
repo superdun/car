@@ -99,6 +99,8 @@ class Customer(db.Model):
     img = db.Column(db.String(800))
     histories = db.relationship('History', backref='Customer', lazy='dynamic')
     orders = db.relationship('Order', backref='Customer', lazy='dynamic')
+    otyherorders = db.relationship('Otherorder', backref='Customer', lazy='dynamic')
+    integralrecords = db.relationship('Integralrecord', backref='Customer', lazy='dynamic')
     openid = db.Column(db.String(800), unique=True)
     password = db.Column(db.String(800))
     driveage = db.Column(db.Integer)
@@ -106,6 +108,7 @@ class Customer(db.Model):
     status = db.Column(db.String(800), default="pending")
     olduser =  db.Column(db.Integer, default=0)
     integral = db.Column(db.Integer, default=0)
+    refereephone = db.Column(db.String(80))
     @property
     def is_authenticated(self):
         return True
@@ -154,6 +157,17 @@ class Mendhistory(db.Model):
     location = db.Column(db.String(80))
     def __repr__(self):
         return "%s %s" % (self.created_at, self.type)
+
+class Integralrecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    customerid = db.Column(db.Integer, db.ForeignKey('customer.id'))
+    orderid = db.Column(db.Integer, db.ForeignKey('order.id'))
+    otherorderid = db.Column(db.Integer, db.ForeignKey('otherorder.id'))
+    detail = db.Column(db.String(800))
+    integral = db.Column(db.Integer)
+    def __repr__(self):
+        return "%s %s" % (self.created_at, self.detail)
 class Serverstop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name =db.Column(db.String(80))
@@ -233,6 +247,7 @@ class Order(db.Model):
     pretodate = db.Column(db.DateTime)
     serverstoplocation =  db.Column(db.String(800))
     notystatus = db.Column(db.Integer)
+    integralrecords = db.relationship('Integralrecord', backref='Order', lazy='dynamic')
 
     @hybrid_property
     def perprice(self):
@@ -241,6 +256,38 @@ class Order(db.Model):
 
     def __repr__(self):
         return self.tradeno
+class Otherorder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    carid = db.Column(db.Integer, db.ForeignKey('cartype.id'))
+    totalfee = db.Column(db.Integer)
+    customeropenid = db.Column(db.Integer, db.ForeignKey('customer.openid'))
+    userid = db.Column(db.Integer, db.ForeignKey('user.id'))
+    tradetype = db.Column(db.String(80))
+    detail = db.Column(db.String(800))
+    tradeno = db.Column(db.String(80))
+    count = db.Column(db.Integer)
+    status = db.Column(db.String(80), default='pending')
+    prepayid = db.Column(db.String(80))
+    wxtradeno = db.Column(db.String(80))
+    pay_at = db.Column(db.String(80))
+    isrefund = db.Column(db.Integer)
+    r_pay_at = db.Column(db.String(80))
+    r_tradeno = db.Column(db.String(80))
+    r_wxtradeno = db.Column(db.String(80))
+    r_detail = db.Column(db.String(800))
+    r_totalfee = db.Column(db.Integer)
+    fromdate = db.Column(db.DateTime)
+    todate = db.Column(db.DateTime)
+    offlinefee = db.Column(db.Integer)
+    preferentialdetail = db.Column(db.String(800))
+    cutfee = db.Column(db.Integer)
+    oldfee = db.Column(db.Integer)
+    location = db.Column(db.String(800))
+    ordertype = db.Column(db.String(800))
+    integralfee = db.Column(db.Integer)
+    integtalused = db.Column(db.Integer)
+    integralrecords = db.relationship('Integralrecord', backref='Otherorder', lazy='dynamic')
 
 
 class Error(db.Model):
