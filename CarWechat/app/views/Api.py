@@ -52,7 +52,7 @@ def idcodeApi():
 def profileApi():
     filter_list = []
     for i in request.form:
-        if request.form[i] == '' or request.form[i] == 'null':
+        if (request.form[i] == '' or request.form[i] == 'null') and i!="referee":
             filter_list.append(i)
         # elif len(request.form['password']) < 6:
         #     filter_list.append("password")
