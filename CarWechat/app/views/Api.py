@@ -212,14 +212,14 @@ def getPayResult():
 
 
 def signIntegralFunc(customer,referee=None):
-    signIntegral = 0
+    signIntegral = getIntegral(u"注册")
     if referee:
         refereeCustomer = Customer.query.filter_by(phone=referee).first()
         if refereeCustomer:
             admin = User.query.filter_by(openid=refereeCustomer.openid).first()
 
             recomendIntegral = getIntegral(u"推荐")
-            signIntegral = getIntegral(u"注册")
+
             if not admin:
                 refereeCustomer.integral = refereeCustomer.integral + recomendIntegral
                 db.session.add(refereeCustomer)
