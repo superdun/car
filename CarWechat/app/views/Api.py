@@ -90,8 +90,11 @@ def profileApi():
     signIntegral = 0
     if referee:
         refereeCustomer = Customer.query.filter_by(phone=referee).first()
+
         if refereeCustomer:
-            pass
+            admin = User.query.filter_by(openid=refereeCustomer.openid).first()
+            if admin:
+                return jsonify({'status': 'alert', 'msg': '推荐人不能为代理'})
         else:
             return jsonify({'status': 'alert', 'msg': '推荐人不存在，请检查'})
 
@@ -178,10 +181,12 @@ def getPayResult():
                 refereeCustomer = Customer.query.filter_by(phone=order.Customer.refereephone).first()
                 integralRefereeImprove=0
                 if refereeCustomer:
-                    integralRefereeImprove = getIntegralImprove(order.totalfee, u"返点")
-                    refereeCustomer.integral = refereeCustomer.integral + integralRefereeImprove
-                    db.session.add(refereeCustomer)
-                    db.session.commit()
+                    admin = User.query.filter_by(openid=refereeCustomer.openid).first()
+                    if not admin:
+                        integralRefereeImprove = getIntegralImprove(order.totalfee, u"返点")
+                        refereeCustomer.integral = refereeCustomer.integral + integralRefereeImprove
+                        db.session.add(refereeCustomer)
+                        db.session.commit()
                 integtalused = 0
                 if order.integtalused:
                     integtalused = order.integtalused
@@ -211,13 +216,16 @@ def signIntegralFunc(customer,referee=None):
     if referee:
         refereeCustomer = Customer.query.filter_by(phone=referee).first()
         if refereeCustomer:
+            admin = User.query.filter_by(openid=refereeCustomer.openid).first()
+
             recomendIntegral = getIntegral(u"推荐")
             signIntegral = getIntegral(u"注册")
+            if not admin:
+                refereeCustomer.integral = refereeCustomer.integral + recomendIntegral
+                db.session.add(refereeCustomer)
+                db.session.commit()
+                saveIntegeralRecord(refereeCustomer.id, recomendIntegral, u"作为" + customer.name + u"的推荐人")
 
-            refereeCustomer.integral = refereeCustomer.integral + recomendIntegral
-            db.session.add(refereeCustomer)
-            db.session.commit()
-            saveIntegeralRecord(refereeCustomer.id, recomendIntegral, u"作为" + customer.name + u"的推荐人")
     customer.integral = signIntegral
     db.session.add(customer)
     db.session.commit()
