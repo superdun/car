@@ -2,6 +2,7 @@
 from ..models.dbORM import *
 import datetime
 from datetime import datetime as dtt
+from ..modules.Wechat import sendIntegralTemplateByCustomer
 from math import floor,ceil
 from app import db
 
@@ -44,10 +45,11 @@ def getIntegral(name):
         return int(integral.ration/integralCash.ration)
     return 0
 
-def saveIntegeralRecord(customerid,integral,detail,orderid=None,otherorderid=None):
-    record = Integralrecord(customerid=customerid,integral=integral,detail=detail,orderid=orderid,otherorderid=otherorderid,created_at = datetime.datetime.now())
+def saveIntegeralRecord(customer,integral,detail,orderid=None,otherorderid=None):
+    record = Integralrecord(customerid=customer.id,integral=integral,detail=detail,orderid=orderid,otherorderid=otherorderid,created_at = datetime.datetime.now())
     db.session.add(record)
     db.session.commit()
+    sendIntegralTemplateByCustomer(customer,integral,detail)
 # def getRecomend():
 #
 #     integral = Integral.query.filter_by(name=u"返点").first()

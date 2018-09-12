@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from flask import current_app
+from flask import current_app,url_for
 import time
 from wechatpy import oauth, client, pay
 from ..models.dbORM import User
@@ -95,7 +95,54 @@ def sendTemplate(openid, title, timeStr, orderType, customerInfo, carType, detai
     }
     wxClent = getClient()
     wxClent.message.send_template(openid, template_id, data,url=url )
-
+def sendIntegralTemplate(openid, title, typeStr, integral, total, detail,url=""):
+    template_id = current_app.config.get("WECHAT_MSG_MODEL_ID_INTEGRAL")
+    data = {
+        "first": {
+            "value": title,
+            "color": "#173177"
+        },
+        "type": {
+            "value": typeStr,
+            "color": "#173177"
+        },
+        "integral": {
+            "value": integral,
+            "color": "#173177"
+        },
+        "all": {
+            "value": total,
+            "color": "#173177"
+        },
+        "remark": {
+            "value": detail,
+            "color": "#173177"
+        }
+    }
+    wxClent = getClient()
+    wxClent.message.send_template(openid, template_id, data,url=url )
+def sendOvertimeTemplate(openid, title, name, expDate, detail,url=""):
+    template_id = current_app.config.get("WECHAT_MSG_MODEL_ID_OVERTIME")
+    data = {
+        "first": {
+            "value": title,
+            "color": "#173177"
+        },
+        "name": {
+            "value": name,
+            "color": "#173177"
+        },
+        "expDate": {
+            "value": expDate,
+            "color": "#173177"
+        },
+        "remark": {
+            "value": detail,
+            "color": "#173177"
+        }
+    }
+    wxClent = getClient()
+    wxClent.message.send_template(openid, template_id, data,url=url )
 
 def sendTemplateByOrder(order, description, type,url=""):
     user = order.Serverstop.User
@@ -111,5 +158,20 @@ def sendTemplateByOrder(order, description, type,url=""):
     for i in admin:
         openid = i.openid
         if openid:
-            sendTemplate(openid, description, order.created_at.strftime("%Y-%m-%d %H:%M:%S"), type,
+            try:
+                sendTemplate(openid, description, order.created_at.strftime("%Y-%m-%d %H:%M:%S"), type,
                          order.Customer.name, order.Cartype.name + "*" + str(order.count), detail,url)
+            except:
+                pass
+def sendIntegralTemplateByCustomer(customer, count,typeStr):
+
+    openid = customer.openid
+
+    if openid:
+        title = u"尊敬的%s,通力币最近交易信息如下：" % customer.name
+        detail=u"如有疑问,请随时咨询代理"
+        url = current_app.config.get('WECHAT_HOST') + url_for("web.profile")
+        try:
+            sendIntegralTemplate(openid,title,typeStr,count,customer.integral,detail,url)
+        except:
+            pass

@@ -53,14 +53,15 @@ def create_app():
         user.role = users[username]['role']
         lr = Loginrecord()
         lr.userid = users[username]['id']
-        real_ip = request.headers['X-Forwarded-For']
-        if len(real_ip.split(',')) > 1:
-            ip = real_ip.split(",")[1]
-        else:
-            ip = real_ip
-        lr.ip = ip
-        db.session.add(lr)
-        db.session.commit()
+        if request.headers.has_key("X-Forwarded-For"):
+            real_ip = request.headers['X-Forwarded-For']
+            if len(real_ip.split(',')) > 1:
+                ip = real_ip.split(",")[1]
+            else:
+                ip = real_ip
+            lr.ip = ip
+            db.session.add(lr)
+            db.session.commit()
         return user
 
     @login_manager.request_loader

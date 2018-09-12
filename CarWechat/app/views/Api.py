@@ -194,10 +194,10 @@ def getPayResult():
                 db.session.add(order)
                 db.session.commit()
                 if integtalused:
-                    saveIntegeralRecord(refereeCustomer.id,integtalused, u"抵现", order.id)
+                    saveIntegeralRecord(refereeCustomer,-1*int(integtalused), u"抵现", order.id)
                 if refereeCustomer:
-                    saveIntegeralRecord(refereeCustomer.id,integralRefereeImprove, u"返点", order.id)
-                saveIntegeralRecord(order.Customer.id,integralImprove, u"积分", order.id)
+                    saveIntegeralRecord(refereeCustomer,integralRefereeImprove, u"返点", order.id)
+                saveIntegeralRecord(order.Customer,integralImprove, u"积分", order.id)
                 wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单",
                                        current_app.config.get('WECHAT_HOST') + url_for("agentweb.wechatCodeOrder",
                                                                                        id=sourceOrderId))
@@ -224,12 +224,12 @@ def signIntegralFunc(customer,referee=None):
                 refereeCustomer.integral = refereeCustomer.integral + recomendIntegral
                 db.session.add(refereeCustomer)
                 db.session.commit()
-                saveIntegeralRecord(refereeCustomer.id, recomendIntegral, u"作为" + customer.name + u"的推荐人")
+                saveIntegeralRecord(refereeCustomer, recomendIntegral, u"作为" + customer.name + u"的推荐人")
 
     customer.integral = signIntegral
     db.session.add(customer)
     db.session.commit()
-    saveIntegeralRecord(customer.id, signIntegral, u"注册")
+    saveIntegeralRecord(customer, signIntegral, u"注册")
 
 @api.route('/getsignpayresult', methods=["POST"])
 def getSignPayResult():
