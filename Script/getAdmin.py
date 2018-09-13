@@ -16,7 +16,7 @@ def getUperAdmin(user):
         result.append(user)
     if user.Userrole.stage == 3:
         result.append(user)
-        up = User.query.filter_by(id=user.upid).first()
+        up = session.query(User).filter(User.id==user.upid).first()
         if up:
             result.append(up)
     return result
