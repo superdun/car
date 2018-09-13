@@ -8,8 +8,7 @@ import wechatNoty
 
 
 
-def preToDate(m):
-    session = dbORM.DBSession()
+def preToDate(m,session):
     if m.ordertype == "normal" and m.fromdate:
         if m.hascontinue:
             orders = session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(
@@ -31,14 +30,11 @@ def preToDate(m):
             dbORM.Order.status == "ok").filter(
             dbORM.Order.id == m.sourceid).first().fromdate
     else:
-        session.close()
         return None
-    session.close()
     return preToDate
 
 
-def OverDateStatus(m, ptd):
-    session = dbORM.DBSession()
+def OverDateStatus(m, ptd,session):
     try:
         preToDate = ptd
         if preToDate:
@@ -72,11 +68,11 @@ def update():
         dbORM.Order.created_at > lastMonth).order_by(dbORM.Order.id.desc()).limit(1000).all()
     for i in orders:
         print i.id
-        ptd = preToDate(i)
-        ods = OverDateStatus(i, ptd)
+        ptd = preToDate(i,session)
+        ods = OverDateStatus(i, ptd,session)
         if ptd:
             pntd = ptd - dt.timedelta(minutes=15)
-            pods = OverDateStatus(i, pntd)
+            pods = OverDateStatus(i, pntd,session)
             print [ptd,ods,i.isoverdate,pods]
             print [i.isoverdate != pods,pods == 1,not i.notystatus,not i.todate,i.created_at > dt.datetime.strptime(
                     "2018-09-12-0", "%Y-%m-%d-%H")]
