@@ -75,6 +75,7 @@ def update():
         if ptd:
             pntd = ptd - dt.timedelta(minutes=15)
             pods = OverDateStatus(i, pntd)
+            print [i.isoverdate,pods]
             print [i.isoverdate != pods,pods == 1,not i.notystatus,not i.todate,i.created_at > dt.datetime.strptime(
                     "2018-09-12-0", "%Y-%m-%d-%H")]
             if i.isoverdate != pods and pods == 1 and not i.notystatus and  not i.todate and i.created_at > dt.datetime.strptime(
