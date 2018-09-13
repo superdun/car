@@ -31,7 +31,9 @@ def preToDate(m):
             dbORM.Order.status == "ok").filter(
             dbORM.Order.id == m.sourceid).first().fromdate
     else:
+        session.close()
         return None
+    session.close()
     return preToDate
 
 
