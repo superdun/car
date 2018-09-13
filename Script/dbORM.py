@@ -117,6 +117,7 @@ class User(Base):
     openid = Column(String(80))
     phone = Column(String(80))
     serverstop = relationship('Serverstop', backref='User', lazy='dynamic')
+    roleid = Column(Integer, ForeignKey('userrole.id'))
     def __repr__(self):
         return self.name
 
@@ -136,7 +137,16 @@ class Car(Base):
         return self.name
 
 
+class Userrole(Base):
+    __tablename__ = "userrole"
 
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80))
+    stage = Column(Integer)
+    users = relationship('User', backref='Userrole', lazy='dynamic')
+
+    def __repr__(self):
+        return self.name
 
 # POST
 

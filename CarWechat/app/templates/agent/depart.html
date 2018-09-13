@@ -317,11 +317,11 @@
                     weui.alert('请上传不超过10M的图片');
                     return false;
                 }
-                if (files.length > 3) { // 防止一下子选择过多文件
+                if (files.length > 6) { // 防止一下子选择过多文件
                     weui.alert('最多只能上传6张图片，请重新选择');
                     return false;
                 }
-                if (uploadCount + 1 > 3) {
+                if (uploadCount + 1 > 6) {
                     weui.alert('最多只能上传6张图片');
                     return false;
                 }

@@ -1,8 +1,11 @@
+# -*- coding:utf-8 -*-
 from sqlalchemy import create_engine
 import dbORM
 import datetime as dt
 from config import *
 import SMS
+import wechatNoty
+
 
 
 def preToDate(m):
@@ -21,10 +24,11 @@ def preToDate(m):
 
     elif session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter_by(
             id=m.sourceid).first() and session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(
-                    dbORM.Order.id == m.sourceid).first().fromdate:
+                dbORM.Order.id == m.sourceid).first().fromdate:
         preToDate = dt.timedelta(
             days=m.count + session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(
-                dbORM.Order.id == m.sourceid).first().count) + session.query(dbORM.Order).filter(dbORM.Order.status == "ok").filter(
+                dbORM.Order.id == m.sourceid).first().count) + session.query(dbORM.Order).filter(
+            dbORM.Order.status == "ok").filter(
             dbORM.Order.id == m.sourceid).first().fromdate
     else:
         return None
@@ -58,21 +62,6 @@ def OverDateStatus(m, ptd):
         return 0
 
 
-def noty(session, order):
-    pass
-    # if not order.todate and  order.notystatus==0:
-    #     cnum = order.Customer.phone
-    #     openid = order.Serverstop.User.openid
-    #     user = session.query(dbORM.Customer).filter(dbORM.Customer.openid == openid).first()
-    #     unum=""
-    #     if user:
-    #         unum = user.phone
-    #     msg = '{"carname": "%s"}' % (order.Car.name)
-    #     if cnum:
-    #         sendResultC = SMS.sendSMS('back', cnum, msg.decode('utf8')).send()
-    #     if unum:
-    #         sendResultU = SMS.sendSMS('back', cnum, msg.decode('utf8')).send()
-
 
 def update():
     session = dbORM.DBSession()
@@ -83,8 +72,10 @@ def update():
         print i.id
         ptd = preToDate(i)
         ods = OverDateStatus(i, ptd)
-        if ods == 1:
-            noty(session, i)
+        pntd = ptd-dt.timedelta(minutes=15)
+        pods = OverDateStatus(i, pntd)
+        if i.isoverdate != pods and pods==1 and not i.notystatus and i.ordertype=="normal" and not i.todate and i.created_at> dt.datetime.strptime("2018-09-12-0", "%Y-%m-%d-%H"):
+            wechatNoty.sendTemplateByOrder(i,ptd.strftime(u"%m月%d日-%H:%M")  )
         if i.isoverdate != ods or i.pretodate != ptd:
             i.isoverdate = ods
 
