@@ -55,8 +55,7 @@ def sendTemplateByOrder(order,expDate):
     for i in admin:
         openid = i.openid
         if openid:
-            sendOvertimeTemplate(openid, title, name, expDate, detail)
-            # try:
-            #     sendOvertimeTemplate(openid,title,name,expDate,detail)
-            # except:
-            #     pass
+            try:
+                sendOvertimeTemplate(openid,title,name,expDate,detail)
+            except:
+                pass
