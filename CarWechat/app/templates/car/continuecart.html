@@ -169,7 +169,7 @@
             var value = v + ($("#count").val() * $('#insure').attr("price") ) / 100.0;
             sumFee = value;
             if (hasntegral) {
-                var newValue = value - integral;
+                var newValue = (value*100-integral*100)/100;
             }
             else {
                 var newValue = value;
@@ -326,6 +326,17 @@
             $("#count").val(1);
             getPrefer();
             getIntegral();
+            $("#integralAgreeLabel").click(function () {
+                 if ($("#integralAgree").prop("checked")) {
+                    hasIntegral = true;
+
+                 }
+                 else {
+                     hasIntegral = false;
+                 }
+
+                 setSum(sumFee,hasIntegral);
+            });
 
         });
         translateCallback = function (data) {
