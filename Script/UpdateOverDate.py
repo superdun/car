@@ -76,7 +76,10 @@ def update():
             if i.isoverdate != pods and pods == 1 and not i.notystatus and  not i.todate and i.created_at > dt.datetime.strptime(
                     "2018-09-12-0", "%Y-%m-%d-%H"):
                 print "send noty %s" % str(i.id)
-                wechatNoty.sendTemplateByOrder(i, ptd.strftime(u"%m月%d日-%H:%M"))
+                try:
+                    wechatNoty.sendTemplateByOrder(i, ptd.strftime(u"%m月%d日-%H:%M"))
+                except Exception,e:
+                    print e.message
                 i.notystatus=1
                 session.add(i)
                 session.commit()
