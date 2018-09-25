@@ -7,23 +7,25 @@ from math import floor,ceil
 from app import db
 
 def getIntegralCut(openid,fee):
-    fee = float(fee)/100-0.1
+    feeYuan = float(fee)/100
     integralSwitch = Integral.query.filter_by(name=u"开关").first()
     integral = Integral.query.filter_by(name=u"兑现").first()
     integralThreshold = Integral.query.filter_by(name=u"满").first()
     customer = Customer.query.filter_by(openid=openid).first()
     customerIntegral = customer.integral
-    if customerIntegral==0 or not integralThreshold or not integral or not customer or not integralSwitch or not int(integralSwitch.ration)==1:
+    if customerIntegral==0 or not integralThreshold or integralThreshold.ration<0.01 or not integral or not customer or not integralSwitch or not int(integralSwitch.ration)==1:
         return {"cut":0,"used":0,"msg":u"积分还不够多哦"}
     else:
         ration = integral.ration
-        cutSum = (floor(customerIntegral*ration*100))/100
-        if cutSum<integralThreshold.ration:
-            return {"cut": 0, "used": 0, "msg": u"积分还不够多哦"}
-        if cutSum<fee:
-            return {"cut": cutSum, "used": customerIntegral}
-        else:
-            return {"cut": fee, "used": int(ceil(fee/ration))}
+        cutSumRaw = min((floor(customerIntegral*ration*100))/100,feeYuan)
+        cutSum = floor(cutSumRaw / integralThreshold.ration)*integralThreshold.ration
+        return {"cut": cutSum, "used": int(cutSum/ration)}
+        # if cutSum<integralThreshold.ration:
+        #     return {"cut": 0, "used": 0, "msg": u"积分还不够多哦"}
+        # if cutSum<fee:
+        #     return {"cut": cutSum, "used": customerIntegral}
+        # else:
+        #     return {"cut": fee, "used": int(ceil(fee/ration))}
 
 def getIntegralImprove(fee,name):
     fee = int(fee)

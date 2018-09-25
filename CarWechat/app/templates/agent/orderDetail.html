@@ -57,12 +57,21 @@
                     <div class="weui-wepay-detail__ft">{{ o.count }}</div>
                 </div>
                 <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">积分消耗：</div>
+
+                    <div class="weui-wepay-detail__ft">-{{ o.integtalused }}</div>
+                </div>
+                <div class="weui-wepay-detail">
                     <div class="weui-wepay-detail__bd">折扣：</div>
                     <div class="weui-wepay-detail__ft">-￥{{ o.cutfee/100 }}</div>
                 </div>
+                <div class="weui-wepay-detail">
+                    <div class="weui-wepay-detail__bd">积分抵扣金额：</div>
+                    <div class="weui-wepay-detail__ft">-￥{{ o.integralfee/100 }}</div>
+                </div>
 
                 <div class="weui-wepay-detail">
-                    <div class="weui-wepay-detail__bd">总价：</div>
+                    <div class="weui-wepay-detail__bd">实际总价：</div>
                     <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ o.totalfee/100 }}</div>
                 </div>
             </div>
@@ -111,6 +120,7 @@
                 <div class="weui-wepay-detail__bd">车型：</div>
                 <div class="weui-wepay-detail__ft">{{ data.Cartype.name }}</div>
             </div>
+
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">车牌：</div>
                 <div class="weui-wepay-detail__ft">{{ data.Car.name }}</div>
@@ -120,8 +130,17 @@
                 <div class="weui-wepay-detail__ft">{{ data.count }}</div>
             </div>
             <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">积分消耗：</div>
+
+                <div class="weui-wepay-detail__ft">{{ data.integtalused }}</div>
+            </div>
+            <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">折扣：</div>
                 <div class="weui-wepay-detail__ft">-￥{{ data.cutfee/100 }}</div>
+            </div>
+            <div class="weui-wepay-detail">
+                <div class="weui-wepay-detail__bd">积分抵扣金额：</div>
+                <div class="weui-wepay-detail__ft">-￥{{ data.integralfee/100 }}</div>
             </div>
             <div class="weui-wepay-detail">
                 <div class="weui-wepay-detail__bd">保险：</div>
@@ -132,7 +151,7 @@
                 {% endif %}
             </div>
             <div class="weui-wepay-detail">
-                <div class="weui-wepay-detail__bd">总价：</div>
+                <div class="weui-wepay-detail__bd">实际总价：</div>
                 <div class="weui-wepay-detail__ft weui-wepay-color-green">￥{{ data.totalfee/100 }}</div>
             </div>
             <div class="weui-wepay-detail">

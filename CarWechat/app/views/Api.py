@@ -469,7 +469,8 @@ def cancelOrderApi(id):
     if rr['result_code'] == "SUCCESS":
         order.status = "canceled"
         order.detail = json.dumps(rr)
-        order.Car.status = "normal"
+        if order.Car:
+            order.Car.status = "normal"
         # order.Cartype.count = order.Cartype.count + 1
         db.session.add(order)
         db.session.commit()
