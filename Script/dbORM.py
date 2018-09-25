@@ -118,6 +118,8 @@ class User(Base):
     phone = Column(String(80))
     serverstop = relationship('Serverstop', backref='User', lazy='dynamic')
     roleid = Column(Integer, ForeignKey('userrole.id'))
+    upid = Column(Integer, ForeignKey('user.id'))
+    down = relationship('User', foreign_keys=upid)
     def __repr__(self):
         return self.name
 
