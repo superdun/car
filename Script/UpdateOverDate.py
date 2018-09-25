@@ -73,8 +73,7 @@ def update():
         if ptd:
             pntd = ptd - dt.timedelta(minutes=15)
             pods = OverDateStatus(i, pntd,session)
-            if i.isoverdate != pods and pods == 1 and not i.notystatus and  not i.todate and i.created_at > dt.datetime.strptime(
-                    "2018-09-12-0", "%Y-%m-%d-%H"):
+            if i.isoverdate != pods and pods == 1 and not i.notystatus and i.ordertype=="normal" and   not i.todate and i.created_at > dt.datetime.now()-dt.timedelta(weeks=4):
                 print "send noty %s" % str(i.id)
                 try:
                     wechatNoty.sendTemplateByOrder(i, ptd.strftime(u"%m月%d日-%H:%M"))
