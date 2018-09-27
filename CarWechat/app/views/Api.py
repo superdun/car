@@ -194,10 +194,12 @@ def getPayResult():
                 db.session.add(order)
                 db.session.commit()
                 if integtalused:
-                    saveIntegeralRecord(refereeCustomer,-1*int(integtalused), u"抵现", order.id)
+                    saveIntegeralRecord(order.Customer,-1*int(integtalused), u"抵现", order.id)
+                if integralImprove>0:
+                    saveIntegeralRecord(order.Customer, integralImprove, u"积分", order.id)
                 if refereeCustomer:
                     saveIntegeralRecord(refereeCustomer,integralRefereeImprove, u"返点", order.id)
-                saveIntegeralRecord(order.Customer,integralImprove, u"积分", order.id)
+
                 wx.sendTemplateByOrder(order, u"通力新订单通知", u"在线下单",
                                        current_app.config.get('WECHAT_HOST') + url_for("agentweb.wechatCodeOrder",
                                                                                        id=sourceOrderId))
