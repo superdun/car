@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block css %}
-    <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static',filename='css/jquery.raty.css') }}">
 
     <style type="text/css">
@@ -204,9 +204,9 @@
 
 {% endblock %}
 {% block script %}
-    <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.staticfile.org/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
-    <script src="https://cdn.bootcss.com/raty/2.8.0/jquery.raty.js"></script>
+    <script src="https://cdn.staticfile.org/raty/2.8.0/jquery.raty.min.js"></script>
     <script>
         var starCount = 0;
         function refund() {
