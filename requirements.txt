@@ -20,7 +20,7 @@ gunicorn==19.8.1
 idna==2.6
 itsdangerous==0.24
 jdcal==1.4
-Jinja2==2.10
+Jinja2==2.11.3
 jsonpatch==1.16
 jsonpointer==1.10
 Markdown==2.6.8
