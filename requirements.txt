@@ -48,7 +48,7 @@ SQLAlchemy==1.2.8
 supervisor==3.2.0
 tablib==0.12.1
 unicodecsv==0.14.1
-urllib3==1.22
+urllib3==1.26.5
 wechatpy==1.7.0
 Werkzeug==0.14.1
 WTForms==2.2
