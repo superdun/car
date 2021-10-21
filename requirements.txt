@@ -1,6 +1,6 @@
 aliyun-python-sdk-core==2.8.2
 aliyun-python-sdk-dysmsapi==1.0.0
-Babel==2.6.0
+Babel==2.9.1
 certifi==2017.7.27.1
 chardet==3.0.4
 Cheetah==2.4.4
